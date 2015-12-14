@@ -4,12 +4,12 @@
 \alias{rankLasso}
 \title{Ranks compounds using the Lasso path}
 \usage{
-rankLasso(msDat, activity, actAve, region, useAve, useFirst, numRank)
+rankLasso(ms, act, msIden, region, useAve = TRUE, byName = TRUE)
 }
 \arguments{
-\item{msDat}{The \emph{mass spectrometry} data}
+\item{ms}{The \emph{mass spectrometry} data}
 
-\item{actDat}{The bioactivity data}
+\item{act}{The bioactivity data}
 }
 \description{
 Returns a vector containing the compounds in the order in which they first
