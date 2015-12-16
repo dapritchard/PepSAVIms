@@ -1,0 +1,186 @@
+
+#' Constructor for class \code{msDat}
+#'
+#' Creates a data structure encapsulating the mass spectrometry intensity
+#' readings as well as identifying information
+#'
+#' @param mass_spec Either a \code{matrix} or \code{data.frame}.  This object
+#'   contains mass spectrometry data and possibly also mass-to-charge values and
+#'   charge information.  The mass spectrometry data is expected to be in a form
+#'   such that a given column provides the mass spectrometry intensity values
+#'   for a particular fraction.  Then either 0, 1, or 2 additional columns may
+#'   be included in the parameter input containing a possible column for the
+#'   mass-to-charge values and a possible column for the charge information. Any
+#'   ordering of the columns is allowed.
+#'
+#'   For example, suppose that a collection of mass spectrometry readings has
+#'   provided data for 50 fractions across 20,000 mass-to-charge values.  Then
+#'   the input for \code{mass_spec} should be a \code{matrix} or
+#'   \code{data.frame} with 20,000 rows and one of 50, 51, or 52 columns.  Each
+#'   row in the 50 columns containing the mass spectrometry readings should be
+#'   for the same mass-to-charge value and charge information.  If columns are
+#'   included for either the mass-to-charge values or charge information then
+#'   the entries in these columns should provide the identifying information for
+#'   the mass spectrometry data in the same row.
+#'
+#' @param mtoz A vector of either length 1 or length equal to the number of
+#'   mass-to-charge values for which mass spectrometry data was collected, and
+#'   which helps identify the mass-to-charge values for this data in one of
+#'   several ways.
+#'
+#'   One way to provide the information is to provide a vector where each entry
+#'   provides the mass-to-charge value for a corresponding row of mass
+#'   spectrometry data.  Then the \code{k}-th entry of the vector would provide
+#'   the mass-to-charge value for the \code{k}-th row of the mass spectrometry
+#'   data.
+#'
+#'   A second way is to provide a single number which provides the column number
+#'   in the input to the \code{mass_spec} parameter for a column which contains
+#'   this information.
+#'
+#'   A third way is provide a single character string which provides the column
+#'   name in the input to the \code{mass_spec} parameter for a column which
+#'   contains this information.
+#'
+#' @param charge The information for the \code{charge} parameter can be provided
+#'   in the same manner as for the mass-to-charge values.
+#'
+#' @return Returns an object of class \code{msDat}.  This class is a \code{list}
+#'   with elements described below.  The class is equipped with a summary
+#'   function.
+#'
+#'   \describe{
+#'
+#'   \item{\code{ms}}{ A \code{matrix} containing mass spectrometry intensity
+#'   readings. Each column provides the mass spectrometry values for a given
+#'   fraction, and each row provides the mass spectrometry values for a given
+#'   mass-to-charge ratio value across the fractions. }
+#'
+#'   \item{\code{mtoz}}{ A vector with length equal to the number of
+#'   mass-to-charge values provided in the mass spectrometry data, such that the
+#'   \code{k}-th entry in the vector provides the mass-to-charge value for the
+#'   \code{k}-th row of mass spectrometry data }
+#'
+#'   \item{\code{chg}}{ A vector with length equal to the number of
+#'   mass-to-charge values provided in the mass spectrometry data, such that the
+#'   \code{k}-th entry in the vector provides the charge information for the
+#'   \code{k}-th row of mass spectrometry data }
+#'
+#'   }
+
+
+msDat <- function(mass_spec, mtoz, charge) {
+
+  checkValInp_bioDat(mass_spec, mtoz, charge)
+  mass_spec <- drop(mass_spec)
+  mtoz <- drop(mtoz)
+  charge <- drop(charge)
+
+  cmpInfo <- getCmpInfo(mass_spec, mtoz, charge)
+  remLoc <- c(cmpInfo$mtoz$loc, cmpInfo$chg$loc)
+
+  outDat <- list( ms   = if (length(remLoc) > 0) mass_spec[, -remLoc] else mass_spec,
+                  mtoz = cmpInfo$mtoz$val,
+                  chg  = cmpInfo$chg$val )
+
+  structure(outDat, class="msDat")
+}
+
+
+
+
+checkValInp_bioDat <- function(mass_spec, mtoz, charge) {
+
+  # Check if parameters are of the matrices / data frames / atomic vectors,
+  # as appropriate
+
+  if ( !(is.matrix(mass_spec) || is.data.frame(mass_spec)) ) {
+    stop("mass_spec must be a matrix or data frame\n")
+  }
+  else if (length(dim(drop(mass_spec))) != 2) {
+    stop("mass_spec must be a matrix or data frame\n")
+  }
+  else if ( !( is.atomic(mtoz) && !is.array(drop(mtoz)) ) ) {
+    stop("mtoz must be a 1-d atomic vector\n")
+  }
+  else if ( !( is.atomic(charge) && !is.array(drop(mtoz)) ) ) {
+    stop("charge must be a 1-d atomic vector\n")
+  }
+}
+
+
+
+#' Basic statistics for mass spectrometry data
+#'
+#' Summary function for class \code{msDat}
+
+summary.msDat <- function(msDat) {
+
+  cat("\nThe mass spectrometry data has",
+      format(ncol(msDat$ms), big.mark=","),
+      "fractions across",
+      format(nrow(msDat$ms), big.mark=","),
+      "mass-to-charge values\n\n")
+}
+
+
+
+
+getCmpInfo <- function(mass_spec, mtoz, charge) {
+
+  if (is.logical(mtoz) || is.logical(charge)) {
+    stop("neither mtoz nor charge can be logical\n")
+  }
+
+  outDat <- list()
+#   varLen <- c( mtoz   = length(mtoz),
+#                charge = length(charge) )
+  varList <- list(mtoz=mtoz, chg=charge)
+  nCmp <- nrow(mass_spec)
+
+
+  for (i in 1:length(varList)) {
+    outDat[[i]] <- list()
+    thisVar <- varList[[i]]
+
+    # nCmp length atomic vector
+    if (length(thisVar) > 1) {
+      if (length(thisVar) != nCmp) {
+        stop("length of mtoz not either 1 or equal to the number of compounds\n")
+      }
+      outDat[[i]]$loc <- numeric(0)
+      outDat[[i]]$val <- thisVar
+    }
+    # length 1 numeric or double
+    else if (is.numeric(thisVar)) {
+      if ((thisVar < 1) || (thisVar > ncol(mass_spec))) {
+        stop(paste("not a valid column number for", names(varList)[i], "\n"))
+      }
+      outDat[[i]]$loc <- as.integer(thisVar)
+      outDat[[i]]$val <- mass_spec[, thisVar]
+    }
+    # length 1 character
+    else if (is.character(thisVar)) {
+      if ( !(thisVar %in% colnames(mass_spec)) ) {
+        stop(paste("invalid column name given for", names(varList)[i], "\n"))
+      }
+      outDat[[i]]$loc <- which(thisVar == colnames(mass_spec))
+      outDat[[i]]$val <- mass_spec[, thisVar]
+    }
+    else {
+
+    }
+  }
+  names(outDat) <- names(varList)
+
+  return (outDat)
+}
+
+
+
+
+
+
+
+
+

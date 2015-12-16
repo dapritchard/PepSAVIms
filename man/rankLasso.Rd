@@ -7,7 +7,7 @@
 rankLasso(ms, act, msIden, region, useAve = TRUE, byName = TRUE)
 }
 \arguments{
-\item{ms}{The \emph{mass spectrometry} data}
+\item{ms}{The mass spectrometry data}
 
 \item{act}{The bioactivity data}
 }

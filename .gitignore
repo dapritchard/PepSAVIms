@@ -1,0 +1,4 @@
+# Ignore R history files, etc
+.R*
+.Rproj.user
+!bioact.Rproj
