@@ -71,19 +71,48 @@
 
 msDat <- function(mass_spec, mtoz, charge) {
 
+  # Perform some checks for validity of input.  Some forms of invalid input may
+  # still exist that are checked for as the function progresses.
   checkValInp_bioDat(mass_spec, mtoz, charge)
+
+  # Delete the dimensions of an array which have only one level (if necessary)
   mass_spec <- drop(mass_spec)
   mtoz <- drop(mtoz)
   charge <- drop(charge)
 
+  # cmpInfo: a list with seperate vectors containing the mass-to-charge values
+  # and charge information, as well as integer values providing (if applicable)
+  # the column number in mass_spec containing this information
   cmpInfo <- getCmpInfo(mass_spec, mtoz, charge)
-  remLoc <- c(cmpInfo$mtoz$loc, cmpInfo$chg$loc)
+  # keepIdx: indexes the columns in mass_spec that contain the mass spectrometry
+  # intensity data
+  keepIdx <- setdiff(1:ncol(mass_spec), c(cmpInfo$mtoz$loc, cmpInfo$chg$loc))
 
-  outDat <- list( ms   = if (length(remLoc) > 0) mass_spec[, -remLoc] else mass_spec,
+  outDat <- list( ms   = as.matrix( mass_spec[, keepIdx] ),
                   mtoz = cmpInfo$mtoz$val,
                   chg  = cmpInfo$chg$val )
 
+  if ( !is.numeric(outDat$ms) ) {
+    stop("mass spectrometry data must be numeric\n")
+  }
+
   structure(outDat, class="msDat")
+}
+
+
+
+
+#' Basic statistics for mass spectrometry data
+#'
+#' Summary function for class \code{msDat}
+
+summary.msDat <- function(msDat) {
+
+  cat("\nThe mass spectrometry data has",
+      format(ncol(msDat$ms), big.mark=","),
+      "fractions across",
+      format(nrow(msDat$ms), big.mark=","),
+      "mass-to-charge values\n\n")
 }
 
 
@@ -106,21 +135,6 @@ checkValInp_bioDat <- function(mass_spec, mtoz, charge) {
   else if ( !( is.atomic(charge) && !is.array(drop(mtoz)) ) ) {
     stop("charge must be a 1-d atomic vector\n")
   }
-}
-
-
-
-#' Basic statistics for mass spectrometry data
-#'
-#' Summary function for class \code{msDat}
-
-summary.msDat <- function(msDat) {
-
-  cat("\nThe mass spectrometry data has",
-      format(ncol(msDat$ms), big.mark=","),
-      "fractions across",
-      format(nrow(msDat$ms), big.mark=","),
-      "mass-to-charge values\n\n")
 }
 
 
