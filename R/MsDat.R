@@ -73,7 +73,7 @@ msDat <- function(mass_spec, mtoz, charge) {
 
   # Perform some checks for validity of input.  Some forms of invalid input may
   # still exist that are checked for as the function progresses.
-  checkValInp_bioDat(mass_spec, mtoz, charge)
+  checkValInp_msDat(mass_spec, mtoz, charge)
 
   # Delete the dimensions of an array which have only one level (if necessary)
   mass_spec <- drop(mass_spec)
@@ -84,6 +84,7 @@ msDat <- function(mass_spec, mtoz, charge) {
   # and charge information, as well as integer values providing (if applicable)
   # the column number in mass_spec containing this information
   cmpInfo <- getCmpInfo(mass_spec, mtoz, charge)
+
   # keepIdx: indexes the columns in mass_spec that contain the mass spectrometry
   # intensity data
   keepIdx <- setdiff(1:ncol(mass_spec), c(cmpInfo$mtoz$loc, cmpInfo$chg$loc))
@@ -118,23 +119,29 @@ summary.msDat <- function(msDat) {
 
 
 
-checkValInp_bioDat <- function(mass_spec, mtoz, charge) {
+checkValInp_msDat <- function(mass_spec, mtoz, charge) {
 
-  # Check if parameters are of the matrices / data frames / atomic vectors,
+  # Check if parameters are one of matrices / data frames / non-list vectors,
   # as appropriate
 
-  if ( !(is.matrix(mass_spec) || is.data.frame(mass_spec)) ) {
+  if ( !(is.matrix(drop(mass_spec)) || is.data.frame(mass_spec)) ) {
     stop("mass_spec must be a matrix or data frame\n")
   }
-  else if (length(dim(drop(mass_spec))) != 2) {
-    stop("mass_spec must be a matrix or data frame\n")
+  else if ( !( is.strictVec(drop(mtoz)) ) ) {
+    stop("mtoz must be a non-list vector\n")
   }
-  else if ( !( is.atomic(mtoz) && !is.array(drop(mtoz)) ) ) {
-    stop("mtoz must be a 1-d atomic vector\n")
+  else if ( !( is.strictVec(drop(charge)) ) ) {
+    stop("charge must be a non-list vector\n")
   }
-  else if ( !( is.atomic(charge) && !is.array(drop(mtoz)) ) ) {
-    stop("charge must be a 1-d atomic vector\n")
-  }
+
+  # TODO: check for missing
+}
+
+
+
+
+is.strictVec <- function(x) {
+  return( is.vector(x) && !is.list(x) )
 }
 
 
@@ -142,16 +149,29 @@ checkValInp_bioDat <- function(mass_spec, mtoz, charge) {
 
 getCmpInfo <- function(mass_spec, mtoz, charge) {
 
-  if (is.logical(mtoz) || is.logical(charge)) {
-    stop("neither mtoz nor charge can be logical\n")
+  # Check if mtoz is numeric or character.  Pre: mtoz is a non-list vector
+  if ( !(is.numeric(mtoz) || is.character(mtoz)) ) {
+    stop("mtoz must be numeric or character\n")
   }
 
+  # Check if charge is numeric or character.  Pre: charge is a non-list vector
+  if ( !(is.numeric(charge) || is.character(charge)) ) {
+    stop("charge must be numeric or character\n")
+  }
+
+  # Initialize a list to save mass spectrometry identifying information (and
+  # possibly location of this information is mass_spec) into
   outDat <- list()
-#   varLen <- c( mtoz   = length(mtoz),
-#                charge = length(charge) )
+  # Create iterable object for for loop
   varList <- list(mtoz=mtoz, chg=charge)
+  # Calculate number of compounds
   nCmp <- nrow(mass_spec)
 
+
+  # Each iteration in loop creates an entry in outDat where the entry is a list
+  # containing elements loc and val.  loc is an index for the column in mass_spec
+  # containing the mass-to-charge or charge information (which may be numeric(0) if
+  # not in mass_spec).  val a vector with the actual information.
 
   for (i in 1:length(varList)) {
     outDat[[i]] <- list()
@@ -182,9 +202,10 @@ getCmpInfo <- function(mass_spec, mtoz, charge) {
       outDat[[i]]$val <- mass_spec[, thisVar]
     }
     else {
-
+      # TODO: is there a case that needs to be considered here?!?
     }
-  }
+  } # End loop entering data into outDat
+
   names(outDat) <- names(varList)
 
   return (outDat)
