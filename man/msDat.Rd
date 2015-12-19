@@ -73,7 +73,7 @@ Returns an object of class \code{msDat}.  This class is a \code{list}
   }
 }
 \description{
-Creates an abstract data type encapsulating the mass spectrometry intensity
+Creates a data structure encapsulating the mass spectrometry intensity
 readings as well as identifying information
 }
 
