@@ -38,15 +38,16 @@
 #'
 #'   If a list, then it must be a list with two named non-list vectors of equal
 #'   length - one is to be named \code{ms} and the other is to be named
-#'   \code{bio}.  The \code{ms} vector specifies the columns (and hence
-#'   fractions) to include in the model from the mass spectrometry data, either
-#'   as a vector of the column numbers or the column names.  The \code{bio}
-#'   vector specifies the columns (and hence fractions) to include in the model
-#'   from the bioactivity data, either as a vector of the column numbers or the
-#'   column names.  It is assumed that the column from the mass spectrometry
-#'   data specified by the \code{k}-th value in the \code{ms} vector corresponds
-#'   to the same fraction as the column specified by the \code{k}-th value in
-#'   the \code{bio} vector, for each \code{k}.
+#'   \code{bio} (note that a n x 2 data frame satisfies this requirement).  The
+#'   \code{ms} vector specifies the columns (and hence fractions) to include in
+#'   the model from the mass spectrometry data, either as a vector of the column
+#'   numbers or the column names.  The \code{bio} vector specifies the columns
+#'   (and hence fractions) to include in the model from the bioactivity data,
+#'   either as a vector of the column numbers or the column names.  It is
+#'   assumed that the column from the mass spectrometry data specified by the
+#'   \code{k}-th value in the \code{ms} vector corresponds to the same fraction
+#'   as the column specified by the \code{k}-th value in the \code{bio} vector,
+#'   for each \code{k}.
 #'
 #' @param useAve A logical value specifying whether or not to average replicate
 #'   bioactivity observations.  Ignored if only one bioactivity observation is
@@ -55,9 +56,22 @@
 
 rankLasso <- function(msDat, bioact, region=NULL, useAve=TRUE) {
 
-  # Checks the form of the input.  Note that some checks for the correctness of
-  # the input are performed later.
-  checkValInp_rankLasso(msDat, bioact, region, useAve)
+  # Check if msDat has an argument provided and is of class msDat
+  check_form_msDat(msDat)
+
+  # Convert (if necessary) bioact to matrix form.  Data is guaranteed to be
+  # numeric with no missing.
+  bioMat <- format_bio(bioact)
+
+  # Convert (if necessary) region to a list containing two vectors (unless
+  # region is NULL, and then function is a noop). Each vector is guaranteed to
+  # be numeric or character with no missing.
+  regList <- format_reg(region)
+
+  # Check if useAve in correct form
+  if ( !(identical(useAve, TRUE) || identical(useAve, FALSE)) ) {
+    stop("useAve must be either TRUE or FALSE\n")
+  }
 
   # Creates region indices for the mass spec and bioactivity data based on the
   # region input.  Also checks to see if the input matches the data.
@@ -68,9 +82,10 @@ rankLasso <- function(msDat, bioact, region=NULL, useAve=TRUE) {
   # where the fractions are the observations and the compounds are the potential
   # predictor variables.  In addition, if useAve is FALSE then replicates of the
   # observations are created a la an ANOVA setting.
-  ms <- conv_ms(msDat$ms, regionIdx$ms, ncol(bioact), useAve)
+  nRepl <- nrow(bioact)
+  ms <- conv_ms(msDat$ms, regionIdx$ms, nRepl, useAve)
 
-  # Creates a non-list vector for the bioactivity response
+  # Creates a numeric vector for the bioactivity response
   bio <- conv_bioact(bioact, regionIdx$bio, useAve)
 
   # Clean up unneeded data for garbage collection
@@ -88,7 +103,7 @@ rankLasso <- function(msDat, bioact, region=NULL, useAve=TRUE) {
   outDat <- list( mtoz     = mtoz[cmpIdx],
                   charge   = chg[cmpIdx],
                   nRegions = length(regionIdx$ms),
-                  nRepl    = 1,
+                  nRepl    = nRepl,
                   useAve   = useAve )
 
   structure(outDat, class="rankCmp")
@@ -139,7 +154,7 @@ conv_ms <- function(ms, msIdx, nRepl, useAve) {
 
   # If we have bioactivity replicates, then we need to copy each fraction of the
   # data (now the rows after transposition), one time for each replicate
-  if (!useAve) {
+  if (!useAve && (nRepl >= 2L)) {
     ms <- ms[rep(1:nrow(ms), each=nRepl), ]
   }
 
@@ -172,8 +187,8 @@ conv_ms <- function(ms, msIdx, nRepl, useAve) {
 
 conv_bioact <- function(bioact, bioIdx, useAve) {
 
-  # case: bioact is non-list vector
-  if (is.strictVec(bioact)) {
+  # case: bioact is non-array atomic vector
+  if (is.strictvec(bioact)) {
     # useAve ignored in this case as there are no replicates.   Simply return
     # one bioactivity observation for each fraction of interest.
     return ( bioact[bioIdx] )
@@ -205,19 +220,24 @@ conv_bioact <- function(bioact, bioIdx, useAve) {
 #'
 #' @param lars_fit An object of class \code{lars}
 #'
+#' @details   A \code{lars} object is a list containing (among other things) an
+#'   obect '\code{actions}'. This object is a list of all the actions taken in
+#'   the model Lasso path, where actions are taken to be either adding or
+#'   removing a predictor variable from model.  If the variable is added to the
+#'   model, then the column index is inserted into the next position in the
+#'   list.  If the variable is removed from the model, then -1 times the column
+#'   index of the variable is inserted into the next position in the list.
+#'
+#'   \code{getCmpIdx} works by reducing '\code{actions}' list to the first
+#'   positive time that a number is in the list.
+#'
 #' @return An integer vector indexing (some of the) compounds by the order in
 #'   which they first enter the Lasso model, from first to last.
 
 
 getCmpIdx <- function(lars_fit) {
 
-  # A lars object is a list containing (among other things) an obect 'actions'.
-  # This object is a list of all the actions taken in the model Lasso path,
-  # where actions are taken to be either adding or removing a predictor variable
-  # from model.  If the variable is added to the model, then the column index is
-  # inserted into the next position in the list.  If the variable is removed
-  # from the model, then -1 times the column index of the variable is inserted
-  # into the next position in the list.
+  # See 'details' in function documentation
 
   actions <- unlist(lars_fit$actions)
   unique(actions[actions > 0])
@@ -265,7 +285,7 @@ getRegionIdx <- function(msDat, bioact, region) {
     # Simply make an index entry for every fraction
     regionIdx <- list( ms  = seq_len(nfrac),
                        bio = seq_len(nfrac) )
-  }
+  } # end null case
 
   # case: non-list vector
   else if (is.strictVec(region)) {
@@ -282,7 +302,7 @@ getRegionIdx <- function(msDat, bioact, region) {
       regionIdx <- list( ms  = char_to_idx(colnames(msDat$ms), region),
                          bio = char_to_idx(colnames(bioact), region) )
     }
-  }
+  } # end non-list vector case
 
   # case: list
   else {
@@ -307,7 +327,16 @@ getRegionIdx <- function(msDat, bioact, region) {
       check_character_region(msDat, bioact, region$bio, "bio")
       regionIdx$bio <- char_to_idx(colnames(bioact), region$bio)
     }
-  }
+  } # end list case
+
+
+  # TODO: move this elsewhere
+
+  #   if ( length(bioact$ms) != length(bioact$bio) ) {
+  #     stop("if region is a list then it must contain
+  #            exactly two non-list vectors of the same length\n")
+  #   }
+
 
   return (regionIdx)
 }
