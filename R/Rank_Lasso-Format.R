@@ -6,15 +6,19 @@ format_bio <- function(bioact) {
 
   # Check that bioact either a non-array atomic vector or a matrix or a data
   # frame.  If so then convert to a matrix.
+  # case: vector
   if ( is.strictvec(bioact) ) {
     bioMat <- matrix(bioact, nrow=1)
   }
+  # case: matrix
   else if ( is.matrix(bioact) ) {
     # noop; this is the desired form
   }
+  # case: data frame
   else if ( is.data.frame(bioact) ) {
     bioact <- as.matrix(bioact)
   }
+  # case: invalid input
   else {
     stop("bioact must be either a non-array atomic vector or a matrix or a data frame\n")
   }
@@ -38,7 +42,7 @@ format_reg <- function(region) {
   # Delete the dimensions of an array which have only one level
   region <- drop(region)
 
-  # Call workhorse function depending on type of input
+  # Call specialized function depending on type of input
   if (is.null(region)) {
     return ( NULL )
   }

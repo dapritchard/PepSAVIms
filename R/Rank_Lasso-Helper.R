@@ -7,7 +7,7 @@ is.strictvec <- function(x) {
 
 check_form_msDat <- function(msDat) {
 
-  if ( is.missing(msDat) ) {
+  if ( missing(msDat) ) {
     stop("msDat must have an argument provided\n")
   }
   if (class(msDat) != "msDat") {
@@ -123,52 +123,71 @@ check_form_msDat <- function(msDat) {
 
 reg_to_idx <- function(msDat, bioact, regVec, whichDat) {
 
-  # check for missing or duplicate values
-  check_miss_dup(regVec)
-
-  # case: numeric region provided
-  if (is.numeric(regVec)) {
-    return ( get_num_reg(msDat, bioact, regVec, whichDat) )
-  }
-  # case: character region provided
-  else {
-    return ( get_char_reg(msDat, bioact, regVec, whichDat) )
-  }
-}
-
-
-
-
-check_miss_dup <- function(regVec) {
-
-  # Check that there are no missing
-  if ( TRUE %in% is.na(regVec) ) {
-    stop("region cannot have any missing values\n")
-  }
-
   # Check that there are no duplicates
   if ( length(unique(regVec)) != length(regVec) ) {
     stop("region cannot have any duplicate values\n")
   }
+
+  # case: numeric region provided
+  if (is.numeric(regVec)) {
+    return ( num_to_idx(msDat, bioact, regVec, whichDat) )
+  }
+  # case: character region provided
+  else {
+    return ( char_to_idx(msDat, bioact, regVec, whichDat) )
+  }
 }
 
 
 
 
-get_num_reg <- function(msDat, bioact, regVec, whichDat) {
+# check_miss_dup <- function(regVec) {
+#
+#   # Check that there are no missing
+#   if ( any( is.na(regVec) ) ) {
+#     stop("region cannot have any missing values\n")
+#   }
+#
+#   # Check that there are no duplicates
+#   if ( length(unique(regVec)) != length(regVec) ) {
+#     stop("region cannot have any duplicate values\n")
+#   }
+# }
+
+
+
+null_to_idx <- function(msDat, bioact) {
+
+  # Check that ms and bioact dimensions match
+  if ( !identical(ncol(msDat$ms), ncol(bioact)) ) {
+    stop("If region is NULL then the number of fractions must be the same for
+           the mass spectrometry data and the bioactivity data\n")
+  }
+
+  # Make an index entry for every fraction
+  regionIdx <- list( ms  = seq_len(nfrac),
+                     bio = seq_len(nfrac) )
+  return (regionIdx)
+}
+
+
+
+
+num_to_idx <- function(msDat, bioact, regVec, whichDat) {
 
   # nfrac: number of fractions in data for which regVec is provided
   # case: regVec provided for mass spec data
-  if (identical(whichDat, "ms")) {
-    nfrac <- ncol(msDat$ms)
-  }
-  # case: regVec provided for bioactivity data
-  else {
-    nfrac <- ifelse(is.numeric(bioact), length(bioact), ncol(bioact))
-  }
+#   if (identical(whichDat, "ms")) {
+#     nfrac <- ncol(msDat$ms)
+#   }
+#   # case: regVec provided for bioactivity data
+#   else {
+#     nfrac <- ncol(bioact)
+#   }
+  nfrac <- ifelse(identical(whichDat, "ms"), ncol(msDat$ms), ncol(bioact))
 
   # Check valid input values
-  if ((min(regionIdx) < 1) || (max(regionIdx) > nfrac)) {
+  if ((min(regVec) < 1) || (max(regVec) > nfrac)) {
     stop("out of bounds region value provided\n")
   }
 
@@ -178,7 +197,7 @@ get_num_reg <- function(msDat, bioact, regVec, whichDat) {
 
 
 
-get_char_region <- function(msDat, bioact, regVec, whichReg) {
+char_to_idx <- function(msDat, bioact, regVec, whichReg) {
 
   # nmFrac: a vector of the fraction names
   nmFrac <- get_data_nm(msDat, bioact, whichReg)
@@ -188,10 +207,10 @@ get_char_region <- function(msDat, bioact, regVec, whichReg) {
 
   # Loop iterates over provided names for region and checks each one to see
   # that it has exactly one match
-  for (i in seq_len(regVec)) {
+  for (i in seq_along(regVec)) {
 
     # Number of matches for current element of regVec in fraction names
-    matchBool <- grepl(nmFrac[i], nmFrac)
+    matchBool <- grepl(regVec[i], nmFrac)
     nMatch <- sum(matchBool)
 
     # Check that current name has exactly one match
@@ -219,7 +238,7 @@ get_data_nm <- function(msDat, bioact, whichDat) {
   }
   # case: regVec provided for bioactivity data
   else {
-    nmFrac <- ifelse(is.numeric(bioact), names(bioact), colnames(bioact))
+    nmFrac <- colnames(bioact)
   }
 
   return (nmFrac)

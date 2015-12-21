@@ -13,9 +13,10 @@
 #'   it is assumed that each column corresponds to a particular fraction, and
 #'   that each row corresponds to a particular bioactivity replicate.
 #'
-#' @param region Either \code{NULL}, a non-list vector, or a list containing
-#'   exactly two atomic vectors, providing information specifying which
-#'   fractions are to be included in the Lasso model.
+#' @param region Either \code{NULL}, a non-list vector, a matrix, or a list
+#'   containing exactly two atomic vectors, providing information specifying
+#'   which fractions are to be included in the Lasso model.  Note that a data
+#'   frame satisfies these requirements.
 #'
 #'   If \code{NULL}, then it is assumed that all fractions included in the data
 #'   are to be used in the model.  This requires that the number of fractions in
@@ -36,18 +37,28 @@
 #'   to the same fraction for both the mass spectrometry data and the
 #'   bioactivity data.
 #'
+#'   If a matrix then it must be either numeric or character with exactly two
+#'   columns - one is to be named \code{ms} and the other is to be named
+#'   \code{bio}.  The \code{ms} column specifies the columns (and hence
+#'   fractions) to include in the model from the mass spectrometry data, either
+#'   as a vector of the column numbers or the column names.  The \code{bio}
+#'   vector specifies the columns (and hence fractions) to include in the model
+#'   from the bioactivity data, either as a vector of the column numbers or the
+#'   column names.  It is assumed that two entries from a given row refer to the
+#'   same fraction.
+#'
 #'   If a list, then it must be a list with two named non-list vectors of equal
 #'   length - one is to be named \code{ms} and the other is to be named
-#'   \code{bio} (note that a n x 2 data frame satisfies this requirement).  The
-#'   \code{ms} vector specifies the columns (and hence fractions) to include in
-#'   the model from the mass spectrometry data, either as a vector of the column
-#'   numbers or the column names.  The \code{bio} vector specifies the columns
-#'   (and hence fractions) to include in the model from the bioactivity data,
-#'   either as a vector of the column numbers or the column names.  It is
-#'   assumed that the column from the mass spectrometry data specified by the
-#'   \code{k}-th value in the \code{ms} vector corresponds to the same fraction
-#'   as the column specified by the \code{k}-th value in the \code{bio} vector,
-#'   for each \code{k}.
+#'   \code{bio} (note that a \code{n x 2} data frame satisfies this
+#'   requirement).  The \code{ms} vector specifies the columns (and hence
+#'   fractions) to include in the model from the mass spectrometry data, either
+#'   as a vector of the column numbers or the column names.  The \code{bio}
+#'   vector specifies the columns (and hence fractions) to include in the model
+#'   from the bioactivity data, either as a vector of the column numbers or the
+#'   column names.  It is assumed that the column from the mass spectrometry
+#'   data specified by the \code{k}-th value in the \code{ms} vector corresponds
+#'   to the same fraction as the column specified by the \code{k}-th value in
+#'   the \code{bio} vector, for each \code{k}.
 #'
 #' @param useAve A logical value specifying whether or not to average replicate
 #'   bioactivity observations.  Ignored if only one bioactivity observation is
@@ -75,7 +86,7 @@ rankLasso <- function(msDat, bioact, region=NULL, useAve=TRUE) {
 
   # Creates region indices for the mass spec and bioactivity data based on the
   # region input.  Also checks to see if the input matches the data.
-  regionIdx <- getRegionIdx(msDat, bioact, region)
+  regionIdx <- getRegionIdx(msDat, bioMat, regList)
 
   # Puts the data into a form where the rows are the fractions and cols are the
   # compounds.  This is done so as to cast the problem as a regression problem
@@ -104,7 +115,8 @@ rankLasso <- function(msDat, bioact, region=NULL, useAve=TRUE) {
                   charge   = chg[cmpIdx],
                   nRegions = length(regionIdx$ms),
                   nRepl    = nRepl,
-                  useAve   = useAve )
+                  useAve   = useAve,
+                  lars_fit = fit )
 
   structure(outDat, class="rankCmp")
 }
@@ -123,8 +135,8 @@ rankLasso <- function(msDat, bioact, region=NULL, useAve=TRUE) {
 #' It is important to define how the ordering of the replicates is performed so
 #' that this behavior matches that of \code{\link{conv_bioact}}.  The current
 #' implementation places replicates within a fraction consecutively, so that for
-#' example, the data may look like (going down the rows): fraction 1,
-#' fraction 1, fraction 1, fraction 2, fraction 2, fraction 2, fraction 3, ...
+#' example, the data may look like (going down the rows): fraction 1, fraction
+#' 1, fraction 1, fraction 2, fraction 2, fraction 2, fraction 3, ...
 #'
 #' @inheritParams rankLasso
 #'
@@ -274,69 +286,14 @@ getRegionIdx <- function(msDat, bioact, region) {
 
   # case: null
   if (is.null(region)) {
-
-    # Check that ms and bioact dimensions match
-    nfrac <- ifelse(is.vector(bioact), length(bioact), ncol(bioact))
-    if ( !identical(ncol(msDat$ms), nfrac) ) {
-      stop("If region is NULL then the number of fractions must be the same for
-           the mass spectrometry data and the bioactivity data\n")
-    }
-
-    # Simply make an index entry for every fraction
-    regionIdx <- list( ms  = seq_len(nfrac),
-                       bio = seq_len(nfrac) )
-  } # end null case
-
-  # case: non-list vector
-  else if (is.strictVec(region)) {
-
-    # case: numeric vector
-    if (is.numeric(region)) {
-      check_numeric_region(msDat, bioact, region, "both")
-      regionIdx <- list( ms  = as.integer(region),
-                         bio = as.integer(region) )
-    }
-    # case: character vector
-    else {
-      check_character_region(msDat, bioact, region, "both")
-      regionIdx <- list( ms  = char_to_idx(colnames(msDat$ms), region),
-                         bio = char_to_idx(colnames(bioact), region) )
-    }
-  } # end non-list vector case
+    regionIdx <- null_to_idx(msDat, bioact)
+  }
 
   # case: list
   else {
-    # case: numeric region$ms
-    if (is.numeric(region$ms)) {
-      check_numeric_region(msDat, bioact, region$ms, "ms")
-      regionIdx <- list(ms=region)
-    }
-    # case: character region$ms
-    else {
-      check_character_region(msDat, bioact, region, "ms")
-      regionIdx <- list(ms=char_to_idx(colnames(msDat$ms), region$ms))
-    }
-
-    # case: numeric region$bio
-    if (is.numeric(region$bio)) {
-      check_numeric_region(msDat, bioact, region$bio, "bio")
-      regionIdx$bio <- region$bio
-    }
-    # case: character region$bio
-    else {
-      check_character_region(msDat, bioact, region$bio, "bio")
-      regionIdx$bio <- char_to_idx(colnames(bioact), region$bio)
-    }
-  } # end list case
-
-
-  # TODO: move this elsewhere
-
-  #   if ( length(bioact$ms) != length(bioact$bio) ) {
-  #     stop("if region is a list then it must contain
-  #            exactly two non-list vectors of the same length\n")
-  #   }
-
+    regionIdx <- list( ms  = reg_to_idx(msDat, bioact, regList$ms, "ms"),
+                       bio = reg_to_idx(msDat, bioact, regList$bio, "bio") )
+  }
 
   return (regionIdx)
 }
