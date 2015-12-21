@@ -5,13 +5,13 @@
 #' readings as well as identifying information
 #'
 #' @param mass_spec Either a \code{matrix} or \code{data.frame}.  This object
-#'   contains mass spectrometry data and possibly also mass-to-charge values and
-#'   charge information.  The mass spectrometry data is expected to be in a form
-#'   such that a given column provides the mass spectrometry intensity values
-#'   for a particular fraction.  Then either 0, 1, or 2 additional columns may
-#'   be included in the parameter input containing a possible column for the
-#'   mass-to-charge values and a possible column for the charge information. Any
-#'   ordering of the columns is allowed.
+#'   contains mass-to-charge values, charge information, and intensity data.
+#'   The mass spectrometry data is expected to be in a form such that a given
+#'   column provides the mass spectrometry intensity values for a particular
+#'   fraction.  Then either 0, 1, or 2 additional columns may be included in the
+#'   parameter input containing a possible column for the mass-to-charge values
+#'   and a possible column for the charge information. Any ordering of the
+#'   columns is allowed.
 #'
 #'   For example, suppose that a collection of mass spectrometry readings has
 #'   provided data for 50 fractions across 20,000 mass-to-charge values.  Then
