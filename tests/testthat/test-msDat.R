@@ -1,31 +1,51 @@
 
 context("msDat constructor")
 
+# Create raw data to use as msDat arguments ------------------------------------
 
-trueMatOut <- structure(list( ms   = matrix(11:25, nrow=5),
-                              mtoz = 1:5,
-                              chg  = 6:10 ), class="msDat")
+# This is the raw data in several forms, which is to be coerced into class
+# msDat.  Columns 1 and 2 of msMat are the mass-to-charge ratio and charge
+# values, respectively.
 
-trueDfOut <- structure(list( ms   = setNames(data.frame(matrix(11:25, nrow=5)), c("X3", "X4", "X5")),
-                              mtoz = 1:5,
-                              chg  = 6:10 ), class="msDat")
-
+# Colnames chosen to match those assi
 msMat <- matrix(1:25, nrow=5)
 msDf <- data.frame(msMat)
-mtoz <- 1:5
-chg <- 6:10
+colnames(msMat) <- colnames(msDf)
+mtoz <- msMat[, 1]
+chg <- msMat[, 2]
 
-expect_identical( msDat(msMat, 1, 2), trueMatOut )
-expect_identical( msDat(msMat[, -1], mtoz, 1), trueMatOut )
-expect_identical( msDat(msMat[, -2], 1, chg), trueMatOut )
-expect_identical( msDat(msMat[, -c(1,2)], mtoz, chg), trueMatOut )
 
-expect_identical( msDat(msDf, 1, 2), trueDfOut )
-expect_identical( msDat(msDf[, -1], mtoz, 1), trueDfOut )
-expect_identical( msDat(msDf[, -2], 1, chg), trueDfOut )
-expect_identical( msDat(msDf[, -c(1,2)], mtoz, chg), trueDfOut )
-expect_identical( msDat(msDf, "X1", 2), trueDfOut )
-expect_identical( msDat(msDf, 1, "X2"), trueDfOut )
-expect_identical( msDat(msDf, "X1", "X2"), trueDfOut )
+# Manually construct "true" msDat object ---------------------------------------
+
+# What the data above should be coerced to by msDat function
+
+ms_true <- matrix(11:25, nrow=5)
+colnames(ms_true) <- paste0("X", 3:nrow(msMat))
+trueDatOut <- structure( list( ms   = ms_true,
+                               mtoz = 1:5,
+                               chg  = 6:10 ),
+                         class="msDat" )
+
+
+# Testing process --------------------------------------------------------
+
+test_that("use matrix as input", {
+  expect_identical( msDat(msMat, 1, 2), trueDatOut )
+  expect_identical( msDat(msMat[, -1], mtoz, 1), trueDatOut )
+  expect_identical( msDat(msMat[, -2], 1, chg), trueDatOut )
+  expect_identical( msDat(msMat[, -c(1, 2)], mtoz, chg), trueDatOut )
+})
+
+test_that("use data frame as input", {
+  expect_identical( msDat(msDf, 1, 2), trueDatOut )
+  expect_identical( msDat(msDf[, -1], mtoz, 1), trueDatOut )
+  expect_identical( msDat(msDf[, -2], 1, chg), trueDatOut )
+  expect_identical( msDat(msDf[, -c(1, 2)], mtoz, chg), trueDatOut )
+  expect_identical( msDat(msDf, "X1", 2), trueDatOut )
+  expect_identical( msDat(msDf, 1, "X2"), trueDatOut )
+  expect_identical( msDat(msDf, "X1", "X2"), trueDatOut )
+})
+
+# TODO: test invalid input
 
 

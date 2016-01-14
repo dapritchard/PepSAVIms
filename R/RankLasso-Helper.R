@@ -18,109 +18,6 @@ check_form_msDat <- function(msDat) {
 
 
 
-# format_bio <- function(bioact) {
-#
-#   # Delete the dimensions of an array which have only one level
-#   bioact <- drop(bioact)
-#
-#   # Check that bioact either a non-array atomic vector or a matrix or a data
-#   # frame.  If so then convert to a matrix.
-#   if ( is.strictvec(bioact) ) {
-#     bioMat <- matrix(bioact, nrow=1)
-#   }
-#   else if ( is.matrix(bioact) ) {
-#     # noop; this is the desired form
-#   }
-#   else if ( is.data.frame(bioact) ) {
-#     bioact <- as.matrix(bioact)
-#   }
-#   else {
-#     stop("bioact must be either a non-array atomic vector or a matrix or a data frame\n")
-#   }
-#
-#   # Check that bioact is numeric w/o missing
-#   if ( !is.numeric(bioact) ) {
-#     stop("bioact must be populated with only numeric values\n")
-#   }
-#   if ( TRUE %in% is.na(bioact) ) {
-#     stop("bioact cannot have any missing values\n")
-#   }
-#
-#   return (bioact)
-# }
-
-
-
-
-# format_reg <- function(region) {
-#
-#   # Delete the dimensions of an array which have only one level
-#   region <- drop(region)
-#
-#   if (is.strictvec(region)) {
-#
-#   }
-#
-#   if (is.matrix(region)) {
-#
-#     if (ncol(region) != 2) {
-#       stop("if a matrix then region must have exactly two columns\n")
-#     }
-#     if ( !( identical(colnames(region), c("ms", "bio"))
-#             || identical(colnames(region), c("bio", "ms")) ) ) {
-#       stop("region columns must have the names \"ms\" and \"bio\"\n")
-#     }
-#     if ( !(is.numeric(region) || is.character(region)) ) {
-#       stop("if a matrix then region must be either numeric or character\n")
-#     }
-#     if ( TRUE %in% is.na(region) ) {
-#       stop("region cannot have any missing values\n")
-#     }
-#
-#     regList <- list( ms  = region[, "ms"],
-#                      bio = region[, "bio"] )
-#     return (regList)
-#   }
-#
-#   if (is.list(region)) {
-#
-#     if (length(region) != 2) {
-#       stop("if a list then region must have exactly two elements")
-#     }
-#     if ( !( identical(names(region), c("ms", "bio"))
-#             || identical(names(region), c("bio", "ms")) ) ) {
-#       stop("region columns must have the names \"ms\" and \"bio\"\n")
-#     }
-#
-#     ms <- drop(region$ms)
-#     bio <- drop(region$bio)
-#
-#     if ( !(is.strictvec(ms) && is.strictvec(bio)) ) {
-#       stop("the elements in region must be non-array vectors\n")
-#     }
-#
-#     if (length(ms) != length(bio)) {
-#       stop("the elements in region must have the same length\n")
-#     }
-#
-#     if ( !(is.numeric(ms) || is.character(ms))
-#          || !(is.numeric(bio) || is.character(bio)) ) {
-#       stop("the elements in region must each be either numeric or character\n")
-#     }
-#
-#     regList <- list( ms  = ms,
-#                      bio = bio )
-#     return (regList)
-#   }
-#
-#   # If we've made it this far then
-#   stop("region must be either a non-array vector, a matrix, or a data frame\n")
-#
-# }
-
-
-
-
 reg_to_idx <- function(msDat, bioact, regVec, whichDat) {
 
   # Check that there are no duplicates
@@ -138,21 +35,6 @@ reg_to_idx <- function(msDat, bioact, regVec, whichDat) {
   }
 }
 
-
-
-
-# check_miss_dup <- function(regVec) {
-#
-#   # Check that there are no missing
-#   if ( any( is.na(regVec) ) ) {
-#     stop("region cannot have any missing values\n")
-#   }
-#
-#   # Check that there are no duplicates
-#   if ( length(unique(regVec)) != length(regVec) ) {
-#     stop("region cannot have any duplicate values\n")
-#   }
-# }
 
 
 
@@ -175,15 +57,6 @@ null_to_idx <- function(msDat, bioact) {
 
 num_to_idx <- function(msDat, bioact, regVec, whichDat) {
 
-  # nfrac: number of fractions in data for which regVec is provided
-  # case: regVec provided for mass spec data
-#   if (identical(whichDat, "ms")) {
-#     nfrac <- ncol(msDat$ms)
-#   }
-#   # case: regVec provided for bioactivity data
-#   else {
-#     nfrac <- ncol(bioact)
-#   }
   nfrac <- ifelse(identical(whichDat, "ms"), ncol(msDat$ms), ncol(bioact))
 
   # Check valid input values
@@ -253,17 +126,6 @@ checkValInp_rankLasso <- function(msDat, bioact, region, useAve) {
   if (class(msDat) != "msDat") {
     stop("msDat must be of class msDat\n")
   }
-
-#   # Check that bioact is the right form
-#   if ( !(is.strictvec(bioact) || is.matrix(bioact) || is.data.frame(bioact)) ) {
-#     stop("bioact must be either a non-array atomic vector or a matrix or a data frame\n")
-#   }
-#   if ( !is.numeric( as.matrix(bioact) ) ) {
-#     stop("bioact must be populated with only numeric values\n")
-#   }
-#   if ( TRUE %in% is.na(bioact) ) {
-#     stop("bioact cannot have any missing values\n")
-#   }
 
   # Check if region is the right form.  Note that this doesn't yet check that the values
   # provided by region make sense (i.e. the numbers provided are not too big / small

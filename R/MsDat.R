@@ -40,7 +40,7 @@
 #'
 #'   A third way is provide a single character string which provides the column
 #'   name in the input to the \code{mass_spec} parameter for a column which
-#'   contains this information.
+#'   contains this information.  Partial matching is allowed.
 #'
 #' @param charge The information for the \code{charge} parameter can be provided
 #'   in the same manner as for the mass-to-charge values.
@@ -87,7 +87,8 @@ msDat <- function(mass_spec, mtoz, charge) {
 
   # keepIdx: indexes the columns in mass_spec that contain the mass spectrometry
   # intensity data
-  keepIdx <- setdiff(1:ncol(mass_spec), c(cmpInfo$mtoz$loc, cmpInfo$chg$loc))
+  keepIdx <- setdiff(seq_len(ncol(mass_spec)),
+                     c(cmpInfo$mtoz$loc, cmpInfo$chg$loc))
 
   outDat <- list( ms   = as.matrix( mass_spec[, keepIdx] ),
                   mtoz = cmpInfo$mtoz$val,
@@ -119,6 +120,13 @@ summary.msDat <- function(msDat) {
 
 
 
+#' Check for valid msDat arguments
+#'
+#' Check that arguments \code{mass_spec}, \code{mtoz}, and \code{charge} are
+#' of the right data type
+#'
+#' @inheritParams msDat
+
 checkValInp_msDat <- function(mass_spec, mtoz, charge) {
 
   # Check if parameters are one of matrices / data frames / non-list vectors,
@@ -134,11 +142,13 @@ checkValInp_msDat <- function(mass_spec, mtoz, charge) {
     stop("charge must be a non-list vector\n")
   }
 
-  # TODO: check for missing
+  # TODO: check for missing.  Is this not performed elsewhere?
 }
 
 
 
+
+# TODO: there is a is.strictvec in RankLasso_Helper.R.  Should merge the two.
 
 is.strictVec <- function(x) {
   return( is.vector(x) && !is.list(x) )
@@ -146,6 +156,8 @@ is.strictVec <- function(x) {
 
 
 
+
+# TODO: need documentation for this
 
 getCmpInfo <- function(mass_spec, mtoz, charge) {
 
@@ -202,7 +214,7 @@ getCmpInfo <- function(mass_spec, mtoz, charge) {
       outDat[[i]]$val <- mass_spec[, thisVar]
     }
     else {
-      # TODO: is there a case that needs to be considered here?!?
+      # TODO: is there a case that needs to be considered here?!?.  Why is this here?
     }
   } # End loop entering data into outDat
 

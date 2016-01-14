@@ -60,12 +60,18 @@
 #'   to the same fraction as the column specified by the \code{k}-th value in
 #'   the \code{bio} vector, for each \code{k}.
 #'
-#' @param useAve A logical value specifying whether or not to average replicate
-#'   bioactivity observations.  Ignored if only one bioactivity observation is
-#'   provided.
+#' @export
 
 
-rankLasso <- function(msDat, bioact, region=NULL, useAve=TRUE) {
+rankLasso <- function(msDat, bioact, region=NULL) {
+
+  # NOTE: in the current form of rankLasso, the solution to the Lasso path is
+  # the same when using either the average of bioactivity replicates or
+  # individual replicates.  A parameter, useAve, used to be offered - but since
+  # the result is the same either way, now it is just set TRUE.  The rest of the
+  # code is left unchanged, in the event another way is found to use individual
+  # replicates.
+  useAve <- TRUE
 
   # Check if msDat has an argument provided and is of class msDat
   check_form_msDat(msDat)
@@ -109,6 +115,9 @@ rankLasso <- function(msDat, bioact, region=NULL, useAve=TRUE) {
 
   # Indices for compounds as they first enter the model
   cmpIdx <- getCmpIdx(fit)
+
+  # Correlation of chosen compounds
+  # TODO
 
   # Construct output object
   outDat <- list( mtoz     = mtoz[cmpIdx],
@@ -291,8 +300,8 @@ getRegionIdx <- function(msDat, bioact, region) {
 
   # case: list
   else {
-    regionIdx <- list( ms  = reg_to_idx(msDat, bioact, regList$ms, "ms"),
-                       bio = reg_to_idx(msDat, bioact, regList$bio, "bio") )
+    regionIdx <- list( ms  = reg_to_idx(msDat, bioact, region$ms, "ms"),
+                       bio = reg_to_idx(msDat, bioact, region$bio, "bio") )
   }
 
   return (regionIdx)
