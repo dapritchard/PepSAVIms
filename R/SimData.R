@@ -1,21 +1,11 @@
-#
-#
-# nCmp <- 200                       # Number of compounds
-# nFrac <- 50                       # Number of fractions
-# nRepl <- 4                        # Number of bioactivity replicates
-# regIdx <- 21:25                   # Indices for the nonzero predictors
-# nPred <- 3       # Number of nonzero predictors
 
-nCmp=3
-nFrac=50
-nRepl=1
-regIdx=11:40
-nPred=3
+# Very, very, naive function used for simulating data.
 
 simData <- function(nCmp, nFrac, nRepl, nPred, regIdx, sigma) {
 
   # Mass spec data
   ms <- matrix(rnorm(nCmp * nFrac), nrow=nCmp, ncol=nFrac)
+  colnames(ms) <- paste0("ms", seq_len(nFrac))
 
   # Define true beta (just the nonzero part of beta)
   beta <- list( idx = seq_len(nPred),
@@ -43,6 +33,7 @@ simData <- function(nCmp, nFrac, nRepl, nPred, regIdx, sigma) {
                     rnorm(nRepl * length(non_assoc_idx$aft) ) ),
                  nrow=nRepl,
                  ncol=nFrac )
+  colnames(bio) <- paste0("bio", seq_len(nFrac))
 
   # Construct msDat object with arbitrary mtoz and charge values
   msDat_out <- msDat(ms, seq_len(nCmp), rep(1, nCmp))

@@ -1,22 +1,6 @@
 
-is.strictvec <- function(x) {
-  is.atomic(x) && !is.array(x)
-}
-
-
-
-check_form_msDat <- function(msDat) {
-
-  if ( missing(msDat) ) {
-    stop("msDat must have an argument provided\n")
-  }
-  if (class(msDat) != "msDat") {
-    stop("msDat must be of class msDat\n")
-  }
-}
-
-
-
+# Delegates generatation of region indices to num_to_idx or char_to_idx,
+# dependent on type of data.  Duplicates are also checked for.
 
 reg_to_idx <- function(msDat, bioact, regVec, whichDat) {
 
@@ -45,6 +29,7 @@ null_to_idx <- function(msDat, bioact) {
     stop("If region is NULL then the number of fractions must be the same for
            the mass spectrometry data and the bioactivity data\n")
   }
+  nfrac <- ncol(msDat$ms)
 
   # Make an index entry for every fraction
   regionIdx <- list( ms  = seq_len(nfrac),
@@ -57,6 +42,8 @@ null_to_idx <- function(msDat, bioact) {
 
 num_to_idx <- function(msDat, bioact, regVec, whichDat) {
 
+  # whichDat is either ms or bio, specifying which data the regions are
+  # referring to
   nfrac <- ifelse(identical(whichDat, "ms"), ncol(msDat$ms), ncol(bioact))
 
   # Check valid input values
@@ -120,56 +107,6 @@ get_data_nm <- function(msDat, bioact, whichDat) {
 
 
 
-checkValInp_rankLasso <- function(msDat, bioact, region, useAve) {
-
-  # Check if msDat of class msDat
-  if (class(msDat) != "msDat") {
-    stop("msDat must be of class msDat\n")
-  }
-
-  # Check if region is the right form.  Note that this doesn't yet check that the values
-  # provided by region make sense (i.e. the numbers provided are not too big / small
-  # or the names don't match).  These checks are performed in reg_to_idx().
-
-  if ( !(is.null(region) || is.strictvec(region) || is.list(region)) ) {
-    stop("region must either be NULL or a non-array atomic vector or a list\n")
-  }
-
-  # case: non-array atomic vector
-  if ( is.strictvec(region) ) {
-    if ( !(is.numeric(region) || is.character(region)) ) {
-      stop("region must be either numeric or character\n")
-    }
-    if ( TRUE %in% is.na(region) ) {
-      stop("region cannot have any missing values\n")
-    }
-  }
-
-  # case: list
-  else if ( is.list(region) ) {
-
-    # Check that (exactly two objects) with names ms and bio contained in region
-    if ( !( identical(names(region), c("ms", "bio"))
-            || identical(names(region), c("bio", "ms")) ) ) {
-      stop("if region is a list then the objects must have the names ms and bio\n")
-    }
-
-    # Check that objects are non-array atomic vectors
-    if ( !(is.strictvec(region$ms) || is.strictvec(region$bio)) ){
-      stop("if region is a list then the objects must be non-array atomic vectors\n")
-    }
-
-    # Check that objects are numeric or character
-    if ( !(is.numeric(bioact$ms) || is.character(bioact$ms))
-         || !(is.numeric(bioact$ms) || is.character(bioact$ms)) ) {
-      stop("if region is a list then the objects must numeric or character\n")
-    }
-  } # end list case
-
-  # Check that useAve is the right form
-  if ( !(identical(useAve, TRUE) || identical(useAve, FALSE)) ) {
-    stop("useAve must either be TRUE or FALSE\n")
-  }
+is.strictvec <- function(x) {
+  is.atomic(x) && !is.array(x)
 }
-
-

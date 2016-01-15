@@ -60,74 +60,110 @@
 #'   to the same fraction as the column specified by the \code{k}-th value in
 #'   the \code{bio} vector, for each \code{k}.
 #'
+#' @details Note that in the current incarnation of rankLasso, the solution to
+#'   the Lasso path is the same when using either the average of bioactivity
+#'   replicates or individual replicates.  A parameter, useAve, used to be
+#'   offered - but since the result is the same either way, now it is just set
+#'   \code{TRUE}.  The rest of the code is left unchanged, in the event another
+#'   way is found to use individual replicates.
+#'
 #' @export
 
 
 rankLasso <- function(msDat, bioact, region=NULL) {
 
-  # NOTE: in the current form of rankLasso, the solution to the Lasso path is
-  # the same when using either the average of bioactivity replicates or
-  # individual replicates.  A parameter, useAve, used to be offered - but since
-  # the result is the same either way, now it is just set TRUE.  The rest of the
-  # code is left unchanged, in the event another way is found to use individual
-  # replicates.
+  # Set useAve to true since it is cheaper and result is invariant to choice
   useAve <- TRUE
 
-  # Check if msDat has an argument provided and is of class msDat
-  check_form_msDat(msDat)
+  # Check that data arguments are of the right type
+  checkValInp_rankLasso(msDat, bioact, region, useAve)
 
   # Convert (if necessary) bioact to matrix form.  Data is guaranteed to be
   # numeric with no missing.
   bioMat <- format_bio(bioact)
 
-  # Convert (if necessary) region to a list containing two vectors (unless
-  # region is NULL, and then function is a noop). Each vector is guaranteed to
-  # be numeric or character with no missing.
+  # Convert (if necessary) region to either a list containing exactly two
+  # vectors, or NULL.  If applicable, each vector is guaranteed to be numeric or
+  # character with no missing.
   regList <- format_reg(region)
-
-  # Check if useAve in correct form
-  if ( !(identical(useAve, TRUE) || identical(useAve, FALSE)) ) {
-    stop("useAve must be either TRUE or FALSE\n")
-  }
 
   # Creates region indices for the mass spec and bioactivity data based on the
   # region input.  Also checks to see if the input matches the data.
   regionIdx <- getRegionIdx(msDat, bioMat, regList)
 
-  # Puts the data into a form where the rows are the fractions and cols are the
-  # compounds.  This is done so as to cast the problem as a regression problem
-  # where the fractions are the observations and the compounds are the potential
-  # predictor variables.  In addition, if useAve is FALSE then replicates of the
-  # observations are created a la an ANOVA setting.
-  nRepl <- nrow(bioact)
-  ms <- conv_ms(msDat$ms, regionIdx$ms, nRepl, useAve)
+  # Puts the data into a form where the rows are the fractions of interest and
+  # columns are the compounds.  This is done so as to cast the problem as a
+  # regression problem where the fractions are the observations and the
+  # compounds are the potential predictor variables.  In addition, if useAve is
+  # FALSE then replicates of the observations are created a la an ANOVA setting.
+  ms_regr <- conv_ms(msDat$ms, regionIdx$ms, nrow(bioact), useAve)
 
   # Creates a numeric vector for the bioactivity response
-  bio <- conv_bioact(bioact, regionIdx$bio, useAve)
-
-  # Clean up unneeded data for garbage collection
-  mtoz <- msDat$mtoz
-  chg <- msDat$chg
-  rm(msDat, bioact)
+  bio_regr <- conv_bioact(bioMat, regionIdx$bio, useAve)
 
   # Calculate the Lasso path
-  fit <- lars::lars(x=ms, y=bio)
+  lars_fit <- lars::lars(x=ms_regr, y=bio_regr)
 
-  # Indices for compounds as they first enter the model
-  cmpIdx <- getCmpIdx(fit)
+  # Obtain indices for compounds as they first enter the model
+  cmpIdx <- getCmpIdx(lars_fit)
 
   # Correlation of chosen compounds
-  # TODO
+  cmp_cor <- getCmpCor(msDat, bioMat, regionIdx, cmpIdx)
+
+  # Record some summary statistics for the data for use by bioact.summary
+  data_desc <- get_data_desc(msDat$ms, bioMat, regionIdx, cmpIdx)
 
   # Construct output object
-  outDat <- list( mtoz     = mtoz[cmpIdx],
-                  charge   = chg[cmpIdx],
-                  nRegions = length(regionIdx$ms),
-                  nRepl    = nRepl,
-                  useAve   = useAve,
-                  lars_fit = fit )
+  outDat <- list( mtoz      = msDat$mtoz[cmpIdx],
+                  charge    = msDat$chg[cmpIdx],
+                  cmp_cor   = cmp_cor,
+                  data_desc = data_desc,
+                  lars_fit  = lars_fit )
 
   structure(outDat, class="rankCmp")
+}
+
+
+
+
+#' Calculates indices for the fractions of interest
+#'
+#' See description of the \code{region} parameter for the behavior of
+#' this function
+#'
+#' @inheritParams rankLasso
+#'
+#' @return A list providing the indices for the fractions of interest
+#'   for the mass spectrometry and bioactivity data.  The list contains
+#'   the elements described below.  Note that the \code{k}-th index
+#'   for the mass spectrometry index corresponds to the \code{k}-th
+#'   index for the bioactivity index.
+#'
+#'   \describe{
+#'
+#'   \item{\code{ms}}{An integer vector providing the indices for the
+#'   fractions of interest in the mass spectrometry data }
+#'
+#'   \item{\code{bio}}{An integer vector providing the indices for the
+#'   fractions of interest in the bioactivity data }
+#'
+#'   }
+
+
+getRegionIdx <- function(msDat, bioact, region) {
+
+  # case: null
+  if (is.null(region)) {
+    regionIdx <- null_to_idx(msDat, bioact)
+  }
+
+  # case: list
+  else {
+    regionIdx <- list( ms  = reg_to_idx(msDat, bioact, region$ms, "ms"),
+                       bio = reg_to_idx(msDat, bioact, region$bio, "bio") )
+  }
+
+  return (regionIdx)
 }
 
 
@@ -176,7 +212,7 @@ conv_ms <- function(ms, msIdx, nRepl, useAve) {
   # If we have bioactivity replicates, then we need to copy each fraction of the
   # data (now the rows after transposition), one time for each replicate
   if (!useAve && (nRepl >= 2L)) {
-    ms <- ms[rep(1:nrow(ms), each=nRepl), ]
+    ms <- ms[rep(seq_len(nrow(ms)), each=nRepl), ]
   }
 
   return (ms)
@@ -200,23 +236,13 @@ conv_ms <- function(ms, msIdx, nRepl, useAve) {
 #' 2, fraction 1 replicate 3, fraction 2 replicate 1, fraction 2 replicate 2,
 #' fraction 2 replicate 3, fraction 3 replicate 1, ...
 #'
-#' @inheritParams rankLasso
+#' @param bioMat The object returned by the format_bio function
 #'
-#' @param msIdx An integer vector providing the indices (and hence fractions)
-#'   for the bioactivity data which are to be used in the Lasso model
+#' @param bioIdx An integer vector providing the indices (and hence fractions of
+#'   interest) for the bioactivity data which are to be used in the Lasso model
 
 
-conv_bioact <- function(bioact, bioIdx, useAve) {
-
-  # case: bioact is non-array atomic vector
-  if (is.strictvec(bioact)) {
-    # useAve ignored in this case as there are no replicates.   Simply return
-    # one bioactivity observation for each fraction of interest.
-    return ( bioact[bioIdx] )
-  }
-
-  # case: bioact is matrix or data frame
-  bioact <- as.matrix(bioact)
+conv_bioact <- function(bioMat, bioIdx, useAve) {
 
   if (useAve) {
     # Want to average the replicates within a fraction.  Note that the input is
@@ -258,7 +284,7 @@ conv_bioact <- function(bioact, bioIdx, useAve) {
 
 getCmpIdx <- function(lars_fit) {
 
-  # See 'details' in function documentation
+  # See 'details' in function documentation to see why this function works
 
   actions <- unlist(lars_fit$actions)
   unique(actions[actions > 0])
@@ -267,42 +293,32 @@ getCmpIdx <- function(lars_fit) {
 
 
 
-#' Calculates indices for the fractions of interest
-#'
-#' See description of the \code{region} parameter for the behavior of
-#' this function
-#'
-#' @inheritParams rankLasso
-#'
-#' @return A list providing the indices for the fractions of interest
-#'   for the mass spectrometry and bioactivity data.  The list contains
-#'   the elements described below.  Note that the \code{k}-th index
-#'   for the mass spectrometry index corresponds to the \code{k}-th
-#'   index for the bioactivity index.
-#'
-#'   \describe{
-#'
-#'   \item{\code{ms}}{An integer vector providing the indices for the
-#'   fractions of interest in the mass spectrometry data }
-#'
-#'   \item{\code{bio}}{An integer vector providing the indices for the
-#'   fractions of interest in the bioactivity data }
-#'
-#'   }
+getCmpCor <- function(msDat, bioMat, regionIdx, cmpIdx) {
 
+  cmpMat <- msDat$ms[cmpIdx, regionIdx$ms]
+  bioAve <- colMeans( bioMat[, regionIdx$bio] )
 
-getRegionIdx <- function(msDat, bioact, region) {
-
-  # case: null
-  if (is.null(region)) {
-    regionIdx <- null_to_idx(msDat, bioact)
-  }
-
-  # case: list
-  else {
-    regionIdx <- list( ms  = reg_to_idx(msDat, bioact, region$ms, "ms"),
-                       bio = reg_to_idx(msDat, bioact, region$bio, "bio") )
-  }
-
-  return (regionIdx)
+  apply(cmpMat, 1, function(x) cor(x, bioAve))
 }
+
+
+
+
+get_data_desc <- function(ms, bioMat, regionIdx, cmpIdx) {
+
+  msDim <- dim(ms)
+  bioDim <- dim(bioMat)
+
+  regionNm <- list( ms  = colnames(ms)[regionIdx$ms],
+                    bio = colnames(bioMat)[regionIdx$bio] )
+
+  data_desc <- list( msDim     = msDim,
+                     bioDim    = bioDim,
+                     regionNm  = regionNm,
+                     regionIdx = regionIdx,
+                     cmpIdx    = cmpIdx )
+  return (data_desc)
+}
+
+
+

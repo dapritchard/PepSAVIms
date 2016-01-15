@@ -27,25 +27,29 @@ trueDatOut <- structure( list( ms   = ms_true,
                          class="msDat" )
 
 
-# Testing process --------------------------------------------------------
+# Testing valid inputs ---------------------------------------------------------
 
 test_that("use matrix as input", {
-  expect_identical( msDat(msMat, 1, 2), trueDatOut )
-  expect_identical( msDat(msMat[, -1], mtoz, 1), trueDatOut )
-  expect_identical( msDat(msMat[, -2], 1, chg), trueDatOut )
+  expect_identical( msDat(msMat, 1, 2),                  trueDatOut )
+  expect_identical( msDat(msMat[, -1], mtoz, 1),         trueDatOut )
+  expect_identical( msDat(msMat[, -2], 1, chg),          trueDatOut )
   expect_identical( msDat(msMat[, -c(1, 2)], mtoz, chg), trueDatOut )
 })
 
 test_that("use data frame as input", {
-  expect_identical( msDat(msDf, 1, 2), trueDatOut )
-  expect_identical( msDat(msDf[, -1], mtoz, 1), trueDatOut )
-  expect_identical( msDat(msDf[, -2], 1, chg), trueDatOut )
+  expect_identical( msDat(msDf, 1, 2),                  trueDatOut )
+  expect_identical( msDat(msDf[, -1], mtoz, 1),         trueDatOut )
+  expect_identical( msDat(msDf[, -2], 1, chg),          trueDatOut )
   expect_identical( msDat(msDf[, -c(1, 2)], mtoz, chg), trueDatOut )
-  expect_identical( msDat(msDf, "X1", 2), trueDatOut )
-  expect_identical( msDat(msDf, 1, "X2"), trueDatOut )
-  expect_identical( msDat(msDf, "X1", "X2"), trueDatOut )
+  expect_identical( msDat(msDf, "X1", 2),               trueDatOut )
+  expect_identical( msDat(msDf, 1, "X2"),               trueDatOut )
+  expect_identical( msDat(msDf, "X1", "X2"),            trueDatOut )
 })
 
-# TODO: test invalid input
+
+# Test invalid input -----------------------------------------------------------
+
+# TODO
+
 
 
