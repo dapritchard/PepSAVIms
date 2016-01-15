@@ -56,7 +56,7 @@ format_reg <- function(region) {
     return ( format_reg_list(region) )
   }
 
-  # Region doesn't satisfy function req's
+  # If we've made it here, then region doesn't satisfy function req's
   stop("region must be either a non-array vector, a matrix, or a list\n")
 }
 
