@@ -127,7 +127,7 @@ rankLasso <- function(msDat, bioact, region=NULL) {
 
 
 
-summary.rankLasso <- function(rl_out) {
+summary.rankCmp <- function(rl_out) {
 
   # Create a link for convenience
   data_desc <- rl_out$data_desc
