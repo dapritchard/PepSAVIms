@@ -120,13 +120,13 @@ conv_bioact <- function(bioMat, bioIdx, useAve) {
   if (useAve) {
     # Want to average the replicates within a fraction.  Note that the input is
     # provided as a column for each fraction.
-    return ( colMeans(bioact[, bioIdx]) )
+    return ( colMeans(bioMat[, bioIdx]) )
   }
   else {
     # Want to convert matrix to a non-list vector; uses c() to do this.  Note
     # that the behavior is to "stack" the columns.  Choice of doing this is
     # arbitrary, *but it must match the behavior of ms_conv()*.
-    return ( c( bioact[, bioIdx] ) )
+    return ( c( bioMat[, bioIdx] ) )
   }
 }
 
