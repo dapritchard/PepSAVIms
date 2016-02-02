@@ -51,7 +51,7 @@ num_to_idx <- function(msDat, bioact, regVec, whichDat) {
     stop("out of bounds region value provided\n")
   }
 
-  return (regVec)
+  return ( as.integer(regVec) )
 }
 
 
@@ -70,8 +70,8 @@ char_to_idx <- function(msDat, bioact, regVec, whichReg) {
   for (i in seq_along(regVec)) {
 
     # Number of matches for current element of regVec in fraction names
-    matchBool <- grepl(regVec[i], nmFrac)
-    nMatch <- sum(matchBool)
+    matchIdx <- grep(regVec[i], nmFrac)
+    nMatch <- length(matchIdx)
 
     # Check that current name has exactly one match
     if (identical(nMatch, 0L)) {
@@ -81,7 +81,7 @@ char_to_idx <- function(msDat, bioact, regVec, whichReg) {
       stop("names in provided region had multiple matches in data\n")
     }
 
-    regionIdx[i] <- which(matchBool)
+    regionIdx[i] <- matchIdx
   }
 
   return (regionIdx)

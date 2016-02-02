@@ -4,7 +4,7 @@
 \alias{rankLasso}
 \title{Ranks compounds using the Lasso path}
 \usage{
-rankLasso(msDat, bioact, region = NULL, useAve = TRUE)
+rankLasso(msDat, bioact, region = NULL)
 }
 \arguments{
 \item{msDat}{An object of class \code{\link{msDat}} containing the mass
@@ -16,9 +16,10 @@ rankLasso(msDat, bioact, region = NULL, useAve = TRUE)
   it is assumed that each column corresponds to a particular fraction, and
   that each row corresponds to a particular bioactivity replicate.}
 
-\item{region}{Either \code{NULL}, a non-list vector, or a list containing
-  exactly two atomic vectors, providing information specifying which
-  fractions are to be included in the Lasso model.
+\item{region}{Either \code{NULL}, a non-list vector, a matrix, or a list
+  containing exactly two atomic vectors, providing information specifying
+  which fractions are to be included in the Lasso model.  Note that a data
+  frame satisfies these requirements.
 
   If \code{NULL}, then it is assumed that all fractions included in the data
   are to be used in the model.  This requires that the number of fractions in
@@ -39,9 +40,20 @@ rankLasso(msDat, bioact, region = NULL, useAve = TRUE)
   to the same fraction for both the mass spectrometry data and the
   bioactivity data.
 
+  If a matrix then it must be either numeric or character with exactly two
+  columns - one is to be named \code{ms} and the other is to be named
+  \code{bio}.  The \code{ms} column specifies the columns (and hence
+  fractions) to include in the model from the mass spectrometry data, either
+  as a vector of the column numbers or the column names.  The \code{bio}
+  vector specifies the columns (and hence fractions) to include in the model
+  from the bioactivity data, either as a vector of the column numbers or the
+  column names.  It is assumed that two entries from a given row refer to the
+  same fraction.
+
   If a list, then it must be a list with two named non-list vectors of equal
   length - one is to be named \code{ms} and the other is to be named
-  \code{bio}.  The \code{ms} vector specifies the columns (and hence
+  \code{bio} (note that a \code{n x 2} data frame satisfies this
+  requirement).  The \code{ms} vector specifies the columns (and hence
   fractions) to include in the model from the mass spectrometry data, either
   as a vector of the column numbers or the column names.  The \code{bio}
   vector specifies the columns (and hence fractions) to include in the model
@@ -50,13 +62,17 @@ rankLasso(msDat, bioact, region = NULL, useAve = TRUE)
   data specified by the \code{k}-th value in the \code{ms} vector corresponds
   to the same fraction as the column specified by the \code{k}-th value in
   the \code{bio} vector, for each \code{k}.}
-
-\item{useAve}{A logical value specifying whether or not to average replicate
-bioactivity observations.  Ignored if only one bioactivity observation is
-provided.}
 }
 \description{
 Returns identifying information for the compounds in the order in which they
 first enter the Lasso model
+}
+\details{
+Note that in the current incarnation of rankLasso, the solution to
+  the Lasso path is the same when using either the average of bioactivity
+  replicates or individual replicates.  A parameter, useAve, used to be
+  offered - but since the result is the same either way, now it is just set
+  \code{TRUE}.  The rest of the code is left unchanged, in the event another
+  way is found to use individual replicates.
 }
 
