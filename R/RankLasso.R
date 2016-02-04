@@ -66,6 +66,8 @@
 #'
 #' @export
 
+# TODO: document function output
+
 
 rankLasso <- function(msDat, bioact, region=NULL) {
 

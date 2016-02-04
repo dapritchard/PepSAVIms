@@ -67,6 +67,8 @@
 #'   \code{k}-th row of mass spectrometry data }
 #'
 #'   }
+#'
+#' @export
 
 
 msDat <- function(mass_spec, mtoz, charge) {
@@ -161,14 +163,25 @@ is.strictVec <- function(x) {
 
 getCmpInfo <- function(mass_spec, mtoz, charge) {
 
+  # Calculate number of compounds
+  nCmp <- nrow(mass_spec)
+
   # Check if mtoz is numeric or character.  Pre: mtoz is a non-list vector
   if ( !(is.numeric(mtoz) || is.character(mtoz)) ) {
     stop("mtoz must be numeric or character\n")
+  }
+  else if ( !( identical(length(mtoz), 1L) || identical(length(mtoz), nCmp) ) ) {
+    stop("mtoz must have either have a length of 1 or length equal to the ",
+         "number of compounds", call.=FALSE)
   }
 
   # Check if charge is numeric or character.  Pre: charge is a non-list vector
   if ( !(is.numeric(charge) || is.character(charge)) ) {
     stop("charge must be numeric or character\n")
+  }
+  else if ( !( identical(length(mtoz), 1L) || identical(length(mtoz), nCmp) ) ) {
+    stop("charge must have either have a length of 1 or length equal to the ",
+         "number of compounds", call.=FALSE)
   }
 
   # Initialize a list to save mass spectrometry identifying information (and
@@ -176,8 +189,6 @@ getCmpInfo <- function(mass_spec, mtoz, charge) {
   outDat <- list()
   # Create iterable object for for loop
   varList <- list(mtoz=mtoz, chg=charge)
-  # Calculate number of compounds
-  nCmp <- nrow(mass_spec)
 
 
   # Each iteration in loop creates an entry in outDat where the entry is a list
@@ -190,14 +201,11 @@ getCmpInfo <- function(mass_spec, mtoz, charge) {
     thisVar <- varList[[i]]
 
     # nCmp length atomic vector
-    if (length(thisVar) > 1) {
-      if (length(thisVar) != nCmp) {
-        stop("length of mtoz not either 1 or equal to the number of compounds\n")
-      }
+    if ( identical(length(thisVar), nCmp) ) {
       outDat[[i]]$loc <- numeric(0)
       outDat[[i]]$val <- thisVar
     }
-    # length 1 numeric or double
+    # length 1 numeric
     else if (is.numeric(thisVar)) {
       if ((thisVar < 1) || (thisVar > ncol(mass_spec))) {
         stop(paste("not a valid column number for", names(varList)[i], "\n"))
@@ -214,7 +222,8 @@ getCmpInfo <- function(mass_spec, mtoz, charge) {
       outDat[[i]]$val <- mass_spec[, thisVar]
     }
     else {
-      # TODO: is there a case that needs to be considered here?!?.  Why is this here?
+      # Should not reach here.  All cases should be covered either in the error
+      # checking or conditionals.
     }
   } # End loop entering data into outDat
 

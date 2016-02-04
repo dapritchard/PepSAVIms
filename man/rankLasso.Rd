@@ -35,10 +35,7 @@ rankLasso(msDat, bioact, region = NULL)
   are specified by number, and if the vector is character, then the desired
   columns are specified by name (partial matching is allowed).  Note that
   this assumes that the corresponding columns in the mass spectrometry data
-  and the bioactivity data refer to the same fractions.  In other words if
-  the \code{k}-th column is selected, then the \code{k}-th column must refer
-  to the same fraction for both the mass spectrometry data and the
-  bioactivity data.
+  and the bioactivity data refer to the same fractions.
 
   If a matrix then it must be either numeric or character with exactly two
   columns - one is to be named \code{ms} and the other is to be named
