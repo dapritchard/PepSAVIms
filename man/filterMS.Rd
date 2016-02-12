@@ -4,7 +4,7 @@
 \alias{filterMS}
 \title{Filter compounds from mass spectrometry data}
 \usage{
-filterMS(msObj, region, border = "all", bor_rat = 0.05, min_inten = 1000,
+filterMS(msObj, region, border = "all", bord_rat = 0.05, min_inten = 1000,
   max_chg = 7L)
 }
 \arguments{
@@ -14,23 +14,33 @@ filterMS(msObj, region, border = "all", bor_rat = 0.05, min_inten = 1000,
   the entries should provide the indices for the region of interest in the
   mass spectrometry data in the argument for \code{msObj}.  If character then
   the entries should uniquely specify the region of interest through partial
-  string matching.}
+  string matching (see criterion 1, 4).}
 
-\item{border}{Either a character string with the value \code{"all"}, or a
-  single numeric value specifying the number of fractions to either side of
-  the region of interest to comprise the bordering region}
+\item{border}{Either a character string \code{"all"}, or a character string
+  \code{"none"}, or a length-1 or length-2 numeric value specifying the
+  number of fractions to either side of the region of interest to comprise
+  the bordering region.  If a single numeric value, then this is number of
+  fractions to each side of the region of interest; if it is two values, the
+  the first value is the number of fractions to the left, and the second
+  value is the number of fractions to the right.  If there are not enough
+  fractions in either direction to completely span the number of specified
+  fractions, the all of the available fractions considered to be the
+  bordering region (see criterion 2).}
 
-\item{bor_rat}{A single numeric value between 0 and 1, inclusive}
+\item{bord_rat}{A single nonnegative numeric value.  A value of 0 will not
+  permit any compounds, while a value greater than or equal to 1 will permit
+  all compounds (see criterion 2).}
 
-\item{min_inten}{A single numeric value greater than or equal to 0}
+\item{min_inten}{A single numeric value.  A value less than the minimum mass
+  spectrometry value in the data will permit all compounds (see criterion 4).}
 
 \item{max_chg}{A single numeric value specifying the maximum charge which a
-  compound may exhibit}
+  compound may exhibit (see criterion 5)}
 }
 \value{
-Returns an object of class of classes \code{link{msDat}} and
-  \code{filterMS}.  This object is a \code{list} with elements described
-  below.  The classes are equipped with a summary function.
+Returns an object of classes \code{filterMS} and \code{\link{msDat}}.
+  This object is a \code{list} with elements described below.  The classes
+  are equipped with a summary function.
 
   \describe{
 
@@ -70,10 +80,12 @@ Attempts to filter out candidate compounds via subject-matter
 
   \item The ratio of the m/z intensity of a species in the areas bordering
   the region of interest and the species maximum intensity must be less than
-  \code{bor_rat}
+  \code{bord_rat}
 
   \item The immediately right adjacent fraction to its maximum intensity
-  fraction for a species must have a non-zero abundance
+  fraction for a species must have a non-zero abundance.  In the case of
+  ties for the maximum, it is the fraction immediately to the right of the
+  rightmost maximum fraction which cannot have zero abundance.
 
   \item Each fraction in the region of interest must have intensity greater
   than \code{min_inten}

@@ -6,7 +6,7 @@ reg_to_idx <- function(msDat, bioact, regVec, whichDat) {
 
   # Check that there are no duplicates
   if ( length(unique(regVec)) != length(regVec) ) {
-    stop("region cannot have any duplicate values\n")
+    stop("region cannot have any duplicate values", call.=FALSE)
   }
 
   # case: numeric region provided
@@ -27,7 +27,7 @@ null_to_idx <- function(msDat, bioact) {
   # Check that ms and bioact dimensions match
   if ( !identical(ncol(msDat$ms), ncol(bioact)) ) {
     stop("If region is NULL then the number of fractions must be the same for
-           the mass spectrometry data and the bioactivity data\n")
+           the mass spectrometry data and the bioactivity data", call.=FALSE)
   }
   nfrac <- ncol(msDat$ms)
 
@@ -48,7 +48,7 @@ num_to_idx <- function(msDat, bioact, regVec, whichDat) {
 
   # Check valid input values
   if ((min(regVec) < 1) || (max(regVec) > nfrac)) {
-    stop("out of bounds region value provided\n")
+    stop("out of bounds region value provided", call.=FALSE)
   }
 
   return ( as.integer(regVec) )
@@ -78,7 +78,7 @@ char_to_idx <- function(msDat, bioact, regVec, whichReg) {
       stop("names in provided region not in data\n")
     }
     if (nMatch >= 2L) {
-      stop("names in provided region had multiple matches in data\n")
+      stop("names in provided region had multiple matches in data", call.=FALSE)
     }
 
     regionIdx[i] <- matchIdx

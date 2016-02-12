@@ -1,5 +1,13 @@
 
-# Very, very, naive function used for simulating data.
+# Simulate data for testing purposes
+#
+# Very, very, naive / unrealistic function used for simulating data.  It creates
+# an msDat object and bioactivity matrix based on a given region and beta vector
+# of regressors.  The data is unrealistic in that the mass spectrometry data is
+# sampled from N(0, 1) distributions independent across both compounds and
+# fractions, and hence does not have the structure characteristic of mass
+# spectrometry intensities.
+
 
 simData <- function(nCmp, nFrac, nRepl, nPred, regIdx, sigma) {
 

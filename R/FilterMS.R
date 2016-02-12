@@ -11,18 +11,28 @@
 #'   the entries should provide the indices for the region of interest in the
 #'   mass spectrometry data in the argument for \code{msObj}.  If character then
 #'   the entries should uniquely specify the region of interest through partial
-#'   string matching.
+#'   string matching (see criterion 1, 4).
 #'
-#' @param border Either a character string with the value \code{"all"}, or a
-#'   single numeric value specifying the number of fractions to either side of
-#'   the region of interest to comprise the bordering region
+#' @param border Either a character string \code{"all"}, or a character string
+#'   \code{"none"}, or a length-1 or length-2 numeric value specifying the
+#'   number of fractions to either side of the region of interest to comprise
+#'   the bordering region.  If a single numeric value, then this is number of
+#'   fractions to each side of the region of interest; if it is two values, the
+#'   the first value is the number of fractions to the left, and the second
+#'   value is the number of fractions to the right.  If there are not enough
+#'   fractions in either direction to completely span the number of specified
+#'   fractions, the all of the available fractions considered to be the
+#'   bordering region (see criterion 2).
 #'
-#' @param bor_rat A single numeric value between 0 and 1, inclusive
+#' @param bord_rat A single nonnegative numeric value.  A value of 0 will not
+#'   permit any compounds, while a value greater than or equal to 1 will permit
+#'   all compounds (see criterion 2).
 #'
-#' @param min_inten A single numeric value greater than or equal to 0
+#' @param min_inten A single numeric value.  A value less than the minimum mass
+#'   spectrometry value in the data will permit all compounds (see criterion 4).
 #'
 #' @param max_chg A single numeric value specifying the maximum charge which a
-#'   compound may exhibit
+#'   compound may exhibit (see criterion 5)
 #'
 #' @details Attempts to filter out candidate compounds via subject-matter
 #'   knowledge, with the goal of removing spurious noise from downstream models.
@@ -36,10 +46,12 @@
 #'
 #'   \item The ratio of the m/z intensity of a species in the areas bordering
 #'   the region of interest and the species maximum intensity must be less than
-#'   \code{bor_rat}
+#'   \code{bord_rat}
 #'
 #'   \item The immediately right adjacent fraction to its maximum intensity
-#'   fraction for a species must have a non-zero abundance
+#'   fraction for a species must have a non-zero abundance.  In the case of
+#'   ties for the maximum, it is the fraction immediately to the right of the
+#'   rightmost maximum fraction which cannot have zero abundance.
 #'
 #'   \item Each fraction in the region of interest must have intensity greater
 #'   than \code{min_inten}
@@ -48,9 +60,9 @@
 #'
 #'   }
 #'
-#' @return Returns an object of class of classes \code{link{msDat}} and
-#'   \code{filterMS}.  This object is a \code{list} with elements described
-#'   below.  The classes are equipped with a summary function.
+#' @return Returns an object of classes \code{filterMS} and \code{\link{msDat}}.
+#'   This object is a \code{list} with elements described below.  The classes
+#'   are equipped with a summary function.
 #'
 #'   \describe{
 #'
@@ -75,13 +87,15 @@
 #' @export
 
 
-filterMS <- function(msObj, region, border="all", bor_rat=0.05, min_inten=1000, max_chg=7L) {
+filterMS <- function(msObj, region, border="all", bord_rat=0.05, min_inten=1000, max_chg=7L) {
 
-  # TODO: check validity of arguments
+  # Check validity of arguments
+  filterMS_check_valid(msObj, region, border, bord_rat, min_inten, max_chg)
 
   # Number of criterion
   nCrit <- 5
 
+  # Create pointers to mass spec variables for convenience
   ms <- msObj$ms
   mtoz <- msObj$mtoz
   chg <- msObj$chg
@@ -94,19 +108,20 @@ filterMS <- function(msObj, region, border="all", bor_rat=0.05, min_inten=1000, 
   regIdx <- reg_to_idx(msObj, NULL, region, "ms")
 
   # Create border index, i.e. the indices that surround the region of interest
-  borIdx <- getBorderIdx(border, regIdx,ms_nc)
+  borIdx <- getBorderIdx(border, regIdx, ms_nc)
 
-  # maxIdx: the column index per row (and hence fraction) of the maximum intensity level
-  maxIdx <- apply(ms, 1, which.max)
+  # maxIdx: the column index per row (and hence fraction) of the maximum intensity level.
+  # The rightmost column index is chosen in the case of ties so as
+  maxIdx <- apply(ms, 1, function(x) tail(which(x == max(x)), 1))
 
-  # critBool: containers for critia, one row for each compound and one column for each
+  # Evaluate criteria predicates
   critBool <- data.frame( array(dim=c(ms_nr, nCrit)) )
   row_seq <- seq_len(ms_nr)
   critBool[, 1] <- maxIdx %in% regIdx
-  critBool[, 2] <- sapply(row_seq, function(i) all(ms[i, borIdx] < bor_rat * ms[i, maxIdx[i]]))
+  critBool[, 2] <- sapply(row_seq, function(i) all(ms[i, borIdx] < bord_rat * ms[i, maxIdx[i]]))
   critBool[, 3] <- sapply(row_seq, function(i) (ms[i, min(maxIdx[i] + 1, ms_nc)] > 0))
-  critBool[, 4] <- sapply(row_seq, function(i) any(ms[i, ] > min_inten))
-  critBool[, 5] <- sapply(row_seq, function(i) chg[i] <= max_chg)
+  critBool[, 4] <- sapply(row_seq, function(i) all(ms[i, regIdx] > min_inten))
+  critBool[, 5] <- (chg <= max_chg)
 
   # Create a vector of indices which satisfy every criterion
   keepIdx <- which( Reduce("&", critBool) )
@@ -133,6 +148,7 @@ filterMS <- function(msObj, region, border="all", bor_rat=0.05, min_inten=1000, 
                                   chg  = chg[thisKeep] )
   }
 
+  # Construct return object
   outObj <- list( msObj    = msObj,
                   cmp_by_cr = cmp_by_cr,
                   summ_info = list( orig_dim  = c(ms_nr, ms_nc),
@@ -179,7 +195,10 @@ summary.filterMS <- function(filtObj) {
   if ( identical(border, "all") ) {
     cat("- The bordering regions were specified as:  everthing not the region of interest\n")
   }
-  else {
+  else if ( (identical(border, "none")) || all(border == 0) ) {
+    cat("- The bordering regions were specified as:  no bordering regions\n")
+  }
+  else if ( identical(length(border), 1L) ) {
     cat("The bordering regions were specified as each having length ",
         border, ", corresponding to:\n",
         rep("-", 78 + nchar(border)), "\n", sep="")
@@ -188,10 +207,20 @@ summary.filterMS <- function(filtObj) {
     }
     cat("\n")
   }
+  else {
+    cat("The bordering regions were specified as having lengths ",
+        border[1], " and ", border[2], ", corresponding to:\n",
+        rep("-", 79 + sum(nchar(border))), "\n", sep="")
+    for (nm in bor_nm) {
+      cat(nm, "\n", sep="")
+    }
+    cat("\n")
+  }
 
-  cat("- The minimum intensity was specified as: ",
-      format(min_inten, width=6, big.mark=","), "\n",
-      "- The maximum charge was specified as:    ", format(max_chg, width=7), "\n",
+  mi <- format(min_inten, big.mark=",")
+  cat("- The minimum intensity was specified as:   ", mi, "\n",
+      "- The maximum charge was specified as:",
+      rep(" ", 5 + nchar(mi), sep=""),  max_chg, "\n",
       "\n", sep="")
 
   cat("Individually, each criterion reduced the ",
@@ -219,64 +248,6 @@ summary.filterMS <- function(filtObj) {
       "-------------------------------------------------------\n",
       "    ", ifelse(is.null(filtObj$msObj), 0, format(nrow(filtObj$msObj$ms), big.mark=",")),
       "\n\n", sep="")
-
-  return (NULL)
 }
-
-
-
-
-getBorderIdx <- function(border, regIdx, ms_nc) {
-
-  if ( is.character(border) ) {
-    if ( !identical(border, "all") ) {
-      stop("If border is of type character then it must have value \"all\"")
-    }
-    borIdx <- setdiff(seq_len(ms_nc), regIdx)
-  }
-  # case: border is numeric
-  else {
-    bsize <- as.integer(border)
-    borIdx <- getBorderIdx_numeric(bsize, regIdx, ms_nc)
-  }
-
-  return (borIdx)
-}
-
-
-
-
-getBorderIdx_numeric <- function(bsize, regIdx, ms_nc) {
-
-  if ( !identical(length(bsize), 1L) ) {
-    stop("If border is of mode numeric then it must have length 1")
-  }
-  else if (bsize < 1L) {
-    stop("Value of border must be greater than or equal to 1")
-  }
-
-  # Create border index variable: borIdx
-  reg_lo <- head(regIdx, 1)
-  if (reg_lo > 1L) {
-    bef_lo <- max(1L, reg_lo - bsize)
-    bef_hi <- reg_lo - 1L
-    bef_seq <- seq(bef_lo, bef_hi)
-  }
-  else {
-    bef_seq <- integer(0)
-  }
-  reg_hi <- tail(regIdx, 1)
-  if (reg_hi < ms_nc) {
-    aft_lo <- reg_hi + 1L
-    aft_hi <- min(reg_hi + bsize, ms_nc)
-    aft_seq <- seq(aft_lo, aft_hi)
-  }
-  else {
-    aft_seq <- integer(0)
-  }
-
-  borIdx <- c(bef_seq, aft_seq)
-}
-
 
 
