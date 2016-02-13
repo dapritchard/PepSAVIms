@@ -1,6 +1,4 @@
 
-context("msDat constructor")
-
 # Create raw data to use as msDat arguments ------------------------------------
 
 # This is the raw data in several forms, which is to be coerced into class
@@ -26,6 +24,14 @@ trueDatOut <- structure( list( ms   = ms_true,
                                chg  = 6:10 ),
                          class="msDat" )
 
+
+
+
+# ``````````````````` #
+#    Begin testing    #
+# ................... #
+
+context("msDat constructor")
 
 # Testing valid inputs ---------------------------------------------------------
 

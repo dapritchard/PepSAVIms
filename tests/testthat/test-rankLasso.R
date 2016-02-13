@@ -1,6 +1,7 @@
 
-context("rankLasso method")
-
+# `````````````````````````````````` #
+#  Load a saved dataset for testing  #
+# .................................. #
 
 # Load saved simulated data ----------------------------------------------------
 
@@ -18,11 +19,17 @@ context("rankLasso method")
 # testDat <- with(sim_args, simData(nCmp, nFrac, nRepl, nPred, regIdx, sigma))
 #
 # save(testDat, sim_args, file="tests/Sim_Ms_Bio.RData")
+#
+# load("tests/Sim_Ms_Bio.RData")
 
-load("tests/Sim_Ms_Bio.RData")
+load("../Sim_Ms_Bio.RData")
 
 
 
+
+# `````````````````````````````````` #
+#  Create a 'true' rankLasso object  #
+# .................................. #
 
 # Calculate model fits for comparison ------------------------------------------
 
@@ -45,7 +52,7 @@ actions <- unlist(lars_fit$actions)
 cmpIdx <- unique( actions[actions > 0] )
 
 # Obtain correlation values of proposed compounds
-cmp_cor <- apply(ms_regr[, cmpIdx], 2, function(x) cor(x, bio))
+cmp_cor <- apply(ms_regr[, cmpIdx], 2, function(x) cor(x, bio_regr))
 
 # Column names for region of interest
 regionNm <- list( ms  = colnames(msDat$ms)[regIdx],
@@ -68,14 +75,21 @@ true_out <- list( mtoz      = msDat$mtoz[cmpIdx],
                   cmp_cor   = cmp_cor,
                   data_desc = data_desc,
                   lars_fit  = lars_fit )
-class(true_out) <- "rankCmp"
+class(true_out) <- "rankLasso"
 
 
-
-
-# Test using simulated data ----------------------------------------------------
+# Create rankLasso object using function ---------------------------------------
 
 rl_out <- rankLasso(msDat, bioact, regIdx)
+
+
+
+
+# ``````````````````` #
+#    Begin testing    #
+# ................... #
+
+context("rankLasso method")
 
 test_that("use matrix as input", {
   expect_identical( rl_out$mtoz,      true_out$mtoz )
