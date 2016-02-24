@@ -117,11 +117,14 @@ conv_ms <- function(ms, msIdx, nRepl, useAve) {
 
 conv_bioact <- function(bioMat, bioIdx, useAve) {
 
-  if (useAve) {
+  if (useAve && (nrow(bioMat) > 1L)) {
     # Want to average the replicates within a fraction.  Note that the input is
     # provided as a column for each fraction.
     return ( colMeans(bioMat[, bioIdx]) )
   }
+  # case: either (i) we're not using the average values and we stack the
+  # replicates into a single column, or (ii) we have a matrix with 1 row and
+  # hence using c() strips the vector of it's dim attributes
   else {
     # Want to convert matrix to a non-list vector; uses c() to do this.  Note
     # that the behavior is to "stack" the columns.  Choice of doing this is
@@ -169,7 +172,13 @@ getCmpIdx <- function(lars_fit) {
 getCmpCor <- function(msDat, bioMat, regionIdx, cmpIdx) {
 
   cmpMat <- msDat$ms[cmpIdx, regionIdx$ms]
-  bioAve <- colMeans( bioMat[, regionIdx$bio] )
+
+  # calculate bioAve: the average for the bioactivity over the replicates
+  if ( identical(nrow(bioMat), 1L) ) {
+    bioAve <- c( bioMat[regionIdx$bio] )
+  } else {
+    colMeans( bioMat[, regionIdx$bio] )
+  }
 
   apply(cmpMat, 1, function(x) cor(x, bioAve))
 }
