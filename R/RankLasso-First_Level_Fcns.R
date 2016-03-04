@@ -177,7 +177,7 @@ getCmpCor <- function(msDat, bioMat, regionIdx, cmpIdx) {
   if ( identical(nrow(bioMat), 1L) ) {
     bioAve <- c( bioMat[regionIdx$bio] )
   } else {
-    colMeans( bioMat[, regionIdx$bio] )
+    bioAve <- colMeans( bioMat[, regionIdx$bio] )
   }
 
   apply(cmpMat, 1, function(x) cor(x, bioAve))

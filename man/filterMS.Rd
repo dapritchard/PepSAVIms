@@ -87,8 +87,8 @@ Attempts to filter out candidate compounds via subject-matter
   for the maximum, it is the fraction immediately to the right of the
   rightmost maximum fraction which cannot have zero abundance.
 
-  \item Each fraction in the region of interest must have intensity greater
-  than \code{min_inten}
+  \item At least 1 fraction in the region of interest must have intensity
+  greater than \code{min_inten}
 
   \item Compound charge state must be less than or equal to \code{max_chg}
 

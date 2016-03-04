@@ -78,9 +78,9 @@ msDat <- function(mass_spec, mtoz, charge) {
   checkValInp_msDat(mass_spec, mtoz, charge)
 
   # Delete the dimensions of an array which have only one level (if necessary)
-  mass_spec <- drop(mass_spec)
-  mtoz <- drop(mtoz)
-  charge <- drop(charge)
+  #mass_spec <- drop(mass_spec)
+  #mtoz <- drop(mtoz)
+  #charge <- drop(charge)
 
   # cmpInfo: a list with seperate vectors containing the mass-to-charge values
   # and charge information, as well as integer values providing (if applicable)
@@ -134,7 +134,7 @@ checkValInp_msDat <- function(mass_spec, mtoz, charge) {
   # Check if parameters are one of matrices / data frames / non-list vectors,
   # as appropriate
 
-  if ( !(is.matrix(drop(mass_spec)) || is.data.frame(mass_spec)) ) {
+  if ( !(is.matrix(mass_spec) || is.data.frame(mass_spec)) ) {
     stop("mass_spec must be a matrix or data frame\n")
   }
   else if ( !( is.strictVec(drop(mtoz)) ) ) {

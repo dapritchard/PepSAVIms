@@ -8,7 +8,7 @@
 # Create mass_spec data with 8 fractions
 region <- paste0("frac", 3:4)
 border <- "all"
-bord_rat <- 0.05
+bord_ratio <- 0.05
 min_inten <- 1000
 max_chg <- 7L
 
@@ -22,7 +22,7 @@ bad_1 <- bad_2 <- bad_3 <- bad_4 <- bad_5 <- good_ms
 # Maximum outside of region
 bad_1[, 1] <- 3000
 
-# Bordering region has values with ratio greater than bord_rat in comparison to
+# Bordering region has values with ratio greater than bord_ratio in comparison to
 # the maximum value
 bad_2[, 2] <- 500
 
@@ -34,7 +34,7 @@ bad_3 <- apply(good_ms, 1, function(x) {
 bad_3 <- t(bad_3)
 
 # Each fraction in region must have value greater than min_inten
-bad_4[, 4] <- 999
+bad_4[, 3:4] <- 999
 
 # Create ms data.  The last block of data is to correspond to a charge value > 7.
 ms <- rbind(good_ms,
@@ -56,9 +56,9 @@ chg_vals <- rep(3:8, each=nrow(good_ms))
 
 keep_cmp_idx <- list(
   c1 = setdiff(1:24, 5:8),
-  c2 = setdiff(1:24, 5:12),
-  c3 = setdiff(1:24, c(8, 13:16)),
-  c4 = setdiff(1:24, 16:20),
+  c2 = setdiff(1:24, c(5:12, c(17, 18, 20))),
+  c3 = setdiff(1:24, c(8, 13:16, 20)),
+  c4 = setdiff(1:24, 17:20),
   c5 = setdiff(1:24, 21:24)
 )
 
@@ -114,9 +114,9 @@ class(true_filterMS_noCmp) <- c("filterMS", "msDat")
 # Create filterMS object from function -----------------------------------------
 
 msObj <- msDat(ms, mtoz_vals, chg_vals)
-fobj <- filterMS(msObj, region, border, bord_rat, min_inten, max_chg)
+fobj <- filterMS(msObj, region, border, bord_ratio, min_inten, max_chg)
 
-fobj_noCmp <- suppressWarnings( filterMS(msObj, region, border, bord_rat, min_inten, max_chg=0L) )
+fobj_noCmp <- suppressWarnings( filterMS(msObj, region, border, bord_ratio, min_inten, max_chg=0L) )
 
 
 
@@ -244,10 +244,10 @@ test_that("filterMS: invalid border", {
                 "The value of border must be greater than or equal to 0" )
 })
 
-test_that("filterMS: invalid bord_rat", {
-  expect_error( filterMS(msObj, 3:4, bord_rat=list()), "bord_rat must be of mode numeric" )
-  expect_error( filterMS(msObj, 3:4, bord_rat="none"), "bord_rat must be of mode numeric" )
-  expect_error( filterMS(msObj, 3:4, bord_rat=-1), "bord_rat must be nonnegative" )
+test_that("filterMS: invalid bord_ratio", {
+  expect_error( filterMS(msObj, 3:4, bord_ratio=list()), "bord_ratio must be of mode numeric" )
+  expect_error( filterMS(msObj, 3:4, bord_ratio="none"), "bord_ratio must be of mode numeric" )
+  expect_error( filterMS(msObj, 3:4, bord_ratio=-1), "bord_ratio must be nonnegative" )
 })
 
 test_that("filterMS: invalid min_inten", {

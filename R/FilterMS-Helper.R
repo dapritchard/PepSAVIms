@@ -9,7 +9,7 @@ getBorderIdx <- function(border, regIdx, ms_nc) {
       borIdx <- integer(0)
     }
     else {
-      stop("Shouldn't reach here!  Please send a bug report\n")
+      stop("Shouldn't reach here!  Please send a bug report")
     }
   }
   # case: border is numeric
@@ -63,7 +63,7 @@ getBorderIdx_numeric <- function(bsize, regIdx, ms_nc) {
 
 
 
-filterMS_check_valid <- function(msObj, region, border, bord_rat, min_inten, max_chg) {
+filterMS_check_valid <- function(msObj, region, border, bord_ratio, min_inten, max_chg) {
 
   ## Check msObj
 
@@ -105,16 +105,16 @@ filterMS_check_valid <- function(msObj, region, border, bord_rat, min_inten, max
     }
   }
 
-  ## Check bord_rat
+  ## Check bord_ratio
 
-  if ( !is.numeric(bord_rat) ) {
-    stop("bord_rat must be of mode numeric", call.=FALSE)
+  if ( !is.numeric(bord_ratio) ) {
+    stop("bord_ratio must be of mode numeric", call.=FALSE)
   }
-  else if ( !identical(length(bord_rat), 1L) ) {
-    stop("bord_rat must be of length 1", call.=FALSE)
+  else if ( !identical(length(bord_ratio), 1L) ) {
+    stop("bord_ratio must be of length 1", call.=FALSE)
   }
-  else if (bord_rat < 0) {
-    stop("bord_rat must be nonnegative", call.=FALSE)
+  else if (bord_ratio < 0) {
+    stop("bord_ratio must be nonnegative", call.=FALSE)
   }
 
   ## Check min_inten

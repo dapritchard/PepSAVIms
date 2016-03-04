@@ -24,7 +24,7 @@
 #'   fractions, then all of the available fractions to the side in question are
 #'   considered to be part of the bordering region (see criterion 2).
 #'
-#' @param bord_rat A single nonnegative numeric value.  A value of 0 will not
+#' @param bord_ratio A single nonnegative numeric value.  A value of 0 will not
 #'   admit any compounds, while a value greater than or equal to 1 will admit
 #'   all compounds (see criterion 2).
 #'
@@ -46,15 +46,15 @@
 #'
 #'   \item The ratio of the m/z intensity of a species in the areas bordering
 #'   the region of interest and the species maximum intensity must be less than
-#'   \code{bord_rat}
+#'   \code{bord_ratio}
 #'
 #'   \item The immediately right adjacent fraction to its maximum intensity
 #'   fraction for a species must have a non-zero abundance.  In the case of ties
 #'   for the maximum, it is the fraction immediately to the right of the
 #'   rightmost maximum fraction which cannot have zero abundance.
 #'
-#'   \item Each fraction in the region of interest must have intensity greater
-#'   than \code{min_inten}
+#'   \item At least 1 fraction in the region of interest must have intensity
+#'   greater than \code{min_inten}
 #'
 #'   \item Compound charge state must be less than or equal to \code{max_chg}
 #'
@@ -87,10 +87,10 @@
 #' @export
 
 
-filterMS <- function(msObj, region, border="all", bord_rat=0.05, min_inten=1000, max_chg=7L) {
+filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=1000, max_chg=7L) {
 
   # Check validity of arguments
-  filterMS_check_valid(msObj, region, border, bord_rat, min_inten, max_chg)
+  filterMS_check_valid(msObj, region, border, bord_ratio, min_inten, max_chg)
 
   # Number of criterion
   nCrit <- 5
@@ -118,9 +118,9 @@ filterMS <- function(msObj, region, border="all", bord_rat=0.05, min_inten=1000,
   critBool <- data.frame( array(dim=c(ms_nr, nCrit)) )
   row_seq <- seq_len(ms_nr)
   critBool[, 1] <- maxIdx %in% regIdx
-  critBool[, 2] <- sapply(row_seq, function(i) all(ms[i, borIdx] < bord_rat * ms[i, maxIdx[i]]))
+  critBool[, 2] <- sapply(row_seq, function(i) all(ms[i, borIdx] < bord_ratio * ms[i, maxIdx[i]]))
   critBool[, 3] <- sapply(row_seq, function(i) (ms[i, min(maxIdx[i] + 1, ms_nc)] > 0))
-  critBool[, 4] <- sapply(row_seq, function(i) all(ms[i, regIdx] > min_inten))
+  critBool[, 4] <- sapply(row_seq, function(i) any(ms[i, regIdx] > min_inten))
   critBool[, 5] <- (chg <= max_chg)
 
   # Create a vector of indices which satisfy every criterion
@@ -132,7 +132,7 @@ filterMS <- function(msObj, region, border="all", bord_rat=0.05, min_inten=1000,
 
   # Create filtered mass spectrometry data
   if (length(keepIdx) > 0) {
-    msObj <- msDat(ms[keepIdx, ], mtoz[keepIdx], chg[keepIdx])
+    msObj <- msDat(ms[keepIdx, , drop=FALSE], mtoz[keepIdx], chg[keepIdx])
   }
   else {
     msObj <- NULL
@@ -143,7 +143,7 @@ filterMS <- function(msObj, region, border="all", bord_rat=0.05, min_inten=1000,
   cmp_by_cr <- setNames(vector("list", nCrit), paste0("c", seq_len(nCrit)))
   for (j in seq_len(nCrit)) {
     thisKeep <- critBool[, j]
-    # note: data frame can handle the case when thisKeep is empty
+    # note: data.frame can handle the case when thisKeep has length 0
     cmp_by_cr[[j]] <- data.frame( mtoz = mtoz[thisKeep],
                                   chg  = chg[thisKeep] )
   }
@@ -167,8 +167,9 @@ filterMS <- function(msObj, region, border="all", bord_rat=0.05, min_inten=1000,
 #' Overview of the filtering process
 #'
 #' Prints a text description of the filtering process.  Displays arguments
-#' chosen for the \code{filterMS} constructor and how many candidate compounds
-#' were chosen for each criterion, as well as overall.
+#' chosen for the \code{filterMS} constructor, how many candidate compounds were
+#' chosen for each criterion, and how many candidate compounds were chosen
+#' overall.
 #'
 #' @export
 
