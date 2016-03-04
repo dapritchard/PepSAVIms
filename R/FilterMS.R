@@ -11,7 +11,7 @@
 #'   then the entries should provide the indices for the region of interest in
 #'   the mass spectrometry data in the argument for \code{msObj}.  If character
 #'   then the entries should uniquely specify the region of interest through
-#'   partial string matching (see criterion 1, 4).
+#'   partial string matching (see criterion 1, 4). Christine
 #'
 #' @param border Either a character string \code{"all"}, or a character string
 #'   \code{"none"}, or a length-1 or length-2 numeric value specifying the
