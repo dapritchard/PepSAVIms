@@ -65,14 +65,14 @@ binMS <- function(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten, time
   }
 
   # Calculate row (mass-to-charge level) criteria status
-  time_pr_bool <- ( (time_pr_range[1] <= raw_data[, time_pr_col])
-                    & (raw_data[, time_pr_col] <= time_pr_range[2]) )
+  time_pr_bool <- ( (time_pr_range[1] <= raw_data[, time_peak_reten])
+                    & (raw_data[, time_peak_reten] <= time_pr_range[2]) )
 
-  mass_bool <- ( (mass_range[1] <= raw_data[[mass_col]])
-                 & (raw_data[[mass_col]] <= mass_range[2]) )
+  mass_bool <- ( (mass_range[1] <= raw_data[[mass]])
+                 & (raw_data[[mass]] <= mass_range[2]) )
 
-  charge_bool <- ( (charge_range[1] <= raw_data[[charge_col]])
-                   & (raw_data[[charge_col]] <= charge_range[2]) )
+  charge_bool <- ( (charge_range[1] <= raw_data[[charge]])
+                   & (raw_data[[charge]] <= charge_range[2]) )
 
   keepIdx <- which( Reduce("&", list(time_pr_bool, mass_bool, charge_bool)) )
 
@@ -86,28 +86,29 @@ binMS <- function(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten, time
   # so as to conform to column major order.
 
   # ms: transpose of the mass spec data
-  ms <- t( raw_data[keep_idx, ms_cols] )
+  ms <- t( raw_data[keepIdx, ms_inten] )
   ms <- ms[, sortIdx]
   # info: data used to identify and combine the mass-to-charge levels
-  info <- t( raw_data[keep_idx, c(mtoz_col, charge_col, time_pr_col, mass_col)] )
+  info <- t( raw_data[keepIdx, c(mtoz, charge, time_peak_reten, mass)] )
   info <- info[, sortIdx]
 
 
   ## Binning mass-to-charge values
 
   # Allocate storage for binned data
+  n <- length(keepIdx)
   info_bin <- matrix(nrow=4, ncol=n)
   ms_bin <- matrix(nrow=nrow(ms), ncol=n)
 
   # Row numbers for the information array (after transposing)
-  rmtoz   <- 1
-  rcharge <- 2
-  rtime   <- 3
-  rmass   <- 4
+  rmtoz   <- 1L
+  rcharge <- 2L
+  rtime   <- 3L
+  rmass   <- 4L
 
-  binIdx  <- 1L    # Index for binned data
-  currIdx <- 1L    # Index for current mass-to-charge level in loop
-  nextIdx <- 1L    # Index for next mass-to-charge to compare current against
+  binIdx  <- 1L    # Track index for binned data
+  currIdx <- 1L    # Track index for current mass-to-charge level in loop
+  nextIdx <- 1L    # Track index for next mass-to-charge to compare current against
   ncmp    <- 1     # Number of mass-to-charge levels in current bin
 
   # Create an illegal charge value used to signal that a mass-to-charge level

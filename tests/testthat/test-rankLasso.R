@@ -19,10 +19,10 @@
 # testDat <- with(sim_args, simData(nCmp, nFrac, nRepl, nPred, regIdx, sigma))
 #
 # save(testDat, sim_args, file="tests/Sim_Ms_Bio.RData")
-#
-# load("tests/Sim_Ms_Bio.RData")
 
-load("../Sim_Ms_Bio.RData")
+load("tests/Sim_Ms_Bio.RData")
+#load("../Sim_Ms_Bio.RData")
+
 
 
 

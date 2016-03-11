@@ -4,8 +4,8 @@
 \alias{filterMS}
 \title{Filter compounds from mass spectrometry data}
 \usage{
-filterMS(msObj, region, border = "all", bord_rat = 0.05, min_inten = 1000,
-  max_chg = 7L)
+filterMS(msObj, region, border = "all", bord_ratio = 0.05,
+  min_inten = 1000, max_chg = 7L)
 }
 \arguments{
 \item{msObj}{An object of class \code{\link{msDat}}}
@@ -14,7 +14,7 @@ filterMS(msObj, region, border = "all", bord_rat = 0.05, min_inten = 1000,
   then the entries should provide the indices for the region of interest in
   the mass spectrometry data in the argument for \code{msObj}.  If character
   then the entries should uniquely specify the region of interest through
-  partial string matching (see criterion 1, 4).}
+  partial string matching (see criterion 1, 4). Christine}
 
 \item{border}{Either a character string \code{"all"}, or a character string
   \code{"none"}, or a length-1 or length-2 numeric value specifying the
@@ -27,7 +27,7 @@ filterMS(msObj, region, border = "all", bord_rat = 0.05, min_inten = 1000,
   fractions, then all of the available fractions to the side in question are
   considered to be part of the bordering region (see criterion 2).}
 
-\item{bord_rat}{A single nonnegative numeric value.  A value of 0 will not
+\item{bord_ratio}{A single nonnegative numeric value.  A value of 0 will not
   admit any compounds, while a value greater than or equal to 1 will admit
   all compounds (see criterion 2).}
 
@@ -80,7 +80,7 @@ Attempts to filter out candidate compounds via subject-matter
 
   \item The ratio of the m/z intensity of a species in the areas bordering
   the region of interest and the species maximum intensity must be less than
-  \code{bord_rat}
+  \code{bord_ratio}
 
   \item The immediately right adjacent fraction to its maximum intensity
   fraction for a species must have a non-zero abundance.  In the case of ties

@@ -1,12 +1,13 @@
 Package: bioact
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1
+Title: Obtain Candidate Compounds With an Effect of Bioactivity
+Version: 0.9.0
 Date: 2015-12-14
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Authors@R: c(
+    person("Pritchard", "David", email="dpritch@live.unc.edu", role=c("aut", "cre")),
+    person("Kirkpatrick", "Christine", email="ckirkpat@live.unc.edu", role="aut"))
 Description: More about what it does (maybe more than one line)
-License: What license is it under?
+License: GPL-3
 LazyData: TRUE
 Suggests: testthat,
     knitr,

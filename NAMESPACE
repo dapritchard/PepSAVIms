@@ -3,4 +3,5 @@
 S3method(summary,filterMS)
 export(filterMS)
 export(msDat)
+export(rankEN)
 export(rankLasso)
