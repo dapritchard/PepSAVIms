@@ -176,7 +176,8 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
 
 summary.filterMS <- function(filtObj) {
 
-  # Add variables to current environment: orig_dim, reg_nm, bor_nm, border, min_inten, max_chg
+  # Add variables to current environment for convenience: orig_dim, reg_nm,
+  # bor_nm, border, min_inten, max_chg
   list2env(filtObj$summ_info, envir=environment())
 
   cat("\n",
