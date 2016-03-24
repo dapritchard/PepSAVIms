@@ -7,7 +7,9 @@
 #' compound; thus, \code{binMS} attempts to recover these underlying compounds
 #' through a binning procedure, described in more detail in \code{Details}.
 #'
-#' @param mass_spec
+#' @param mass_spec Either a matrix or data frame providing the entirety of the
+#'   mass spectrometry data.  Must contain columns with data for at least the
+#'   following: ******
 #'
 #' @param mtoz
 #'
@@ -23,68 +25,76 @@
 #' @param time_pr_diff
 #' @param ...
 #' @return out
+#'
+#' @export
 
 binMS <- function(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten, time_pr_range,
-                  mass_range, charge_range, mtoz_diff, time_pr_diff, ...) {
+                  mass_range, charge_range, mtoz_diff, time_pr_diff) {
 
   # If necessary read data from file into a dataframe (or leave as is)
-  if( !is.matrix(mass_spec) && !is.data.frame(mass_spec) ) {
-    raw_data <- read_csv(file=mass_spec, ...)
-  } else {
-    raw_data <- mass_spec
-  }
+  # if( !is.matrix(mass_spec) && !is.data.frame(mass_spec) ) {
+  #   raw_data <- read_csv(file=mass_spec, ...)
+  # } else {
+  #   raw_data <- mass_spec
+  # }
 
-  ## Step 1: construct (sorted) indices of rows in the data that satisfy the
+  ## Step 1: construct sorted indices of rows in the data that satisfy the
   ## mass, time of peak retention, and charge criteria
 
   # Calculate row (i.e. mass-to-charge level) criteria status
-  time_pr_bool <- ( (time_pr_range[1] <= raw_data[, time_peak_reten])
-                    & (raw_data[, time_peak_reten] <= time_pr_range[2]) )
+  time_pr_bool <- ( (time_pr_range[1] <= mass_spec[, time_peak_reten])
+                    & (mass_spec[, time_peak_reten] <= time_pr_range[2]) )
 
-  mass_bool <- ( (mass_range[1] <= raw_data[[mass]])
-                 & (raw_data[[mass]] <= mass_range[2]) )
+  mass_bool <- ( (mass_range[1] <= mass_spec[[mass]])
+                 & (mass_spec[[mass]] <= mass_range[2]) )
 
-  charge_bool <- ( (charge_range[1] <= raw_data[[charge]])
-                   & (raw_data[[charge]] <= charge_range[2]) )
+  charge_bool <- ( (charge_range[1] <= mass_spec[[charge]])
+                   & (mass_spec[[charge]] <= charge_range[2]) )
 
   keepIdx <- which( Reduce("&", list(time_pr_bool, mass_bool, charge_bool)) )
 
   # Obtain indices of ordered data after removing m/z levels that didn't meet
   # row criteria
-  sortIdx <- order(raw_data[keepIdx, mtoz],
-                   raw_data[keepIdx, time_peak_reten],
-                   raw_data[keepIdx, charge])
+  sortIdx <- order(mass_spec[keepIdx, mtoz],
+                   mass_spec[keepIdx, time_peak_reten],
+                   mass_spec[keepIdx, charge])
 
   ## Step 2: reduce data by row criteria and by selecting columns needed in
   ## future.  Transpose so as to conform to column major order.
 
   # ms: transpose of the mass spec data
-  ms <- t( raw_data[keepIdx, ms_inten] )
+  ms <- t( mass_spec[keepIdx, ms_inten] )
   ms <- ms[, sortIdx]
   # info: data used to identify and combine the mass-to-charge levels
-  info_orig <- t( raw_data[keepIdx, c(mtoz, charge, time_peak_reten, mass)] )
+  info_orig <- t( mass_spec[keepIdx, c(mtoz, charge, time_peak_reten, mass)] )
   info_orig <- info_orig[, sortIdx]
 
 
   ## Step 3: perform binning of observations that meet the similarity criteria
   ## based on mass-to-charge values, time of peak retention, and charge state
 
-  # Allocate memory for binned data
-  n_bef_comb <- length(keepIdx)
-  info_bin <- matrix(nrow=4, ncol=n_bef_comb)
-  ms_bin <- matrix(nrow=nrow(ms), ncol=n_bef_comb)
+  # Allocate memory for binned data.  We keep the data in two matrices; one for
+  # what we call the information which are the values that determine whether or
+  # not to combine two m/z levels, and another for the mass spectrometry
+  # abundances.  The reason for separating the two is that the information data
+  # gets averaged within a bin while the ms abundances are summed.
+  n_befbin <- length(keepIdx)
+  info_bin <- matrix(nrow=4, ncol=n_befbin)
+  ms_bin <- matrix(nrow=nrow(ms), ncol=n_befbin)
 
-  # Row numbers for the information array (after transposing)
+  # Give names to rows (i.e. the variables) in the binned data information
+  # matrix so as to make the algorithm more readable.  The variables correspond
+  # to the m/z value, charge, time of peak retention, and mass respectively.
   rmtoz  <- 1L
   rchg   <- 2L
   rtime  <- 3L
   rmass  <- 4L
 
-  binIdx     <- 1L  # Index for binned data
-  origDatIdx <- 1L  # Index for original data
-  cmpMtozIdx <- 1L  # Index for original data within inner loop that looks for
-                    # all occurences of data within the allowed m/z difference
-  ncmp       <- 1L  # Number of mass-to-charge levels in current bin
+  binCtr   <- 1L  # Index for next binned data entry
+  origCtr  <- 1L  # Index for next orig data to be considered for binned data
+  innerCtr <- 1L  # Index for orig data within inner loop that looks for all
+                  # occurences of data within the allowed m/z difference
+  nbin     <- 1L  # Number of mass-to-charge levels in current bin
 
   # Create an illegal charge value used to signal that a mass-to-charge level
   # has already been included as part of a bin
@@ -95,63 +105,90 @@ binMS <- function(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten, time
   # bin and compare to larger m/z levels, adding levels to the bin when criteria
   # are met, and ending when m/z levels gets out of range.
   
-  while (origDatIdx <= n_bef_comb) {
+  while (origCtr <= n_befbin) {
 
     # case: current row was already included as part of a bin; move on to next
     # m/z level in the pre-binned data (recall that when a row was already
-    # included as part of a bin then the charge is set to (charge_range - 1)
-    # as a signal)
-    if (info_orig[rchg, origDatIdx] < charge_range[1]) {
-      origDatIdx <- origDatIdx + 1L
+    # included as part of a bin then the charge is set to charge_range[1] - 1 as
+    # a signal)
+    if (info_orig[rchg, origCtr] < charge_range[1]) {
+      origCtr <- origCtr + 1L
       next
     }
 
-    # Begin a new bin with current m/z level
-    info_bin[, binIdx] <- info_orig[, origDatIdx]
-    ms_bin[, binIdx] <- ms[, origDatIdx]
-    cmpMtozIdx <- origDatIdx + 1L
-    ncmp <- 1L
+    # If we've made it here then we've found a m/z level in the original data
+    # not yet included in any previous bin.  Begin a new bin starting with this
+    # level as its first entry.
+    info_bin[, binCtr] <- info_orig[, origCtr]
+    ms_bin[, binCtr] <- ms[, origCtr]
+    # Set innerCtr to be the index of the first m/z level to consider for adding
+    # to the new bin
+    innerCtr <- origCtr + 1L
+    # Initial number of m/z levels in the bin
+    nbin <- 1L
 
     # Each iteration compares a m/z value to the current m/z level until the
     # values being compared against have a m/z outside of the allowed range. If
     # all of the criteria for the iteration are met, then the m/z level is
     # combined with the current bin.
     #
-    # Note that when comparisons are made that we divide by ncmp (i.e. the number
+    # Note that when comparisons are made that we divide by nbin (i.e. the number
     # of compounds in the bin) since we are only summing observations from the
     # original data when placing it in the bin (and taking the mean occurs after
     # the (following inner) loop) ends.
 
-    while ( (cmpMtozIdx <= n_bef_comb)
-            && (info_orig[rmtoz, cmpMtozIdx] - (info_bin[rmtoz, binIdx] / ncmp)
-              < mtoz_diff) ) {
+    while ( (innerCtr <= n_befbin)
+            && (info_orig[rmtoz, innerCtr] - (info_bin[rmtoz, binCtr] / nbin) < mtoz_diff) ) {
 
       # case: criteria met.  Add m/z level to current bin.
-      if ( (info_orig[rchg, cmpMtozIdx] == (info_bin[rchg, binIdx] / ncmp))
-           && (abs(info_orig[rtime, cmpMtozIdx] - (info_bin[rtime, binIdx] / ncmp))
+      if ( (info_orig[rchg, innerCtr] == (info_bin[rchg, binCtr] / nbin))
+           && (abs(info_orig[rtime, innerCtr] - (info_bin[rtime, binCtr] / nbin))
              < time_pr_diff) ) {
 
         # add m/z level to current bin
-        info_bin[, binIdx] <- info_bin[, binIdx] + info_orig[, cmpMtozIdx]
-        ms_bin[, binIdx] <- ms_bin[, binIdx] + ms[, cmpMtozIdx]
+        info_bin[, binCtr] <- info_bin[, binCtr] + info_orig[, innerCtr]
+        ms_bin[, binCtr] <- ms_bin[, binCtr] + ms[, innerCtr]
 
         # signal that m/z level is already part of a bin
-        info_orig[rchg, cmpMtozIdx] <- flagv
-        ncmp <- ncmp + 1L
+        info_orig[rchg, innerCtr] <- flagv
+        nbin <- nbin + 1L
+        
       }
-      # case: criteria not me
-      else {
-        # noop
-      }
-
-      cmpMtozIdx <- cmpMtozIdx + 1L
+      # else: criteria not me; noop
+              
+      # Update the counter indexing the next m/z level to consider for adding to
+      # the current bin
+      innerCtr <- innerCtr + 1L
+              
     } # end compare current bin to next m/z level loop
 
-    info_bin[, binIdx] <- info_bin[, binIdx] / ncmp
-    origDatIdx <- origDatIdx + 1L
-    binIdx <- binIdx + 1L
-  } # end start a new bin loop (when m/z level not already in a bin)
+    # Take the average of the binned m/z levels (note: don't need to do this
+    # for ms_bin as these values are strictly summed)
+    info_bin[, binCtr] <- info_bin[, binCtr] / nbin
+    
+    # We've found every m/z level in the original data that belongs in the
+    # binned data.  Update the counter indexing the next m/z level from the
+    # original data, and update the counter indexing the next available bin to
+    # start placing consolidated data into.
+    origCtr <- origCtr + 1L
+    binCtr <- binCtr + 1L
+    
+  } # end iterate over original m/z levels loop
 
+  # Construct msDat object
+  # binCtr indexes the next available bin, so 1 less is the number of bins
+  n_binned <- binCtr - 1L
+  msObj <- msDat(t(ms_bin[, binCtr]), info_bin[rmtoz, binCtr], info_bin[rchg, binCtr])
   
-  list(info_bin[, seq_len(binIdx - 1L)], ms_bin[, seq_len(binIdx - 1L)])
+  summ_info <- list(n_tot = nrow(mass_spec),
+                    n_time_pr = sum(time_pr_bool),
+                    n_mass = sum(mass_bool),
+                    n_charge = sum(charge_bool),
+                    n_tiMaCh = length(keepIdx),
+                    n_binned = n_binned)
+
+  outObj <- list(msObj     = msObj,
+                 summ_info = summ_info)
+  structure(outObj, class=binMS)
 }
+
