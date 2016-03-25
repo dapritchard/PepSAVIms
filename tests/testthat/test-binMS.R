@@ -108,9 +108,9 @@ sampleList <- lapply(1:11, function(x) {
   base_nm <- paste0("info_", x)
   replicate(5, sampObs(get(base_nm)))
 })
-testDat <- matrix(unlist( t( Reduce(cbind, sampleList) ) ), ncol=4)
-testDat <- as.matrix( cbind(testDat, rep(1, nrow(testDat))) )
-colnames(testDat) <- c("mtoz", "chg", "time", "mass", "ms")
+testMS <- matrix(unlist( t( Reduce(cbind, sampleList) ) ), ncol=4)
+testMS <- as.matrix( cbind(testMS, rep(1, nrow(testDat))) )
+colnames(testMS) <- c("mtoz", "chg", "time", "mass", "ms")
 
 
 
@@ -120,8 +120,10 @@ colnames(testDat) <- c("mtoz", "chg", "time", "mass", "ms")
 # ........................................ #
 
 idx <- lapply(1:8, function(j) seq(5 * (j - 1) + 1, 5 * j))
-binDat <- t( sapply(idx, function(j) colMeans(testDat[j, ])) )
-binDat[, 5] <- 5
-colMeans(testDat[1:5, ])
-typeof(testDat)
-is.data.frame(testDat)
+binDat <- t( sapply(idx, function(j) colMeans(testMS[j, ])) )
+binDat <- binDat[order(binDat[, "mtoz"], binDat[, "time"], binDat[, "chg"]), ]
+
+msObj <- msDat(binDat[, "ms", drop=FALSE], binDat[, "mtoz"], binDat[, "chg"])
+
+out <- binMS(testMS, "mtoz", "chg", "mass", "time", "ms", c(14, 45), c(2e3, 15e3), c(2, 10),
+             0.05, 1)

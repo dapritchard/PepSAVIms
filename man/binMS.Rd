@@ -4,46 +4,177 @@
 \alias{binMS}
 \title{Consolidate mass spectrometry observations}
 \usage{
-binMS(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten, time_pr_range,
-  mass_range, charge_range, mtoz_diff, time_pr_diff, ...)
+binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
+  ms_inten = NULL, time_range, mass_range, charge_range, mtoz_diff, time_diff)
 }
 \arguments{
-\item{mass_spec}{}
+\item{mass_spec}{Either a \code{matrix} or \code{data.frame}.  This object
+  contains mass-to-charge values, charge information, and intensity data.
+  The mass spectrometry data is expected to be in a form such that a given
+  column provides the mass spectrometry intensity values for a particular
+  fraction.  Then either 0, 1, or 2 additional columns may be included in the
+  parameter input containing a possible column for the mass-to-charge values
+  and a possible column for the charge information. Any ordering of the
+  columns is allowed.
 
-\item{mtoz}{}
+  For example, suppose that a collection of mass spectrometry readings has
+  provided data for 50 fractions across 20,000 mass-to-charge values.  Then
+  the input for \code{mass_spec} should be a \code{matrix} or
+  \code{data.frame} with 20,000 rows and one of 50, 51, or 52 columns.  Each
+  row in the 50 columns containing the mass spectrometry readings should be
+  for the same mass-to-charge value and charge information.  If columns are
+  included for either the mass-to-charge values or charge information then
+  the entries in these columns should provide the identifying information for
+  the mass spectrometry data in the same row.}
 
-\item{charge}{}
+\item{mtoz}{A vector of either length 1 or length equal to the number of
+  mass-to-charge values for which mass spectrometry data was collected, and
+  which helps identify the mass-to-charge values for this data in one of
+  several ways.
 
-\item{mass}{}
+  One way to provide the information is to provide a vector where each entry
+  provides the mass-to-charge value for a corresponding row of mass
+  spectrometry data.  Then the \code{k}-th entry of the vector would provide
+  the mass-to-charge value for the \code{k}-th row of the mass spectrometry
+  data.
 
-\item{time_peak_reten}{}
+  A second way is to provide a single number which provides the column number
+  in the input to the \code{mass_spec} parameter for a column which contains
+  this information.
 
-\item{ms_inten}{}
+  A third way is provide a single character string which provides the column
+  name in the input to the \code{mass_spec} parameter for a column which
+  contains this information.  Partial matching is allowed.}
 
-\item{time_pr_range}{}
+\item{charge}{The information for the \code{charge} parameter can be provided
+  in the same manner as for the mass-to-charge values.}
 
-\item{mass_range}{}
+\item{mass}{The information for the mass need not be provided, as it can be
+  derived using the mass-to-charge and charge information; in this case the
+  parameter should be given its default, \code{NULL}.  If however the
+  information for mass is already included in the dataset in hand, then
+  providing it to the function will be slightly more efficient then
+  re-performing the calculations.  The information for the \code{charge}
+  parameter can be provided in the same manner as for the mass-to-charge
+  values.}
 
-\item{charge_range}{}
+\item{time_peak_reten}{The information for the \code{time_peak_reten}
+  parameter can be provided in the same manner as for the mass-to-charge and
+  other information; this paramater specifies the time at which the peak
+  retention level of the compound was achieved.}
 
-\item{mtoz_diff}{}
+\item{ms_inten}{********}
 
-\item{time_pr_diff}{}
+\item{mass_range}{A length-2 numeric vector specifying the lower bound and
+  upper bound (inclusive) of allowed mass for an observation to be included
+  in the consolidation process.}
 
-\item{...}{}
-}
-\value{
-out
+\item{charge_range}{A length-2 numeric vector specifying the lower bound and
+  upper bound (inclusive) of allowed electrical charge state for an
+  observation to be included in the consolidation process.}
+
+\item{mtoz_diff}{A single numerical value such that any two observations with
+  a larger absolute difference between their mass-to-charge values are
+  considered to have originated from different underlying compounds.  Two
+  observations with a smaller absolute difference between their
+  mass-to-charge values could potentially be considered to originate from the
+  same underlying compound, contingent on other criteria also being met.}
+
+\item{time_pr_range}{A length-2 numeric vector specifying the lower bound and
+  upper bound (inclusive) of allowed peak retention time occurance for an
+  observation to be included in the consolidation process.}
+
+\item{time_pr_diff}{A single numerical value such that any two observations
+  with a larger absolute difference between their peak elution times are
+  considered to have originated from different underlying compounds.  Two
+  observations with a smaller absolute difference between their peak elution
+  times could potentially be considered to originate from the same underlying
+  compound, contingent on other criteria also being met.}
 }
 \description{
 Combines mass spectrometry observations that are believed to belong to the
-same true observation into a single observation.  In concept, the data
-produced by the mass spectrometer may contain multiple reads for a single
-underlying compound.  Thus, this function attempts to recover these
-underlying compounds through a binning procedure, described in more detail
-in \code{Details}.
+same underlying compound into a single observation.  In concept, the data
+produced by the mass spectrometer may produce multiple reads for a single
+compound; thus, \code{binMS} attempts to recover these underlying compounds
+through a binning procedure, described in more detail in \code{Details}.
 }
-\author{
-Pritchard
+\details{
+The algorithm described in what follows attempts to combines mass
+  spectrometry observations that are believed to belong to the same
+  underlying compound into a single observation for each compound.  There are
+  two conceptually separate steps.
+
+  The first step is as follows.  All observations much satisfy each of the
+  following criteria for inclusion in the binning process.
+
+  \enumerate{
+
+  \item Each observation must have its peak elution time occur during the
+  interval specified by \code{time_pr_range}
+
+  \item Each observation must have a mass that falls within the interval
+  specified by \code{mass_range}
+
+  \item Each observation must have an electrical charge state that falls
+  within the interval specified by \code{charge_range}
+
+  }
+
+  Once that a set of observations satisfying the above criteria is obtained,
+  then a second step attempts to combine observations believed to belong to
+  the same underlying compound.  The algorithm considers two observations
+  that satisfy each of the following criteria to belong to the same compound.
+
+  \enumerate{
+
+  \item The absolute difference in Daltons of the mass-to-charge value
+  between the two observations is less the the value specified by
+  \code{mtoz_diff}
+
+  \item The absolute difference of the peak elution time between the two
+  observations is less than the value specified by \code{time_pr_diff}
+
+  \item The electrical charge state must be the same for the two observations
+
+  }
+
+  Then the binning algorithm is defined as follows.  Consider an observation
+  that satisfies the inclusion criteria; this observation is compaired
+  pairwise with every other observation that satisfies the inclusion
+  criteria.  If a pair of observations satisfies the criteria determining
+  them to belong to the same underlying compound then the two observations
+  are merged into a single observation.  The two previous compounds are
+  removed from the working set, and the process starts over with the newly
+  created observation.  The process repeats until no other observation in the
+  working set meets the criteria determining it to belong to the same
+  underlying compound as that of the current observation; at this point it is
+  considered that all observations belonging to the compound have been found,
+  and the process starts over with a new observation.
+
+  The merging process has not yet been defined; it is performed by averaging
+  the mass-to-charge values and peak elution times, and summing the mass
+  spectrometry intensities at each fraction.  Although observations are
+  merged pairwise, when multiple observations are combined in a sequence of
+  pairings, the averages are given equal weight for all of the observations.
+  In other words, if a pair of observations are merged, and then a third
+  observation is merged with the new observation created by combining the
+  original two, then the mass-to-charge value and peak elution time values of
+  the new observation are obtained by summing the values for each of the
+  three original observations and dividing by three.
+
+  Having described the binning algorithm, it is apparent that there are
+  scenarios in which the order in which observations are merged affects the
+  outcome of the algorithm.  Since it seems that a minumum requirement of any
+  binning algorithm is that the algorithm is invariant to the ordering of the
+  observations in the data, this algorithm abides by the following rules.
+  The observations in the data are sorted in increasing order by
+  mass-to-charge value, peak elution time, and electical charge state,
+  respectively.  Then when choosing an observation to compare to the rest of
+  the set, we start with the observation at the top of the sort ordering, and
+  compare it one-at-a-time to the other elements in the set according to the
+  same ordering.  When a consolidated observation is complete in that no
+  other observation left in the working set satisfies the merging criteria,
+  then this consolidated observation can be removed from consideration for
+  all future merges.
 }
 

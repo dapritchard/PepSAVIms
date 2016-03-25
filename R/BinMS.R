@@ -7,36 +7,132 @@
 #' compound; thus, \code{binMS} attempts to recover these underlying compounds
 #' through a binning procedure, described in more detail in \code{Details}.
 #'
-#' @param mass_spec Either a matrix or data frame providing the entirety of the
-#'   mass spectrometry data.  Must contain columns with data for at least the
-#'   following: ******
+#' @inheritParams msDat
 #'
-#' @param mtoz
+#' @param mass The information for the mass need not be provided, as it can be
+#'   derived using the mass-to-charge and charge information; in this case the
+#'   parameter should be given its default, \code{NULL}.  If however the
+#'   information for mass is already included in the dataset in hand, then
+#'   providing it to the function will be slightly more efficient then
+#'   re-performing the calculations.  The information for the \code{charge}
+#'   parameter can be provided in the same manner as for the mass-to-charge
+#'   values.
 #'
-#' @param charge
-#' @param mass
+#' @param time_peak_reten The information for the \code{time_peak_reten}
+#'   parameter can be provided in the same manner as for the mass-to-charge and
+#'   other information; this paramater specifies the time at which the peak
+#'   retention level of the compound was achieved.
 #'
-#' @param time_peak_reten
-#' @param ms_inten
-#' @param time_pr_range
-#' @param mass_range
-#' @param charge_range
-#' @param mtoz_diff
-#' @param time_pr_diff
-#' @param ...
-#' @return out
+#' @param ms_inten ********
+#'
+#' @param time_pr_range A length-2 numeric vector specifying the lower bound and
+#'   upper bound (inclusive) of allowed peak retention time occurance for an
+#'   observation to be included in the consolidation process.
+#'
+#' @param mass_range A length-2 numeric vector specifying the lower bound and
+#'   upper bound (inclusive) of allowed mass for an observation to be included
+#'   in the consolidation process.
+#'
+#' @param charge_range A length-2 numeric vector specifying the lower bound and
+#'   upper bound (inclusive) of allowed electrical charge state for an
+#'   observation to be included in the consolidation process.
+#'
+#' @param mtoz_diff A single numerical value such that any two observations with
+#'   a larger absolute difference between their mass-to-charge values are
+#'   considered to have originated from different underlying compounds.  Two
+#'   observations with a smaller absolute difference between their
+#'   mass-to-charge values could potentially be considered to originate from the
+#'   same underlying compound, contingent on other criteria also being met.
+#'
+#' @param time_pr_diff A single numerical value such that any two observations
+#'   with a larger absolute difference between their peak elution times are
+#'   considered to have originated from different underlying compounds.  Two
+#'   observations with a smaller absolute difference between their peak elution
+#'   times could potentially be considered to originate from the same underlying
+#'   compound, contingent on other criteria also being met.
+#'
+#' @details The algorithm described in what follows attempts to combines mass
+#'   spectrometry observations that are believed to belong to the same
+#'   underlying compound into a single observation for each compound.  There are
+#'   two conceptually separate steps.
+#'
+#'   The first step is as follows.  All observations much satisfy each of the
+#'   following criteria for inclusion in the binning process.
+#'
+#'   \enumerate{
+#'
+#'   \item Each observation must have its peak elution time occur during the
+#'   interval specified by \code{time_pr_range}
+#'
+#'   \item Each observation must have a mass that falls within the interval
+#'   specified by \code{mass_range}
+#'
+#'   \item Each observation must have an electrical charge state that falls
+#'   within the interval specified by \code{charge_range}
+#'
+#'   }
+#'
+#'   Once that a set of observations satisfying the above criteria is obtained,
+#'   then a second step attempts to combine observations believed to belong to
+#'   the same underlying compound.  The algorithm considers two observations
+#'   that satisfy each of the following criteria to belong to the same compound.
+#'
+#'   \enumerate{
+#'
+#'   \item The absolute difference in Daltons of the mass-to-charge value
+#'   between the two observations is less the the value specified by
+#'   \code{mtoz_diff}
+#'
+#'   \item The absolute difference of the peak elution time between the two
+#'   observations is less than the value specified by \code{time_pr_diff}
+#'
+#'   \item The electrical charge state must be the same for the two observations
+#'
+#'   }
+#'
+#'   Then the binning algorithm is defined as follows.  Consider an observation
+#'   that satisfies the inclusion criteria; this observation is compaired
+#'   pairwise with every other observation that satisfies the inclusion
+#'   criteria.  If a pair of observations satisfies the criteria determining
+#'   them to belong to the same underlying compound then the two observations
+#'   are merged into a single observation.  The two previous compounds are
+#'   removed from the working set, and the process starts over with the newly
+#'   created observation.  The process repeats until no other observation in the
+#'   working set meets the criteria determining it to belong to the same
+#'   underlying compound as that of the current observation; at this point it is
+#'   considered that all observations belonging to the compound have been found,
+#'   and the process starts over with a new observation.
+#'
+#'   The merging process has not yet been defined; it is performed by averaging
+#'   the mass-to-charge values and peak elution times, and summing the mass
+#'   spectrometry intensities at each fraction.  Although observations are
+#'   merged pairwise, when multiple observations are combined in a sequence of
+#'   pairings, the averages are given equal weight for all of the observations.
+#'   In other words, if a pair of observations are merged, and then a third
+#'   observation is merged with the new observation created by combining the
+#'   original two, then the mass-to-charge value and peak elution time values of
+#'   the new observation are obtained by summing the values for each of the
+#'   three original observations and dividing by three.
+#'
+#'   Having described the binning algorithm, it is apparent that there are
+#'   scenarios in which the order in which observations are merged affects the
+#'   outcome of the algorithm.  Since it seems that a minumum requirement of any
+#'   binning algorithm is that the algorithm is invariant to the ordering of the
+#'   observations in the data, this algorithm abides by the following rules.
+#'   The observations in the data are sorted in increasing order by
+#'   mass-to-charge value, peak elution time, and electical charge state,
+#'   respectively.  Then when choosing an observation to compare to the rest of
+#'   the set, we start with the observation at the top of the sort ordering, and
+#'   compare it one-at-a-time to the other elements in the set according to the
+#'   same ordering.  When a consolidated observation is complete in that no
+#'   other observation left in the working set satisfies the merging criteria,
+#'   then this consolidated observation can be removed from consideration for
+#'   all future merges.
 #'
 #' @export
 
-binMS <- function(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten, time_range,
+binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=NULL, time_range,
                   mass_range, charge_range, mtoz_diff, time_diff) {
-
-  # If necessary read data from file into a dataframe (or leave as is)
-  # if( !is.matrix(mass_spec) && !is.data.frame(mass_spec) ) {
-  #   raw_data <- read_csv(file=mass_spec, ...)
-  # } else {
-  #   raw_data <- mass_spec
-  # }
 
   ## Step 1: construct sorted indices of rows in the data that satisfy the
   ## mass, time of peak retention, and charge criteria
@@ -68,7 +164,6 @@ binMS <- function(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten, time
   # info: data used to identify and combine the mass-to-charge levels
   info_orig <- t( mass_spec[keepIdx, c(mtoz, charge, time_peak_reten, mass)] )
   info_orig <- info_orig[, sortIdx]
-
 
   ## Step 3: perform binning of observations that meet the similarity criteria
   ## based on mass-to-charge values, time of peak retention, and charge state
@@ -211,23 +306,45 @@ binMS <- function(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten, time
 
 
 
+#' Print routine for class \code{binMS}
+#' 
+#' More details *******
+#'
+#' @param binObj An object of class \code{\link{binMS}}
+#' 
+#' @export
+
+print.binMS <- function(binObj) {
+
+  cat("Some info about binMS objs *******\n")
+}
+
+
+
+
 #' Overview of the binning process
 #'
-#' Prints a text description of the binning process.  Displays arguments
-#' chosen for the \code{binMS} constructor, how many candidate compounds were
-#' chosen for each criterion, and how many candidate compounds were chosen
-#' overall.
+#' Prints a text description of the binning process.  Displays arguments passed
+#' to the \code{binMS} routine, how many m/z levels were chosen for each
+#' criterion, how many candidate compounds were chosen overall, and how many
+#' candidate compounds were obtained after consolidation.
+#'
+#' @param binObj An object of class \code{\link{binMS}}
 #'
 #' @export
 
 
 summary.binMS <- function(binObj) {
 
+  # Add variables to current environment for convenience: n_tot, n_time_pr,
+  # n_mass, n_charge, n_tiMaCh, n_binned, time_range, mass_range, charge_range,
+  # mtoz_diff, time_diff
+  list2env(binObj$summ_info, envir=environment())
 
   cat("\n",
       "The mass spectrometry data prior to binning had:\n",
       "------------------------------------------------\n",
-      "    ", format(orig_dim[1], width=5, big.mark=","), " m/z levels\n",
+      "    ", format(n_tot, big.mark=","), " m/z levels\n",
       "\n", sep="")
 
   cat("The inclusion criteria was specified as follows:\n",
@@ -237,14 +354,14 @@ summary.binMS <- function(binObj) {
       "    charge:                  between ", charge_range[1], " and ", charge_range[2], "\n",
       "\n", sep="")
 
-  nlev <- sapply(c("n_time_pr", "n_mass", "n_chg"), function(x) {
+  nlev <- sapply(c("n_time_pr", "n_mass", "n_charge"), function(x) {
     formatC(get(x), format="d", big.mark=",")
   })
   len_nlev <- nchar(nlev)
   max_nlev <- max( len_nlev )
   combin <- formatC(n_tiMaCh, format="d", big.mark=",")
-  cat("The number of remaining compounds after filtering by the inclusion criteria was:\n"
-      "--------------------------------------------------------------------------------\n"
+  cat("The number of remaining compounds after filtering by the inclusion criteria was:\n",
+      "--------------------------------------------------------------------------------\n",
       "    time of peak retention:  ", rep(" ", max_nlev - len_nlev[1]), nlev[1], "\n",
       "    mass:                    ", rep(" ", max_nlev - len_nlev[2]), nlev[2], "\n",
       "    charge:                  ", rep(" ", max_nlev - len_nlev[3]), nlev[3], "\n",
@@ -253,13 +370,13 @@ summary.binMS <- function(binObj) {
   
   cat("m/z levels were consolidated when each of the following criteria were met:\n",
       "--------------------------------------------------------------------------\n",
-      "    m/z levels no different than ", mtoz_diff, " units apart\n",
-      "    the time peak retention occured no farther apart than ", time_diff, " units\n",
-      "    the charge states were the same\n"
+      "    (i)   m/z levels were no more than ", mtoz_diff, " units apart\n",
+      "    (ii)  the time peak retention occured no farther apart than ", time_diff, " units\n",
+      "    (iii) the charge states were the same\n",
       "\n", sep="")
 
   cat("After consolidating the m/z levels, there were:\n",
       "-----------------------------------------------\n",
-      "    ", formatC(n_tot, format="d", big.mark=","), "levels\n",
+      "    ", formatC(n_binned, format="d", big.mark=","), " levels\n",
       "\n", sep="")  
 }
