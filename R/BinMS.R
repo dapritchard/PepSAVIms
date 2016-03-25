@@ -138,52 +138,69 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
   binMS_check_valid_input(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten, time_range,
                           mass_range, charge_range, mtoz_diff, time_diff)
 
+  # Translate arguments to values
+  mtoz <- extract_var(mtoz, mass_spec)
+  charge <- extract_var(charge, mass_spec)
+  time_peak_reten <- extract_var(time_peak_reten, mass_spec)
+  # Either mass already provided or calculate via formula
+  if (is.null(mass)) {
+    mass <- charge * (mtoz - 1.007825)
+  } else {
+    mass <- extract_var(mass, mass_spec)
+  }
+  # NULL implies that mass_spec is a matrix of mass spectrometry abundances
+  if (is.null(ms_inten)) {
+    ms_inten <- mass_spec
+  } else {
+    ms_inten <- extract_var(ms_inten, mass_spec, TRUE)
+  }
   
-
   ## Step 1: construct sorted indices of rows in the data that satisfy the
   ## mass, time of peak retention, and charge criteria
 
-  # Calculate row (i.e. mass-to-charge level) criteria status
-  time_pr_bool <- ( (time_range[1] <= mass_spec[, time_peak_reten])
-                    & (mass_spec[, time_peak_reten] <= time_range[2]) )
-
-  mass_bool <- ( (mass_range[1] <= mass_spec[, mass])
-                 & (mass_spec[, mass] <= mass_range[2]) )
-
-  charge_bool <- ( (charge_range[1] <= mass_spec[, charge])
-                   & (mass_spec[, charge] <= charge_range[2]) )
-
+  # Calculate inclusion criteria status
+  time_pr_bool <- (time_range[1] <= time_peak_reten) & (time_peak_reten <= time_range[2])
+  mass_bool <- (mass_range[1] <= mass) & (mass <= mass_range[2])
+  charge_bool <- (charge_range[1] <= charge) & (charge <= charge_range[2])
   keepIdx <- which( Reduce("&", list(time_pr_bool, mass_bool, charge_bool)) )
 
-  # TODO: what to do if keepIdx is empty?
-
-  # Obtain indices of ordered data after removing m/z levels that didn't meet
-  # row criteria
-  sortIdx <- order(mass_spec[keepIdx, mtoz],
-                   mass_spec[keepIdx, time_peak_reten],
-                   mass_spec[keepIdx, charge])
+  # Number of observations satisfying the inclusion criteria
+  n_befbin <- length(keepIdx)
 
   ## Step 2: reduce data by row criteria and by selecting columns needed in
   ## future.  Transpose so as to conform to column major order.
 
-  # ms: transpose of the mass spec data
-  ms <- t( mass_spec[keepIdx, ms_inten, drop=FALSE] )
-  ms <- ms[, sortIdx, drop=FALSE]
-  # info: data used to identify and combine the mass-to-charge levels
-  info_orig <- t( mass_spec[keepIdx, c(mtoz, charge, time_peak_reten, mass)] )
-  info_orig <- info_orig[, sortIdx]
+  # case: some observations satisfied the inclusion criteria
+  if (!identical(n_befbin, 0L)) {
 
-  ## Step 3: perform binning of observations that meet the similarity criteria
-  ## based on mass-to-charge values, time of peak retention, and charge state
+    # Remove m/z levels that didn't meet inclusion criteria
+    mtoz <- mtoz[keepIdx]
+    charge <- charge[keepIdx]
+    time_peak_reten <- time_peak_reten[keepIdx]
+    mass <- mass[keepIdx]
+    ms_inten <- ms_inten[keepIdx, , drop=FALSE]
 
-  # Allocate memory for binned data.  We keep the data in two matrices; one for
-  # what we call the information which are the values that determine whether or
-  # not to combine two m/z levels, and another for the mass spectrometry
-  # abundances.  The reason for separating the two is that the information data
-  # gets averaged within a bin while the ms abundances are summed.
-  n_befbin <- length(keepIdx)
-  info_bin <- matrix(nrow=4, ncol=n_befbin)
-  ms_bin <- matrix(nrow=nrow(ms), ncol=n_befbin)
+    # Obtain indices of ordered data
+    sortIdx <- order(mtoz, time_peak_reten, charge)
+
+    # ms: transpose of the mass spec data
+    ms <- t( ms_inten[sortIdx, , drop=FALSE] )
+    # info: data used to identify and combine the mass-to-charge levels
+    info_orig <- matrix(c(mtoz, charge, time_peak_reten, mass), nrow=4, byrow=TRUE)
+    info_orig <- info_orig[, sortIdx]
+
+    ## Step 3: perform binning of observations that meet the similarity criteria
+    ## based on mass-to-charge values, time of peak retention, and charge state
+
+    # Allocate memory for binned data.  We keep the data in two matrices; one for
+    # what we call the information which are the values that determine whether or
+    # not to combine two m/z levels, and another for the mass spectrometry
+    # abundances.  The reason for separating the two is that the information data
+    # gets averaged within a bin while the ms abundances are summed.
+    info_bin <- matrix(nrow=4, ncol=n_befbin)
+    ms_bin <- matrix(nrow=nrow(ms), ncol=n_befbin)
+    
+  } # end keepIdx not empty case
 
   # Give names to rows (i.e. the variables) in the binned data information
   # matrix so as to make the algorithm more readable.  The variables correspond
@@ -278,19 +295,26 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
     
   } # end iterate over original m/z levels loop
 
-  # It is possible that the binned data can be out of order.  This happens when
-  # the minimum observation of one bin is smaller than that of another, but the
-  # mean is larger.  binCtr indexes the next available bin, so 1 less is the
-  # number of bins.
+  # Construct msDat object from binned data
   nbinned <- binCtr - 1L
-  resortIdx <- order(info_bin[rmtoz, 1:nbinned],
-                     info_bin[rtime, 1:nbinned],
-                     info_bin[rchg, 1:nbinned])
+  if (!identical(nbinned, 0L)) {
+  
+    # It is possible that the binned data can be out of order.  This happens when
+    # the minimum observation of one bin is smaller than that of another, but the
+    # mean is larger.  binCtr indexes the next available bin, so 1 less is the
+    # number of bins.
+    resortIdx <- order(info_bin[rmtoz, 1:nbinned],
+                       info_bin[rtime, 1:nbinned],
+                       info_bin[rchg, 1:nbinned])
 
-  # Construct msDat object
-  msObj <- msDat(t(ms_bin[, resortIdx,  drop=FALSE]),
-                 info_bin[rmtoz, resortIdx],
-                 info_bin[rchg, resortIdx])
+    # Construct msDat object
+    msObj <- msDat(t(ms_bin[, resortIdx,  drop=FALSE]),
+                   info_bin[rmtoz, resortIdx],
+                   info_bin[rchg, resortIdx])
+  }
+  else {
+    msObj <- NULL
+  }
 
   # Info for use by summary.binMS to describe binning process
   summ_info <- list(n_tot = nrow(mass_spec),
@@ -386,5 +410,7 @@ summary.binMS <- function(binObj) {
   cat("After consolidating the m/z levels, there were:\n",
       "-----------------------------------------------\n",
       "    ", formatC(n_binned, format="d", big.mark=","), " levels\n",
-      "\n", sep="")  
+      "\n", sep="")
+
+  NULL
 }

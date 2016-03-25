@@ -4,7 +4,7 @@
 # ...................................................... #
 
 extract_var <- function(callArg, dataObs, expect_matr_bool=FALSE) {
-
+  
   nVars <- NCOL(dataObs)
 
   if (is.null(callArg)) {
@@ -12,7 +12,7 @@ extract_var <- function(callArg, dataObs, expect_matr_bool=FALSE) {
     return (1)
   }
   # case: were already passed the variable
-  else if (identical(length(callArg), nObs)) {
+  else if (identical(length(callArg), nVars)) {
     return (callArg)
   }
   # else: the variable is included as part of a data.frame or matrix

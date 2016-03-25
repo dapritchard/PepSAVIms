@@ -40,52 +40,52 @@ null_to_idx <- function(msDat, bioact) {
 
 
 
-num_to_idx <- function(msDat, bioact, regVec, whichDat) {
+# num_to_idx <- function(msDat, bioact, regVec, whichDat) {
 
-  # whichDat is either ms or bio, specifying which data the regions are
-  # referring to
-  nfrac <- ifelse(identical(whichDat, "ms"), ncol(msDat$ms), ncol(bioact))
+#   # whichDat is either ms or bio, specifying which data the regions are
+#   # referring to
+#   nfrac <- ifelse(identical(whichDat, "ms"), ncol(msDat$ms), ncol(bioact))
 
-  # Check valid input values
-  if ((min(regVec) < 1) || (max(regVec) > nfrac)) {
-    stop("out of bounds region value provided", call.=FALSE)
-  }
+#   # Check valid input values
+#   if ((min(regVec) < 1) || (max(regVec) > nfrac)) {
+#     stop("out of bounds region value provided", call.=FALSE)
+#   }
 
-  return ( as.integer(regVec) )
-}
-
-
+#   return ( as.integer(regVec) )
+# }
 
 
-char_to_idx <- function(msDat, bioact, regVec, whichReg) {
 
-  # nmFrac: a vector of the fraction names
-  nmFrac <- get_data_nm(msDat, bioact, whichReg)
 
-  # regionIdx: container for the indexes corresponding to provided regVec
-  regionIdx <- integer( length(regVec) )
+# char_to_idx <- function(msDat, bioact, regVec, whichReg) {
 
-  # Loop iterates over provided names for region and checks each one to see
-  # that it has exactly one match
-  for (i in seq_along(regVec)) {
+#   # nmFrac: a vector of the fraction names
+#   nmFrac <- get_data_nm(msDat, bioact, whichReg)
 
-    # Number of matches for current element of regVec in fraction names
-    matchIdx <- grep(regVec[i], nmFrac)
-    nMatch <- length(matchIdx)
+#   # regionIdx: container for the indexes corresponding to provided regVec
+#   regionIdx <- integer( length(regVec) )
 
-    # Check that current name has exactly one match
-    if (identical(nMatch, 0L)) {
-      stop("names in provided region not in data\n")
-    }
-    if (nMatch >= 2L) {
-      stop("names in provided region had multiple matches in data", call.=FALSE)
-    }
+#   # Loop iterates over provided names for region and checks each one to see
+#   # that it has exactly one match
+#   for (i in seq_along(regVec)) {
 
-    regionIdx[i] <- matchIdx
-  }
+#     # Number of matches for current element of regVec in fraction names
+#     matchIdx <- grep(regVec[i], nmFrac)
+#     nMatch <- length(matchIdx)
 
-  return (regionIdx)
-}
+#     # Check that current name has exactly one match
+#     if (identical(nMatch, 0L)) {
+#       stop("names in provided region not in data\n")
+#     }
+#     if (nMatch >= 2L) {
+#       stop("names in provided region had multiple matches in data", call.=FALSE)
+#     }
+
+#     regionIdx[i] <- matchIdx
+#   }
+
+#   return (regionIdx)
+# }
 
 
 

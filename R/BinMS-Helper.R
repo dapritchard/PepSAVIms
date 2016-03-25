@@ -1,15 +1,14 @@
 
-binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten,
-                                    ms_inten=NULL, time_range, mass_range, charge_range, mtoz_diff,
-                                    time_diff) {
+binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten,
+                                    time_range, mass_range, charge_range, mtoz_diff, time_diff) {
 
   ## Check for missing variables
   
-  all_vars <- list("mass_spec", "mtoz", "charge", "mass", "time_peak_reten",
+  all_var_nm <- c("mass_spec", "mtoz", "charge", "mass", "time_peak_reten",
                   "ms_inten", "time_range", "mass_range", "charge_range",
                   "mtoz_diff", "time_diff")
   for (var_nm in all_var_nm) {
-    if (!hasArg(var_nm)) {
+    if (!eval(substitute(hasArg(var_nm)))) {
       stop(paste0("Must provide an argument for ", var_nm), call.=FALSE)
     }
   }
@@ -45,7 +44,7 @@ binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass=NULL, time_pea
     if (!is.numeric(x)) {
       stop(paste0(var_nm, " must be of mode numeric"), call.=FALSE)
     }
-    else if (identical(length(x), 2L)) {
+    else if (!identical(length(x), 2L)) {
       stop(paste0(var_nm, " must have a length of 2"), call.=FALSE)
     }
     else if (isTRUE(x[1] >= x[2])) {
@@ -60,7 +59,7 @@ binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass=NULL, time_pea
     if (!is.numeric(x)) {
       stop(paste0(var_nm, " must be of mode numeric"), call.=FALSE)
     }
-    else if (identical(length(x), 1L)) {
+    else if (!identical(length(x), 1L)) {
       stop(paste0(var_nm, " must have a length of 1"), call.=FALSE)
     }
   }

@@ -109,7 +109,7 @@ sampleList <- lapply(1:11, function(x) {
   replicate(5, sampObs(get(base_nm)))
 })
 testMS <- matrix(unlist( t( Reduce(cbind, sampleList) ) ), ncol=4)
-testMS <- as.matrix( cbind(testMS, rep(1, nrow(testDat))) )
+testMS <- as.matrix( cbind(testMS, rep(1, nrow(testMS))) )
 colnames(testMS) <- c("mtoz", "chg", "time", "mass", "ms")
 
 
