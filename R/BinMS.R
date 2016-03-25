@@ -56,7 +56,7 @@
 #'   underlying compound into a single observation for each compound.  There are
 #'   two conceptually separate steps.
 #'
-#'   The first step is as follows.  All observations much satisfy each of the
+#'   The first step is as follows.  All observations must satisfy each of the
 #'   following criteria for inclusion in the binning process.
 #'
 #'   \enumerate{
@@ -134,6 +134,12 @@
 binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=NULL, time_range,
                   mass_range, charge_range, mtoz_diff, time_diff) {
 
+  # Check for validity of the form of the arguments
+  binMS_check_valid_input(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten, time_range,
+                          mass_range, charge_range, mtoz_diff, time_diff)
+
+  
+
   ## Step 1: construct sorted indices of rows in the data that satisfy the
   ## mass, time of peak retention, and charge criteria
 
@@ -148,6 +154,8 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
                    & (mass_spec[, charge] <= charge_range[2]) )
 
   keepIdx <- which( Reduce("&", list(time_pr_bool, mass_bool, charge_bool)) )
+
+  # TODO: what to do if keepIdx is empty?
 
   # Obtain indices of ordered data after removing m/z levels that didn't meet
   # row criteria
