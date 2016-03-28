@@ -149,11 +149,11 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
     mass <- extract_var(mass, mass_spec)
   }
   # NULL implies that mass_spec is a matrix of mass spectrometry abundances
-  if (is.null(ms_inten)) {
-    ms_inten <- mass_spec
-  } else {
-    ms_inten <- extract_var(ms_inten, mass_spec, TRUE)
-  }
+  # if (is.null(ms_inten)) {
+  #   ms_inten <- mass_spec
+  # } else {
+  #   ms_inten <- extract_ms(ms_inten, mass_spec, TRUE)
+  # }
   
   ## Step 1: construct sorted indices of rows in the data that satisfy the
   ## mass, time of peak retention, and charge criteria
@@ -313,6 +313,7 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
                    info_bin[rchg, resortIdx])
   }
   else {
+    warning("No observations satisfied all of the inclusion criteria", call.=FALSE)
     msObj <- NULL
   }
 
@@ -340,15 +341,25 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
 
 #' Print routine for class \code{binMS}
 #' 
-#' More details *******
+#' Prints the number of m/z levels and fractions of the resultant mass spectrometry data
 #'
 #' @param binObj An object of class \code{\link{binMS}}
 #' 
 #' @export
 
 print.binMS <- function(binObj) {
+  msObj <- binObj$msObj
 
-  cat("Some info about binMS objs *******\n")
+  if (is.null(msObj)) {
+    cat("An object of class \"binMS\"; no observations satisfied all of the inclusion criteria.\n",
+        "Use summary.binMS to see details regarding the consolidation process.\n")
+  }
+  else {
+    cat("An object of class \"binMS\" with ", NROW(msObj$ms), " compounds and ",
+        NCOL(msObj$ms), " fractions.\n",
+        "Use summary.binMS() to see details regarding the consolidation process.\n", sep="")
+  }
+
 }
 
 
@@ -392,8 +403,8 @@ summary.binMS <- function(binObj) {
   len_nlev <- nchar(nlev)
   max_nlev <- max( len_nlev )
   combin <- formatC(n_tiMaCh, format="d", big.mark=",")
-  cat("The number of remaining compounds after filtering by the inclusion criteria was:\n",
-      "--------------------------------------------------------------------------------\n",
+  cat("The number of remaining m/z levels after filtering by the inclusion criteria was:\n",
+      "---------------------------------------------------------------------------------\n",
       "    time of peak retention:  ", rep(" ", max_nlev - len_nlev[1]), nlev[1], "\n",
       "    mass:                    ", rep(" ", max_nlev - len_nlev[2]), nlev[2], "\n",
       "    charge:                  ", rep(" ", max_nlev - len_nlev[3]), nlev[3], "\n",
@@ -411,6 +422,5 @@ summary.binMS <- function(binObj) {
       "-----------------------------------------------\n",
       "    ", formatC(n_binned, format="d", big.mark=","), " levels\n",
       "\n", sep="")
-
-  NULL
+  
 }

@@ -3,7 +3,7 @@
 #  Construct some baseline values used to generate data  #
 # ...................................................... #
 
-## Set of values 1 (numbered 1-4)
+## Set of values 1 (numbered 1-4, are all valid observations)
 
 # Create a baseline set of values
 info_1 <- list(mass = 5000,
@@ -30,7 +30,7 @@ info_4 <- list(mass = 6000,
 info_4$mtoz <- info_4$mass / info_4$chg
 
 
-## Set of values 2 (numbered 5-8)
+## Set of values 2 (numbered 5-8, are all valid observations)
 
 # Create a baseline set of values
 info_5 <- list(mass = 9000,
@@ -57,7 +57,7 @@ info_8 <- list(mass = 8000,
 info_8$mtoz <- info_8$mass / info_8$chg
 
 
-## Set of values 3 (numbered 9-12)
+## Set of values 3 (numbered 9-12, are all invalid observations)
 
 # Charges out-of-bounds
 info_9 <- list(mass = 9000,
@@ -111,19 +111,3 @@ sampleList <- lapply(1:11, function(x) {
 testMS <- matrix(unlist( t( Reduce(cbind, sampleList) ) ), ncol=4)
 testMS <- as.matrix( cbind(testMS, rep(1, nrow(testMS))) )
 colnames(testMS) <- c("mtoz", "chg", "time", "mass", "ms")
-
-
-
-
-# ```````````````````````````````````````` #
-#  Calculate the binned data for test set  #
-# ........................................ #
-
-idx <- lapply(1:8, function(j) seq(5 * (j - 1) + 1, 5 * j))
-binDat <- t( sapply(idx, function(j) colMeans(testMS[j, ])) )
-binDat <- binDat[order(binDat[, "mtoz"], binDat[, "time"], binDat[, "chg"]), ]
-
-msObj <- msDat(binDat[, "ms", drop=FALSE], binDat[, "mtoz"], binDat[, "chg"])
-
-out <- binMS(testMS, "mtoz", "chg", "mass", "time", "ms", c(14, 45), c(2e3, 15e3), c(2, 10),
-             0.05, 1)

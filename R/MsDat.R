@@ -72,35 +72,22 @@
 #' @export
 
 
-msDat <- function(mass_spec, mtoz, charge) {
+msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
 
   # Perform some checks for validity of input.  Some forms of invalid input may
   # still exist that are checked for as the function progresses.
-  checkValInp_msDat(mass_spec, mtoz, charge)
+  checkValInp_msDat(mass_spec, mtoz, charge, ms_inten)
 
-  # Delete the dimensions of an array which have only one level (if necessary)
-  #mass_spec <- drop(mass_spec)
-  #mtoz <- drop(mtoz)
-  #charge <- drop(charge)
+  # Obtain mass-to-charge, charge, and ms abundance variables
+  mtoz <- extract_var(mtoz, mass_spec)
+  charge <- extract_var(charge, mass_spec)
+  ms_inten <- extract_var(ms_inten, mass_spec, TRUE)
 
-  # cmpInfo: a list with seperate vectors containing the mass-to-charge values
-  # and charge information, as well as integer values providing (if applicable)
-  # the column number in mass_spec containing this information
-  cmpInfo <- getCmpInfo(mass_spec, mtoz, charge)
-
-  # keepIdx: indexes the columns in mass_spec that contain the mass spectrometry
-  # intensity data
-  keepIdx <- setdiff(seq_len(ncol(mass_spec)),
-                     c(cmpInfo$mtoz$loc, cmpInfo$chg$loc))
-
-  outDat <- list( ms   = as.matrix( mass_spec[, keepIdx] ),
-                  mtoz = cmpInfo$mtoz$val,
-                  chg  = cmpInfo$chg$val )
-
-  if ( !is.numeric(outDat$ms) ) {
-    stop("mass spectrometry data must be numeric\n")
-  }
-
+  # Construct msDat object
+  outDat <- list( ms   = ms_inten,
+                  mtoz = mtoz,
+                  chg  = charge )
+  
   structure(outDat, class="msDat")
 }
 
@@ -144,6 +131,8 @@ checkValInp_msDat <- function(mass_spec, mtoz, charge) {
   else if ( !( is.strictVec(drop(charge)) ) ) {
     stop("charge must be a non-list vector\n")
   }
+
+  # TODO: ms_inten variable
 
   # TODO: check for missing.  Is this not performed elsewhere?
 }
