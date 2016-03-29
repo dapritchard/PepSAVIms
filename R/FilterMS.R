@@ -105,8 +105,13 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   ms_nc <- ncol(ms)
 
   # Create region index variable
-  regIdx <- reg_to_idx(msObj, NULL, region, "ms")
-
+  # regIdx <- reg_to_idx(msObj, NULL, region, "ms")
+  if (is.character(region)) {
+    regIdx <- extract_char_to_idx(region, ms, "region", TRUE)
+  } else {
+    regIdx <- extract_num_to_idx(region, ms, "region", TRUE)
+  }    
+  
   # Create border index, i.e. the indices that surround the region of interest
   borIdx <- getBorderIdx(border, regIdx, ms_nc)
 
