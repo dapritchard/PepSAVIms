@@ -2,14 +2,14 @@
 binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten,
                                     time_range, mass_range, charge_range, mtoz_diff, time_diff) {
 
-  ## Check for missing variables
+  ## Check for missing arguments
   
   all_var_nm <- c("mass_spec", "mtoz", "charge", "mass", "time_peak_reten",
                   "ms_inten", "time_range", "mass_range", "charge_range",
                   "mtoz_diff", "time_diff")
   for (var_nm in all_var_nm) {
     if (!eval(substitute(hasArg(var_nm)))) {
-      stop(paste0("Must provide an argument for ", var_nm), call.=FALSE)
+      stop("Must provide an argument for ", var_nm, call.=FALSE)
     }
   }
 
@@ -63,6 +63,4 @@ binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_ret
       stop(paste0(var_nm, " must have a length of 1"), call.=FALSE)
     }
   }
-  
-  NULL
 }

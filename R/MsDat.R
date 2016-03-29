@@ -117,7 +117,7 @@ summary.msDat <- function(msDat) {
 #'
 #' @inheritParams msDat
 
-checkValInp_msDat <- function(mass_spec, mtoz, charge) {
+checkValInp_msDat <- function(mass_spec, mtoz, charge, ms_inten) {
 
   # Check if parameters are one of matrices / data frames / non-list vectors,
   # as appropriate

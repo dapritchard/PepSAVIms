@@ -139,29 +139,26 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
                           mass_range, charge_range, mtoz_diff, time_diff)
 
   # Translate arguments to values
-  mtoz <- extract_var(mtoz, mass_spec)
-  charge <- extract_var(charge, mass_spec)
-  time_peak_reten <- extract_var(time_peak_reten, mass_spec)
-  # Either mass already provided or calculate via formula
+  dmtoz <- extract_var(mtoz, mass_spec)
+  dcharge <- extract_var(charge, mass_spec)
+  dtime_pr <- extract_var(time_peak_reten, mass_spec)
+  # Check if we need to calculate mass from scratch
   if (is.null(mass)) {
-    mass <- charge * (mtoz - 1.007825)
+    dmass <- charge * (dmtoz - 1.007825)
+    # Can't pass NULL to extract_var
+    mass <- dmass
   } else {
-    mass <- extract_var(mass, mass_spec)
+    dmass <- extract_var(mass, mass_spec)
   }
-  # NULL implies that mass_spec is a matrix of mass spectrometry abundances
-  # if (is.null(ms_inten)) {
-  #   ms_inten <- mass_spec
-  # } else {
-  #   ms_inten <- extract_ms(ms_inten, mass_spec, TRUE)
-  # }
+  dms_inten <- extract_var(ms_inten, mass_spec, TRUE, mtoz, charge, mass, time_peak_reten)
   
   ## Step 1: construct sorted indices of rows in the data that satisfy the
   ## mass, time of peak retention, and charge criteria
 
   # Calculate inclusion criteria status
-  time_pr_bool <- (time_range[1] <= time_peak_reten) & (time_peak_reten <= time_range[2])
-  mass_bool <- (mass_range[1] <= mass) & (mass <= mass_range[2])
-  charge_bool <- (charge_range[1] <= charge) & (charge <= charge_range[2])
+  time_pr_bool <- (time_range[1] <= dtime_pr) & (dtime_pr <= time_range[2])
+  mass_bool <- (mass_range[1] <= dmass) & (dmass <= mass_range[2])
+  charge_bool <- (charge_range[1] <= dcharge) & (dcharge <= charge_range[2])
   keepIdx <- which( Reduce("&", list(time_pr_bool, mass_bool, charge_bool)) )
 
   # Number of observations satisfying the inclusion criteria
@@ -174,19 +171,19 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
   if (!identical(n_befbin, 0L)) {
 
     # Remove m/z levels that didn't meet inclusion criteria
-    mtoz <- mtoz[keepIdx]
-    charge <- charge[keepIdx]
-    time_peak_reten <- time_peak_reten[keepIdx]
-    mass <- mass[keepIdx]
-    ms_inten <- ms_inten[keepIdx, , drop=FALSE]
+    dmtoz <- dmtoz[keepIdx]
+    dcharge <- dcharge[keepIdx]
+    dtime_pr <- dtime_pr[keepIdx]
+    dmass <- dmass[keepIdx]
+    dms_inten <- dms_inten[keepIdx, , drop=FALSE]
 
     # Obtain indices of ordered data
-    sortIdx <- order(mtoz, time_peak_reten, charge)
+    sortIdx <- order(dmtoz, dtime_pr, dcharge)
 
     # ms: transpose of the mass spec data
-    ms <- t( ms_inten[sortIdx, , drop=FALSE] )
+    ms <- t( dms_inten[sortIdx, , drop=FALSE] )
     # info: data used to identify and combine the mass-to-charge levels
-    info_orig <- matrix(c(mtoz, charge, time_peak_reten, mass), nrow=4, byrow=TRUE)
+    info_orig <- matrix(c(dmtoz, dcharge, dtime_pr, dmass), nrow=4, byrow=TRUE)
     info_orig <- info_orig[, sortIdx]
 
     ## Step 3: perform binning of observations that meet the similarity criteria
@@ -199,6 +196,7 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
     # gets averaged within a bin while the ms abundances are summed.
     info_bin <- matrix(nrow=4, ncol=n_befbin)
     ms_bin <- matrix(nrow=nrow(ms), ncol=n_befbin)
+    row.names(ms_bin) <- colnames(dms_inten)
     
   } # end keepIdx not empty case
 
