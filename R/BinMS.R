@@ -23,7 +23,16 @@
 #'   other information; this paramater specifies the time at which the peak
 #'   retention level of the compound was achieved.
 #'
-#' @param ms_inten ********
+#' @param ms_inten Either \code{NULL} or a vector either of mode character or
+#'   mode numeric specifying which of the mass spectrometry fractions in the
+#'   data encapsulated by \code{msObj} are to be considered the region of
+#'   interest with respect to the filtering process.  If \code{NULL}, then it is
+#'   taken to mean that the entirety of the fractions in the mass spectrometry
+#'   data is the region of interest.  If it is a numeric vector, then the
+#'   entries should provide the indices for the region of interest in the mass
+#'   spectrometry data in the argument for \code{msObj}. If it is a character
+#'   vector, then the entries should uniquely specify the region of interest
+#'   through partial string matching.
 #'
 #' @param time_pr_range A length-2 numeric vector specifying the lower bound and
 #'   upper bound (inclusive) of allowed peak retention time occurance for an

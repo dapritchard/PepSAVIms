@@ -9,13 +9,14 @@ binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
 }
 \arguments{
 \item{mass_spec}{Either a \code{matrix} or \code{data.frame}.  This object
-  contains mass-to-charge values, charge information, and intensity data.
-  The mass spectrometry data is expected to be in a form such that a given
-  column provides the mass spectrometry intensity values for a particular
-  fraction.  Then either 0, 1, or 2 additional columns may be included in the
-  parameter input containing a possible column for the mass-to-charge values
-  and a possible column for the charge information. Any ordering of the
-  columns is allowed.
+  must contain mass spectrometry abundances, and may optionally contain
+  mass-to-charge values and/or charge state information.  The mass
+  spectrometry data is expected to be in a form such that a given column
+  provides the mass spectrometry intensity values for a particular fraction.
+  Then either 0, 1, or 2 additional columns may be included in the parameter
+  input containing a possible column for the mass-to-charge values and a
+  possible column for the charge information. Any ordering of the columns is
+  allowed.
 
   For example, suppose that a collection of mass spectrometry readings has
   provided data for 50 fractions across 20,000 mass-to-charge values.  Then
@@ -63,7 +64,16 @@ binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
   other information; this paramater specifies the time at which the peak
   retention level of the compound was achieved.}
 
-\item{ms_inten}{********}
+\item{ms_inten}{Either \code{NULL} or a vector either of mode character or
+  mode numeric specifying which of the mass spectrometry fractions in the
+  data encapsulated by \code{msObj} are to be considered the region of
+  interest with respect to the filtering process.  If \code{NULL}, then it is
+  taken to mean that the entirety of the fractions in the mass spectrometry
+  data is the region of interest.  If it is a numeric vector, then the
+  entries should provide the indices for the region of interest in the mass
+  spectrometry data in the argument for \code{msObj}. If it is a character
+  vector, then the entries should uniquely specify the region of interest
+  through partial string matching.}
 
 \item{mass_range}{A length-2 numeric vector specifying the lower bound and
   upper bound (inclusive) of allowed mass for an observation to be included
@@ -104,7 +114,7 @@ The algorithm described in what follows attempts to combines mass
   underlying compound into a single observation for each compound.  There are
   two conceptually separate steps.
 
-  The first step is as follows.  All observations much satisfy each of the
+  The first step is as follows.  All observations must satisfy each of the
   following criteria for inclusion in the binning process.
 
   \enumerate{

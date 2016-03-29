@@ -10,6 +10,6 @@
 \item{binObj}{An object of class \code{\link{binMS}}}
 }
 \description{
-More details *******
+Prints the number of m/z levels and fractions of the resultant mass spectrometry data
 }
 

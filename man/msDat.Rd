@@ -4,17 +4,18 @@
 \alias{msDat}
 \title{Constructor for class \code{msDat}}
 \usage{
-msDat(mass_spec, mtoz, charge)
+msDat(mass_spec, mtoz, charge, ms_inten = NULL)
 }
 \arguments{
 \item{mass_spec}{Either a \code{matrix} or \code{data.frame}.  This object
-  contains mass-to-charge values, charge information, and intensity data.
-  The mass spectrometry data is expected to be in a form such that a given
-  column provides the mass spectrometry intensity values for a particular
-  fraction.  Then either 0, 1, or 2 additional columns may be included in the
-  parameter input containing a possible column for the mass-to-charge values
-  and a possible column for the charge information. Any ordering of the
-  columns is allowed.
+  must contain mass spectrometry abundances, and may optionally contain
+  mass-to-charge values and/or charge state information.  The mass
+  spectrometry data is expected to be in a form such that a given column
+  provides the mass spectrometry intensity values for a particular fraction.
+  Then either 0, 1, or 2 additional columns may be included in the parameter
+  input containing a possible column for the mass-to-charge values and a
+  possible column for the charge information. Any ordering of the columns is
+  allowed.
 
   For example, suppose that a collection of mass spectrometry readings has
   provided data for 50 fractions across 20,000 mass-to-charge values.  Then
