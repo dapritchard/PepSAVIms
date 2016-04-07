@@ -110,7 +110,7 @@ extract_num_to_idx <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
 
   # Check valid input values
   if ((min(callArg) < 1) || (max(callArg) > NCOL(dataObs))) {
-    stop(arg_nm, ":  out of bounds variable value provided", call.=FALSE)
+    stop("out of bounds value provided for ", arg_nm, call.=FALSE)
   }
 
   return (callArg)
@@ -134,10 +134,11 @@ extract_char_to_idx <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
 
     # Check that current name has exactly one match
     if (identical(nMatch, 0L)) {
-      stop("name provided not in data:  ", nm, " from ", arg_nm, call.=FALSE)
+      stop("name provided not in data - ", nm, " element in ", arg_nm, call.=FALSE)
     }
     else if (!identical(nMatch, 1L)) {
-      stop("name provided had multiple matches in data:  ", nm, "from ", arg_nm, call.=FALSE)
+      stop("name provided had multiple matches in data - ", nm, " element in ",
+           arg_nm, call.=FALSE)
     }
 
     return (matchIdx)

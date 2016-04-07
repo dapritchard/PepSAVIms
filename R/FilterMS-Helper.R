@@ -1,5 +1,23 @@
 
-getBorderIdx <- function(border, regIdx, ms_nc) {
+filterMS_getRegionIdx <- function(region, ms) {
+  
+  extract_check_valid(region, ms, "region", TRUE)
+  
+  if (is.character(region)) {
+    regIdx <- extract_char_to_idx(region, ms, "region", TRUE)
+  } else if (is.numeric(region)) {
+    regIdx <- extract_num_to_idx(region, ms, "region", TRUE)
+  } else {
+    stop("Shouldn't reach here!  Please send a bug report")
+  }
+  
+  return (regIdx)
+}
+
+
+
+
+filterMS_getBorderIdx <- function(border, regIdx, ms_nc) {
 
   if ( is.character(border) ) {
     if ( identical(border, "all") ) {
@@ -15,7 +33,7 @@ getBorderIdx <- function(border, regIdx, ms_nc) {
   # case: border is numeric
   else {
     bsize <- as.integer(border)
-    borIdx <- getBorderIdx_numeric(bsize, regIdx, ms_nc)
+    borIdx <- filterMS_getBorderIdx_numeric(bsize, regIdx, ms_nc)
   }
 
   return (borIdx)
@@ -24,7 +42,7 @@ getBorderIdx <- function(border, regIdx, ms_nc) {
 
 
 
-getBorderIdx_numeric <- function(bsize, regIdx, ms_nc) {
+filterMS_getBorderIdx_numeric <- function(bsize, regIdx, ms_nc) {
 
   if ( !(identical(length(bsize), 1L) || identical(length(bsize), 2L)) ) {
     stop("If border is of mode numeric then it must have length 1 or 2", call.=FALSE)
@@ -70,8 +88,8 @@ filterMS_check_valid <- function(msObj, region, border, bord_ratio, min_inten, m
   if (missing(msObj)) {
     stop("Must provide an argument for msObj", call.=FALSE)
   }
-  else if ( !("msDat" %in% class(msObj)) ) {
-    stop("msObj must be of class \"msDat\"", call.=FALSE)
+  else if (!identical(class(msObj), "binMS") && !identical(class(msObj), "msDat"))) {
+    stop("msObj must be of either be of class \"binMS\" or \"msDat\"", call.=FALSE)
   }
 
   ## Check region

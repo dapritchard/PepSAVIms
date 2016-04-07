@@ -5,7 +5,7 @@
 #' \code{Details}. Returns an object of classes \code{\link{msDat}} and
 #' \code{filterMS}.
 #'
-#' @param msObj An object of class \code{\link{msDat}}
+#' @param msObj An object either of class \code{binMS} or of class \code{\link{msDat}}
 #'
 #' @param region A vector either of mode character or mode numeric.  If numeric
 #'   then the entries should provide the indices for the region of interest in
@@ -25,7 +25,7 @@
 #'   considered to be part of the bordering region (see criterion 2).
 #'
 #' @param bord_ratio A single nonnegative numeric value.  A value of 0 will not
-#'   admit any compounds, while a value greater than or equal to 1 will admit
+#'   admit any compounds, while a value greater than 1 will admit
 #'   all compounds (see criterion 2).
 #'
 #' @param min_inten A single numeric value.  A value less than the minimum mass
@@ -96,24 +96,20 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   nCrit <- 5
 
   # Create pointers to mass spec variables for convenience
-  ms <- msObj$ms
-  mtoz <- msObj$mtoz
-  chg <- msObj$chg
+  msDatObj <- extract_msDat(msObj, "msDat")
+  ms <- msDatObj$ms
+  mtoz <- msDatObj$mtoz
+  chg <- msDatObj$chg
 
   # Dimensions of mass spectrometry data
   ms_nr <- nrow(ms)
   ms_nc <- ncol(ms)
 
   # Create region index variable
-  # regIdx <- reg_to_idx(msObj, NULL, region, "ms")
-  if (is.character(region)) {
-    regIdx <- extract_char_to_idx(region, ms, "region", TRUE)
-  } else {
-    regIdx <- extract_num_to_idx(region, ms, "region", TRUE)
-  }    
+  regIdx <- filterMS_getRegionIdx(region, ms)
   
   # Create border index, i.e. the indices that surround the region of interest
-  borIdx <- getBorderIdx(border, regIdx, ms_nc)
+  borIdx <- filterMS_getBorderIdx(border, regIdx, ms_nc)
 
   # maxIdx: the column index per row (and hence fraction) of the maximum intensity level.
   # The rightmost column index is chosen in the case of ties so as
@@ -156,14 +152,15 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   # Construct return object
   outObj <- list( msObj    = msObj,
                   cmp_by_cr = cmp_by_cr,
-                  summ_info = list( orig_dim  = c(ms_nr, ms_nc),
-                                    reg_nm    = ms_nm[regIdx],
-                                    bor_nm    = ms_nm[borIdx],
-                                    border    = border,
-                                    min_inten = min_inten,
-                                    max_chg   = max_chg ) )
+                  summ_info = list( orig_dim   = c(ms_nr, ms_nc),
+                                    reg_nm     = ms_nm[regIdx],
+                                    bor_nm     = ms_nm[borIdx],
+                                    border     = border,
+                                    bord_ratio = bord_ratio,
+                                    min_inten  = min_inten,
+                                    max_chg    = max_chg ) )
 
-  structure(outObj, class=c("filterMS", "msDat"))
+  structure(outObj, class="filterMS")
 }
 
 
@@ -182,7 +179,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
 summary.filterMS <- function(filtObj) {
 
   # Add variables to current environment for convenience: orig_dim, reg_nm,
-  # bor_nm, border, min_inten, max_chg
+  # bor_nm, border, bord_ratio, min_inten, max_chg
   list2env(filtObj$summ_info, envir=environment())
 
   cat("\n",
@@ -228,6 +225,8 @@ summary.filterMS <- function(filtObj) {
   cat("- The minimum intensity was specified as:   ", mi, "\n",
       "- The maximum charge was specified as:",
       rep(" ", 5 + nchar(mi), sep=""),  max_chg, "\n",
+      "- The bordering region ratio was:  ",
+      rep(" ", 8 + nchar(mi), sep=""), format(bord_ratio, digits=2, nsmall=2), "\n",
       "\n", sep="")
 
   cat("Individually, each criterion reduced the ",
@@ -238,22 +237,24 @@ summary.filterMS <- function(filtObj) {
   ncri <- sapply(filtObj$cmp_by_cr, function(x) format(nrow(x), big.mark=","))
   plen <- sapply(ncri, nchar)
   mlen <- max(plen)
+  bordperc <- paste0(format(100 * bord_ratio, digits=0), "%")
 
   cat("Criterion 1:  ", rep(" ", mlen - plen[1]), ncri[1],
-      "    (maximum in region of interest)\n",
+      "    (fraction with maximum abundance is in region of interest)\n",
       "Criterion 2:  ", rep(" ", mlen - plen[2]), ncri[2],
-      "    (< 5% of maximum in bordering areas)\n",
+      "    (fractions in bordering region have < ", bordperc, " of maximum abundance)\n",
       "Criterion 3:  ", rep(" ", mlen - plen[3]), ncri[3],
-      "    (nonzero abundance in right adj. fraction to maximum)\n",
+      "    (nonzero abundance in right adjacent fraction to maximum)\n",
       "Criterion 4:  ", rep(" ", mlen - plen[4]), ncri[4],
-      "    (must be an intensity > ", format(min_inten, big.mark=","), " in region of interest)\n",
+      "    (at least 1 intensity > ", format(min_inten, big.mark=","), " in region of interest)\n",
       "Criterion 5:  ", rep(" ", mlen - plen[5]), ncri[5],
       "    (must have charge <= ", max_chg, ")\n",
       "\n", sep="")
 
+  totcmp <- ifelse(is.null(filtObj$msObj), 0, format(nrow(filtObj$msObj$ms), big.mark=","))
   cat("The total number of candidate compounds was reduced to:\n",
       "-------------------------------------------------------\n",
-      "    ", ifelse(is.null(filtObj$msObj), 0, format(nrow(filtObj$msObj$ms), big.mark=",")),
+      rep(" ", 14 + mlen - nchar(totcmp)), totcmp,      
       "\n\n", sep="")
 }
 

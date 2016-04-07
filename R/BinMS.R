@@ -23,17 +23,6 @@
 #'   other information; this paramater specifies the time at which the peak
 #'   retention level of the compound was achieved.
 #'
-#' @param ms_inten Either \code{NULL} or a vector either of mode character or
-#'   mode numeric specifying which of the mass spectrometry fractions in the
-#'   data encapsulated by \code{msObj} are to be considered the region of
-#'   interest with respect to the filtering process.  If \code{NULL}, then it is
-#'   taken to mean that the entirety of the fractions in the mass spectrometry
-#'   data is the region of interest.  If it is a numeric vector, then the
-#'   entries should provide the indices for the region of interest in the mass
-#'   spectrometry data in the argument for \code{msObj}. If it is a character
-#'   vector, then the entries should uniquely specify the region of interest
-#'   through partial string matching.
-#'
 #' @param time_pr_range A length-2 numeric vector specifying the lower bound and
 #'   upper bound (inclusive) of allowed peak retention time occurance for an
 #'   observation to be included in the consolidation process.
@@ -154,7 +143,7 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
   # Check if we need to calculate mass from scratch
   if (is.null(mass)) {
     dmass <- charge * (dmtoz - 1.007825)
-    # Can't pass NULL to extract_var
+    # Can't pass NULL to extract_var so create a variable
     mass <- dmass
   } else {
     dmass <- extract_var(mass, mass_spec)
@@ -358,15 +347,14 @@ print.binMS <- function(binObj) {
   msObj <- binObj$msObj
 
   if (is.null(msObj)) {
-    cat("An object of class \"binMS\"; no observations satisfied all of the inclusion criteria.\n",
-        "Use summary.binMS to see details regarding the consolidation process.\n")
+    cat("An object of class \"binMS\"; no observations satisfied all of the inclusion criteria.\n")
   }
   else {
     cat("An object of class \"binMS\" with ", NROW(msObj$ms), " compounds and ",
-        NCOL(msObj$ms), " fractions.\n",
-        "Use summary.binMS() to see details regarding the consolidation process.\n", sep="")
+        NCOL(msObj$ms), " fractions.\n", sep="")
   }
-
+  cat("Use summary.binMS to see more details regarding the consolidation process.\n",
+      "Use extractMS to extract the binned mass spectrometry data\n\n")
 }
 
 

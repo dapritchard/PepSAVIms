@@ -69,12 +69,13 @@ true_cmp_by_cr <- lapply(keep_cmp_idx, function(j)
 true_msObj <- msDat(ms[1:4, ], mtoz_vals[1:4], chg_vals[1:4])
 
 true_summ_info <- list(
-  orig_dim  = c(24L, 6L),
-  reg_nm    = region,
-  bor_nm    = paste0("frac", c(1:2, 5:6)),
-  border    = border,
-  min_inten = min_inten,
-  max_chg   = max_chg
+  orig_dim   = c(24L, 6L),
+  reg_nm     = region,
+  bor_nm     = paste0("frac", c(1:2, 5:6)),
+  border     = border,
+  bord_ratio = bord_ratio,
+  min_inten  = min_inten,
+  max_chg    = max_chg
 )
 
 true_filterMS <- list( msObj     = true_msObj,
@@ -199,7 +200,7 @@ test_that("filterMS: region and borders", {
 
 # Test for invalid input -------------------------------------------------------
 
-test_that("filterMS: invalid input", {
+test_that("filterMS: missing input", {
   expect_error( filterMS(region=region),
                 "Must provide an argument for msObj" )
   expect_error( filterMS(msObj),
@@ -220,13 +221,13 @@ test_that("filterMS: invalid region", {
   expect_error( filterMS(msObj, c("a", "a")),
                 "region cannot have any duplicate values" )
   expect_error( filterMS(msObj, -99),
-                "out of bounds region value provided" )
+                "out of bounds value provided for region" )
   expect_error( filterMS(msObj, 1e10),
-                "out of bounds region value provided" )
-  expect_error( filterMS(msObj, "frac_not_in_ms"),
-                "names in provided region not in data" )
+                "out of bounds value provided for region" )
+  expect_error( filterMS(msObj, c("frac1", "frac_not_in_ms")),
+                "name provided not in data - frac_not_in_ms element in region" )
   expect_error( filterMS(msObj, "frac"),
-                "names in provided region had multiple matches in data" )
+                "name provided had multiple matches in data - frac element in region" )
 })
 
 test_that("filterMS: invalid border", {

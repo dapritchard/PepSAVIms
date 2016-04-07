@@ -8,7 +8,7 @@ filterMS(msObj, region, border = "all", bord_ratio = 0.05,
   min_inten = 1000, max_chg = 7L)
 }
 \arguments{
-\item{msObj}{An object of class \code{\link{msDat}}}
+\item{msObj}{An object either of class \code{binMS} or of class \code{\link{msDat}}}
 
 \item{region}{A vector either of mode character or mode numeric.  If numeric
   then the entries should provide the indices for the region of interest in
@@ -28,7 +28,7 @@ filterMS(msObj, region, border = "all", bord_ratio = 0.05,
   considered to be part of the bordering region (see criterion 2).}
 
 \item{bord_ratio}{A single nonnegative numeric value.  A value of 0 will not
-  admit any compounds, while a value greater than or equal to 1 will admit
+  admit any compounds, while a value greater than 1 will admit
   all compounds (see criterion 2).}
 
 \item{min_inten}{A single numeric value.  A value less than the minimum mass
