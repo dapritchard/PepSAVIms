@@ -96,7 +96,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   nCrit <- 5
 
   # Create pointers to mass spec variables for convenience
-  msDatObj <- extract_msDat(msObj, "msDat")
+  msDatObj <- extractMS(msObj, "msDat")
   ms <- msDatObj$ms
   mtoz <- msDatObj$mtoz
   chg <- msDatObj$chg
@@ -163,6 +163,30 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   structure(outObj, class="filterMS")
 }
 
+
+
+
+
+#' Basic information for class \code{filterMS}
+#'
+#' Displays the number of candidate compounds left in the data after filtering
+#'
+#' @export
+
+print.filterMS <- function(filtObj) {
+  msObj <- binObj$msObj
+
+  if (is.null(msObj)) {
+    cat("An object of class \"filterMS\"; no observations ",
+        "satisfied all of the inclusion criteria.\n")
+  }
+  else {
+    cat("An object of class \"filterMS\" with ", NROW(msObj$ms), " compounds and ",
+        NCOL(msObj$ms), " fractions.\n", sep="")
+  }
+  cat("Use summary.filterMS to see more details regarding the filtering process.\n",
+      "Use extractMS to extract the filtered mass spectrometry data\n\n")
+}
 
 
 

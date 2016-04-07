@@ -88,7 +88,7 @@ filterMS_check_valid <- function(msObj, region, border, bord_ratio, min_inten, m
   if (missing(msObj)) {
     stop("Must provide an argument for msObj", call.=FALSE)
   }
-  else if (!identical(class(msObj), "binMS") && !identical(class(msObj), "msDat"))) {
+  else if (!identical(class(msObj), "binMS") && !identical(class(msObj), "msDat")) {
     stop("msObj must be of either be of class \"binMS\" or \"msDat\"", call.=FALSE)
   }
 

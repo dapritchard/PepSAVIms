@@ -9,23 +9,19 @@ checkValInp_msDat(mass_spec, mtoz, charge, ms_inten)
 \arguments{
 \item{mass_spec}{Either a \code{matrix} or \code{data.frame}.  This object
   must contain mass spectrometry abundances, and may optionally contain
-  mass-to-charge values and/or charge state information.  The mass
-  spectrometry data is expected to be in a form such that a given column
-  provides the mass spectrometry intensity values for a particular fraction.
-  Then either 0, 1, or 2 additional columns may be included in the parameter
-  input containing a possible column for the mass-to-charge values and a
-  possible column for the charge information. Any ordering of the columns is
-  allowed.
+  mass-to-charge values, charge state information, or additional extraneous
+  variables.  The mass spectrometry data is expected to be in a form with
+  each column corresponding to a variable and each row corresponding to a
+  mass-to-charge level.
 
-  For example, suppose that a collection of mass spectrometry readings has
-  provided data for 50 fractions across 20,000 mass-to-charge values.  Then
-  the input for \code{mass_spec} should be a \code{matrix} or
-  \code{data.frame} with 20,000 rows and one of 50, 51, or 52 columns.  Each
-  row in the 50 columns containing the mass spectrometry readings should be
-  for the same mass-to-charge value and charge information.  If columns are
-  included for either the mass-to-charge values or charge information then
-  the entries in these columns should provide the identifying information for
-  the mass spectrometry data in the same row.}
+  For example, suppose that a collection of mass spectrometry intensity
+  observations has provided data for 50 fractions across 20,000
+  mass-to-charge values.  Then the input for \code{mass_spec} should be a
+  \code{matrix} or \code{data.frame} with 20,000 rows and 50 or more columns.
+  The additional columns beyond the 50 containing the mass spectrometry
+  intensities can be the mass-to-charge data, the charge data, or other
+  extraneous variables (which will be ignored when constructing the
+  \code{msDat} object).}
 
 \item{mtoz}{A vector of either length 1 or length equal to the number of
   mass-to-charge values for which mass spectrometry data was collected, and
@@ -44,10 +40,22 @@ checkValInp_msDat(mass_spec, mtoz, charge, ms_inten)
 
   A third way is provide a single character string which provides the column
   name in the input to the \code{mass_spec} parameter for a column which
-  contains this information.  Partial matching is allowed.}
+  contains this information.  Partial matching is supported.}
 
 \item{charge}{The information for the \code{charge} parameter can be provided
   in the same manner as for the mass-to-charge values.}
+
+\item{ms_inten}{Either \code{NULL} or a vector either of mode character or
+  mode numeric specifying which of the mass spectrometry fractions in the
+  data encapsulated by \code{msObj} are to be considered the region of
+  interest with respect to the filtering process.  If \code{NULL}, then it is
+  taken to mean that the entirety of the data in \code{mass_spec}, after
+  removing variables in the data that are specified as arguments, is the mass
+  spectrometry intensity data.  If it is a numeric vector, then the entries
+  should provide the indices for the region of interest in the mass
+  spectrometry data in the argument for \code{msObj}. If it is a character
+  vector, then the entries should uniquely specify the region of interest
+  through partial string matching.}
 }
 \description{
 Check that arguments \code{mass_spec}, \code{mtoz}, and \code{charge} are
