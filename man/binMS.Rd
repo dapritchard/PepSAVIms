@@ -29,19 +29,21 @@ binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
   which helps identify the mass-to-charge values for this data in one of
   several ways.
 
-  One way to provide the information is to provide a vector where each entry
-  provides the mass-to-charge value for a corresponding row of mass
-  spectrometry data.  Then the \code{k}-th entry of the vector would provide
-  the mass-to-charge value for the \code{k}-th row of the mass spectrometry
-  data.
+  One way to provide the information is to provide a numeric vector where
+  each entry provides the mass-to-charge value for a corresponding row of
+  mass spectrometry data.  Then the \code{k}-th entry of the vector would
+  provide the mass-to-charge value for the \code{k}-th row of the mass
+  spectrometry data.
 
-  A second way is to provide a single number which provides the column number
-  in the input to the \code{mass_spec} parameter for a column which contains
-  this information.
+  A second way is to provide a single number which specifies the column
+  number in the \code{matrix} or \code{data.frame} provided as the argument
+  for the \code{mass_spec} parameter such that this column contains the
+  mass-to-charge information.
 
   A third way is provide a single character string which provides the column
-  name in the input to the \code{mass_spec} parameter for a column which
-  contains this information.  Partial matching is supported.}
+  name in the \code{matrix} or \code{data.frame} provided as the argument for
+  the \code{mass_spec} parameter such that this column contains the
+  mass-to-charge information.  Partial matching is supported.}
 
 \item{charge}{The information for the \code{charge} parameter can be provided
   in the same manner as for the mass-to-charge values.}
@@ -61,16 +63,15 @@ binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
   retention level of the compound was achieved.}
 
 \item{ms_inten}{Either \code{NULL} or a vector either of mode character or
-  mode numeric specifying which of the mass spectrometry fractions in the
-  data encapsulated by \code{msObj} are to be considered the region of
-  interest with respect to the filtering process.  If \code{NULL}, then it is
-  taken to mean that the entirety of the data in \code{mass_spec}, after
-  removing variables in the data that are specified as arguments, is the mass
-  spectrometry intensity data.  If it is a numeric vector, then the entries
-  should provide the indices for the region of interest in the mass
-  spectrometry data in the argument for \code{msObj}. If it is a character
-  vector, then the entries should uniquely specify the region of interest
-  through partial string matching.}
+  mode numeric specifying which of the variables in the argument to
+  \code{mass_spec} are to be retained as the mass spectrometry intensity
+  data.  If \code{NULL}, then it is taken to mean that the entirety of the
+  data in \code{mass_spec}, after removing variables in the data that are
+  specified as arguments, is the mass spectrometry intensity data.  If it is
+  a numeric vector, then the entries should provide the indices for the
+  region of interest in the mass spectrometry data in the argument for
+  \code{msObj}. If it is a character vector, then the entries should uniquely
+  specify the region of interest through partial string matching.}
 
 \item{mass_range}{A length-2 numeric vector specifying the lower bound and
   upper bound (inclusive) of allowed mass for an observation to be included

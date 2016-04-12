@@ -61,9 +61,21 @@ extractMS <- function(msObj, type="matrix") {
 
 
 
+#' Mass spectrometry abundances fraction names
+#'
+#' Retrieve or set the mass spectrometry abundances fraction names for objects
+#' of class \code{binMS}, \code{filterMS}, or \code{msDat}.
+#'
+#' @param msObj An object of class \code{binMS}, \code{filterMS}, or
+#'   \code{msDat}
+#'
+#' @param value Either \code{NULL} or a character vector or an object that can
+#'   be coerced to a character vector.  If non-\code{NULL}, then must be of the same
+#'   length as the number of fractions in the mass spectrometry data.
+#'
 #' @export
 
-namesMS <- function(msObj) {
+colnamesMS <- function(msObj) {
   # Error-checking performed in extractMS
   msDatObj <- extractMS(msObj, "msDat")
   # returns NULL when msDatObj is NULL
@@ -71,14 +83,23 @@ namesMS <- function(msObj) {
 }
 
 
-`namesMS<-` <- function(msObj, value) {
+#' @rdname colnamesMS
+#'
+#' @export
+
+`colnamesMS<-` <- function(msObj, value) {
   
-  # Check args are of the right type
-  if (missing(msObj)) {
-    stop("Must provide an argument for msObj")
+  # Note: don't need to check if msObj, value are missing.  R won't invoke this
+  # function unless both args are present
+
+  # If non-NULL, ensure that value is a character vector
+  if (!is.null(value) && !is.character(value)) {
+    # Will throw an error if cannot coerce; use default error message
+    value <- as.character(value)
   }
   
-  # class() returns a character vector regardless of input
+  # Ensure that msObj of a valid class.  note: class() returns a character
+  # vector regardless of input
   class_nm <- class(msObj)
   if (!identical(class_nm, "binMS")
       && !identical(class_nm, "filterMS")
@@ -86,22 +107,44 @@ namesMS <- function(msObj) {
     stop("msObj must be an object of class \"binMS\", \"filterMS\", or \"msDat\"")
   }
 
-  # Code adapted from `colnames<-`
-  dn <- ifelse(identical(class_nm, "msDat"), dimnames(msObj$ms), dimnames(msObj$msObj$ms))
-  print(dn)
+  # Extract dimnames from mass spectrometry abundances matrix
+  if (identical(class_nm, "msDat")) {
+    dn <- dimnames(msObj$ms)
+    nfrac <- NCOL(msObj$ms)
+  }
+  else {
+    dn <- dimnames(msObj$msObj$ms)
+    nfrac <- NCOL(msObj$msObj$ms)
+  }
+
+  # Ensure that length of replacement is correct
+  if (!is.null(value) && !identical(length(value), nfrac)) {
+    stop("Length of replacement vector (", length(value), ") ",
+         "not equal to the number of fractions in mass spectrometry data (", nfrac, ")")
+  }
   
+  # case: dimnames from ms matrix are null; if value is null then just return,
+  # otherwise create container to store new values
   if (is.null(dn)) {
     if (is.null(value)) {
-      return(msDatObj)
+      return(msObj)
     }
-    dn <- vector("list", nd)
+    dn <- vector("list", 2)
   }
-  # 
+  
+  # Store value in dn
   if (is.null(value)) {
     dn[2L] <- list(NULL)
+  } else {
+    dn[[2L]] <- value
   }
-  else dn[[2L]] <- value
+
+  # Write updated dimnames to ms matrix
+  if (identical(class_nm, "msDat")) {
+    dimnames(msObj$ms) <- dn
+  } else {
+    dimnames(msObj$msObj$ms) <- dn
+  }
   
-  dimnames(get(msDat_nm)[["ms"]]) <- dn
   return (msObj)
 }

@@ -28,39 +28,40 @@ msDat(mass_spec, mtoz, charge, ms_inten = NULL)
   which helps identify the mass-to-charge values for this data in one of
   several ways.
 
-  One way to provide the information is to provide a vector where each entry
-  provides the mass-to-charge value for a corresponding row of mass
-  spectrometry data.  Then the \code{k}-th entry of the vector would provide
-  the mass-to-charge value for the \code{k}-th row of the mass spectrometry
-  data.
+  One way to provide the information is to provide a numeric vector where
+  each entry provides the mass-to-charge value for a corresponding row of
+  mass spectrometry data.  Then the \code{k}-th entry of the vector would
+  provide the mass-to-charge value for the \code{k}-th row of the mass
+  spectrometry data.
 
-  A second way is to provide a single number which provides the column number
-  in the input to the \code{mass_spec} parameter for a column which contains
-  this information.
+  A second way is to provide a single number which specifies the column
+  number in the \code{matrix} or \code{data.frame} provided as the argument
+  for the \code{mass_spec} parameter such that this column contains the
+  mass-to-charge information.
 
   A third way is provide a single character string which provides the column
-  name in the input to the \code{mass_spec} parameter for a column which
-  contains this information.  Partial matching is supported.}
+  name in the \code{matrix} or \code{data.frame} provided as the argument for
+  the \code{mass_spec} parameter such that this column contains the
+  mass-to-charge information.  Partial matching is supported.}
 
 \item{charge}{The information for the \code{charge} parameter can be provided
   in the same manner as for the mass-to-charge values.}
 
 \item{ms_inten}{Either \code{NULL} or a vector either of mode character or
-  mode numeric specifying which of the mass spectrometry fractions in the
-  data encapsulated by \code{msObj} are to be considered the region of
-  interest with respect to the filtering process.  If \code{NULL}, then it is
-  taken to mean that the entirety of the data in \code{mass_spec}, after
-  removing variables in the data that are specified as arguments, is the mass
-  spectrometry intensity data.  If it is a numeric vector, then the entries
-  should provide the indices for the region of interest in the mass
-  spectrometry data in the argument for \code{msObj}. If it is a character
-  vector, then the entries should uniquely specify the region of interest
-  through partial string matching.}
+  mode numeric specifying which of the variables in the argument to
+  \code{mass_spec} are to be retained as the mass spectrometry intensity
+  data.  If \code{NULL}, then it is taken to mean that the entirety of the
+  data in \code{mass_spec}, after removing variables in the data that are
+  specified as arguments, is the mass spectrometry intensity data.  If it is
+  a numeric vector, then the entries should provide the indices for the
+  region of interest in the mass spectrometry data in the argument for
+  \code{msObj}. If it is a character vector, then the entries should uniquely
+  specify the region of interest through partial string matching.}
 }
 \value{
 Returns an object of class \code{msDat}.  This class is a \code{list}
-  with elements described below.  The class is equipped with a summary
-  function.
+  with elements described below.  The class is equipped with a \code{print}
+  and \code{extractMS} function.
 
   \describe{
 
@@ -84,5 +85,16 @@ Returns an object of class \code{msDat}.  This class is a \code{list}
 \description{
 Creates a data structure encapsulating the mass spectrometry intensity
 readings as well as identifying information
+}
+\details{
+Since the mass spectrometry data could conceivably be available to
+  the researcher in a variety forms, this function attempts to provide a
+  uniform data structure for encapsulating this information.  It is the
+  fundamental data structure containing the mass spectrometry data used
+  internally by the \code{binMS} and \code{filterMS} routines.  The external
+  interface for \code{msDat} is provided to the user so that specifying the
+  mass spectrometry information can be made in a distinct step from
+  performing statistical analyses, which it is hoped makes the downstream
+  analysis routines simpler and more intuitive to use.
 }
 
