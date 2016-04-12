@@ -60,9 +60,9 @@
 #'
 #'   }
 #'
-#' @return Returns an object of classes \code{filterMS} and \code{\link{msDat}}.
-#'   This object is a \code{list} with elements described below.  The classes
-#'   are equipped with a summary function.
+#' @return Returns an object of class \code{filterMS}.  This object is a
+#'   \code{list} with elements described below.  The class is equipped with a
+#'   \code{print}, code{summary}, and \code{extractMS} function.
 #'
 #'   \describe{
 #'
@@ -102,8 +102,8 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   chg <- msDatObj$chg
 
   # Dimensions of mass spectrometry data
-  ms_nr <- nrow(ms)
-  ms_nc <- ncol(ms)
+  ms_nr <- NROW(ms)
+  ms_nc <- NCOL(ms)
 
   # Create region index variable
   regIdx <- filterMS_getRegionIdx(region, ms)
@@ -111,8 +111,9 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   # Create border index, i.e. the indices that surround the region of interest
   borIdx <- filterMS_getBorderIdx(border, regIdx, ms_nc)
 
-  # maxIdx: the column index per row (and hence fraction) of the maximum intensity level.
-  # The rightmost column index is chosen in the case of ties so as
+  # maxIdx: the column index per row (i.e. per observation) of the fraction
+  # containing the maximum intensity level.  The rightmost column index is
+  # chosen in the case of ties.
   maxIdx <- apply(ms, 1, function(x) tail(which(x == max(x)), 1))
 
   # Evaluate criteria predicates
@@ -166,7 +167,6 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
 
 
 
-
 #' Basic information for class \code{filterMS}
 #'
 #' Displays the number of candidate compounds left in the data after filtering
@@ -181,12 +181,13 @@ print.filterMS <- function(filtObj) {
         "satisfied all of the inclusion criteria.\n")
   }
   else {
-    cat("An object of class \"filterMS\" with ", NROW(msObj$ms), " compounds and ",
-        NCOL(msObj$ms), " fractions.\n", sep="")
+    cat("An object of class \"filterMS\" with ", format(NROW(msObj$ms), big.mark=","),
+        " compounds and ", NCOL(msObj$ms), " fractions.\n", sep="")
   }
   cat("Use summary.filterMS to see more details regarding the filtering process.\n",
       "Use extractMS to extract the filtered mass spectrometry data\n\n")
 }
+
 
 
 

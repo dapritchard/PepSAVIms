@@ -25,38 +25,49 @@
 #'   which helps identify the mass-to-charge values for this data in one of
 #'   several ways.
 #'
-#'   One way to provide the information is to provide a vector where each entry
-#'   provides the mass-to-charge value for a corresponding row of mass
-#'   spectrometry data.  Then the \code{k}-th entry of the vector would provide
-#'   the mass-to-charge value for the \code{k}-th row of the mass spectrometry
-#'   data.
+#'   One way to provide the information is to provide a numeric vector where
+#'   each entry provides the mass-to-charge value for a corresponding row of
+#'   mass spectrometry data.  Then the \code{k}-th entry of the vector would
+#'   provide the mass-to-charge value for the \code{k}-th row of the mass
+#'   spectrometry data.
 #'
-#'   A second way is to provide a single number which provides the column number
-#'   in the input to the \code{mass_spec} parameter for a column which contains
-#'   this information.
+#'   A second way is to provide a single number which specifies the column
+#'   number in the \code{matrix} or \code{data.frame} provided as the argument
+#'   for the \code{mass_spec} parameter such that this column contains the
+#'   mass-to-charge information.
 #'
 #'   A third way is provide a single character string which provides the column
-#'   name in the input to the \code{mass_spec} parameter for a column which
-#'   contains this information.  Partial matching is supported.
+#'   name in the \code{matrix} or \code{data.frame} provided as the argument for
+#'   the \code{mass_spec} parameter such that this column contains the
+#'   mass-to-charge information.  Partial matching is supported.
 #'
 #' @param charge The information for the \code{charge} parameter can be provided
 #'   in the same manner as for the mass-to-charge values.
 #'
 #' @param ms_inten Either \code{NULL} or a vector either of mode character or
-#'   mode numeric specifying which of the mass spectrometry fractions in the
-#'   data encapsulated by \code{msObj} are to be considered the region of
-#'   interest with respect to the filtering process.  If \code{NULL}, then it is
-#'   taken to mean that the entirety of the data in \code{mass_spec}, after
-#'   removing variables in the data that are specified as arguments, is the mass
-#'   spectrometry intensity data.  If it is a numeric vector, then the entries
-#'   should provide the indices for the region of interest in the mass
-#'   spectrometry data in the argument for \code{msObj}. If it is a character
-#'   vector, then the entries should uniquely specify the region of interest
-#'   through partial string matching.
+#'   mode numeric specifying which of the variables in the argument to
+#'   \code{mass_spec} are to be retained as the mass spectrometry intensity
+#'   data.  If \code{NULL}, then it is taken to mean that the entirety of the
+#'   data in \code{mass_spec}, after removing variables in the data that are
+#'   specified as arguments, is the mass spectrometry intensity data.  If it is
+#'   a numeric vector, then the entries should provide the indices for the
+#'   region of interest in the mass spectrometry data in the argument for
+#'   \code{msObj}. If it is a character vector, then the entries should uniquely
+#'   specify the region of interest through partial string matching.
+#'
+#' @details Since the mass spectrometry data could conceivably be available to
+#'   the researcher in a variety forms, this function attempts to provide a
+#'   uniform data structure for encapsulating this information.  It is the
+#'   fundamental data structure containing the mass spectrometry data used
+#'   internally by the \code{binMS} and \code{filterMS} routines.  The external
+#'   interface for \code{msDat} is provided to the user so that specifying the
+#'   mass spectrometry information can be made in a distinct step from
+#'   performing statistical analyses, which it is hoped makes the downstream
+#'   analysis routines simpler and more intuitive to use.
 #'
 #' @return Returns an object of class \code{msDat}.  This class is a \code{list}
-#'   with elements described below.  The class is equipped with a summary
-#'   function.
+#'   with elements described below.  The class is equipped with a \code{print}
+#'   and \code{extractMS} function.
 #'
 #'   \describe{
 #'
@@ -82,11 +93,10 @@
 
 msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
 
-  # Perform some checks for validity of input.  Some forms of invalid input may
-  # still exist that are checked for as the function progresses.
-  checkValInp_msDat(mass_spec, mtoz, charge, ms_inten)
+  # Check that input is of the right form
+  msDat_check_valid_input(mass_spec, mtoz, charge, ms_inten)
 
-  # Obtain mass-to-charge, charge, and ms abundance variables
+  # Obtain mass-to-charge, charge, and mass spectrometry abundances variables
   dmtoz <- extract_var(mtoz, mass_spec)
   dcharge <- extract_var(charge, mass_spec)
   ms_inten <- extract_var(ms_inten, mass_spec, TRUE, mtoz, charge)
@@ -102,56 +112,69 @@ msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
 
 
 
-#' Basic statistics for mass spectrometry data
+# Class methods ----------------------------------------------------------------
+
+
+#' Basic information for class \code{msDat}
 #'
-#' Summary function for class \code{msDat}
+#' Displays the number of candidate compounds left in the data
+#'
+#' @export
 
-summary.msDat <- function(msDat) {
+print.msDat <- function(msDat) {
 
-  cat("\nThe mass spectrometry data has",
-      format(ncol(msDat$ms), big.mark=","),
-      "fractions across",
-      format(nrow(msDat$ms), big.mark=","),
-      "mass-to-charge values\n\n")
+  cat("An object of class \"msDat\" with ", format(NROW(msDat$ms), big.mark=","),
+        " compounds and ", NCOL(msDat$ms), " fractions.\n", sep="")
+  cat("Use extractMS to extract the mass spectrometry data.\n\n")
 }
 
 
 
 
-#' Check for valid msDat arguments
-#'
-#' Check that arguments \code{mass_spec}, \code{mtoz}, and \code{charge} are
-#' of the right data type
-#'
-#' @inheritParams msDat
+# Helper functions -------------------------------------------------------------
 
-checkValInp_msDat <- function(mass_spec, mtoz, charge, ms_inten) {
 
-  # Check if parameters are one of matrices / data frames / non-list vectors,
-  # as appropriate
+msDat_check_valid_input <- function(mass_spec, mtoz, charge, ms_inten) {
 
-  if ( !(is.matrix(mass_spec) || is.data.frame(mass_spec)) ) {
-    stop("mass_spec must be a matrix or data frame\n")
-  }
-  else if ( !( is.strictVec(drop(mtoz)) ) ) {
-    stop("mtoz must be a non-list vector\n")
-  }
-  else if ( !( is.strictVec(drop(charge)) ) ) {
-    stop("charge must be a non-list vector\n")
+  ## Check for missing arguments
+  
+  all_var_nm <- c("mass_spec", "mtoz", "charge", "ms_inten")
+  for (var_nm in all_var_nm) {
+    if (!eval(substitute(hasArg(var_nm)))) {
+      stop("Must provide an argument for ", var_nm, call.=FALSE)
+    }
   }
 
-  # TODO: ms_inten variable
+  ## Check mass_spec
 
-  # TODO: check for missing.  Is this not performed elsewhere?
-}
+  if (!is.matrix(mass_spec) && !is.data.frame(mass_spec)) {
+    stop("mass_spec must be either a matrix or data.frame", call.=FALSE)
+  }
+  # The decision to not allow 0 rows is a design decision, and the reason that
+  # we can't have 1 row is because that if a number is supplied then we don't
+  # know if it is the value of the data or an index being supplied
+  else if (NROW(mass_spec) <= 1L) {
+    stop("mass_spec must have 2 or more rows", call.=FALSE)
+  }
+  # Decide not to allow 0 columns in data
+  else if (identical(NCOL(mass_spec), 0L)) {
+    stop("mass_spec cannot have 0 columns", call.=FALSE)
+  }
+  
+  ## Check mtoz, charge
 
+  for (var_nm in c("mtoz", "charge")) {
+    x <- get(var_nm)
+    if (!is.numeric(x) && !is.character(x)) {
+      stop(var_nm, " must be either of mode numeric or character", call.=FALSE)
+    }
+  }
 
+  ## Check ms_inten
 
-
-# TODO: there is a is.strictvec in RankLasso_Helper.R.  Should merge the two.
-
-is.strictVec <- function(x) {
-  return( is.vector(x) && !is.list(x) )
+  if (!is.null(ms_inten) && !is.numeric(ms_inten) && !is.character(ms_inten)) {
+    stop("ms_inten must be either NULL or of mode numeric or character", call.=FALSE)
+  }
 }
 
 
@@ -159,76 +182,76 @@ is.strictVec <- function(x) {
 
 # TODO: need documentation for this
 
-getCmpInfo <- function(mass_spec, mtoz, charge) {
+# getCmpInfo <- function(mass_spec, mtoz, charge) {
 
-  # Calculate number of compounds
-  nCmp <- nrow(mass_spec)
+#   # Calculate number of compounds
+#   nCmp <- nrow(mass_spec)
 
-  # Check if mtoz is numeric or character.  Pre: mtoz is a non-list vector
-  if ( !(is.numeric(mtoz) || is.character(mtoz)) ) {
-    stop("mtoz must be numeric or character\n")
-  }
-  else if ( !( identical(length(mtoz), 1L) || identical(length(mtoz), nCmp) ) ) {
-    stop("mtoz must have either have a length of 1 or length equal to the ",
-         "number of compounds", call.=FALSE)
-  }
+#   # Check if mtoz is numeric or character.  Pre: mtoz is a non-list vector
+#   if ( !(is.numeric(mtoz) || is.character(mtoz)) ) {
+#     stop("mtoz must be numeric or character\n")
+#   }
+#   else if ( !( identical(length(mtoz), 1L) || identical(length(mtoz), nCmp) ) ) {
+#     stop("mtoz must have either have a length of 1 or length equal to the ",
+#          "number of compounds", call.=FALSE)
+#   }
 
-  # Check if charge is numeric or character.  Pre: charge is a non-list vector
-  if ( !(is.numeric(charge) || is.character(charge)) ) {
-    stop("charge must be numeric or character\n")
-  }
-  else if ( !( identical(length(mtoz), 1L) || identical(length(mtoz), nCmp) ) ) {
-    stop("charge must have either have a length of 1 or length equal to the ",
-         "number of compounds", call.=FALSE)
-  }
+#   # Check if charge is numeric or character.  Pre: charge is a non-list vector
+#   if ( !(is.numeric(charge) || is.character(charge)) ) {
+#     stop("charge must be numeric or character\n")
+#   }
+#   else if ( !( identical(length(mtoz), 1L) || identical(length(mtoz), nCmp) ) ) {
+#     stop("charge must have either have a length of 1 or length equal to the ",
+#          "number of compounds", call.=FALSE)
+#   }
 
-  # Initialize a list to save mass spectrometry identifying information (and
-  # possibly location of this information is mass_spec) into
-  outDat <- list()
-  # Create iterable object for for loop
-  varList <- list(mtoz=mtoz, chg=charge)
+#   # Initialize a list to save mass spectrometry identifying information (and
+#   # possibly location of this information is mass_spec) into
+#   outDat <- list()
+#   # Create iterable object for for loop
+#   varList <- list(mtoz=mtoz, chg=charge)
 
 
-  # Each iteration in loop creates an entry in outDat where the entry is a list
-  # containing elements loc and val.  loc is an index for the column in mass_spec
-  # containing the mass-to-charge or charge information (which may be numeric(0) if
-  # not in mass_spec).  val a vector with the actual information.
+#   # Each iteration in loop creates an entry in outDat where the entry is a list
+#   # containing elements loc and val.  loc is an index for the column in mass_spec
+#   # containing the mass-to-charge or charge information (which may be numeric(0) if
+#   # not in mass_spec).  val a vector with the actual information.
 
-  for (i in 1:length(varList)) {
-    outDat[[i]] <- list()
-    thisVar <- varList[[i]]
+#   for (i in 1:length(varList)) {
+#     outDat[[i]] <- list()
+#     thisVar <- varList[[i]]
 
-    # nCmp length atomic vector
-    if ( identical(length(thisVar), nCmp) ) {
-      outDat[[i]]$loc <- numeric(0)
-      outDat[[i]]$val <- thisVar
-    }
-    # length 1 numeric
-    else if (is.numeric(thisVar)) {
-      if ((thisVar < 1) || (thisVar > ncol(mass_spec))) {
-        stop(paste("not a valid column number for", names(varList)[i], "\n"))
-      }
-      outDat[[i]]$loc <- as.integer(thisVar)
-      outDat[[i]]$val <- mass_spec[, thisVar]
-    }
-    # length 1 character
-    else if (is.character(thisVar)) {
-      if ( !(thisVar %in% colnames(mass_spec)) ) {
-        stop(paste("invalid column name given for", names(varList)[i], "\n"))
-      }
-      outDat[[i]]$loc <- which(thisVar == colnames(mass_spec))
-      outDat[[i]]$val <- mass_spec[, thisVar]
-    }
-    else {
-      # Should not reach here.  All cases should be covered either in the error
-      # checking or conditionals.
-    }
-  } # End loop entering data into outDat
+#     # nCmp length atomic vector
+#     if ( identical(length(thisVar), nCmp) ) {
+#       outDat[[i]]$loc <- numeric(0)
+#       outDat[[i]]$val <- thisVar
+#     }
+#     # length 1 numeric
+#     else if (is.numeric(thisVar)) {
+#       if ((thisVar < 1) || (thisVar > ncol(mass_spec))) {
+#         stop(paste("not a valid column number for", names(varList)[i], "\n"))
+#       }
+#       outDat[[i]]$loc <- as.integer(thisVar)
+#       outDat[[i]]$val <- mass_spec[, thisVar]
+#     }
+#     # length 1 character
+#     else if (is.character(thisVar)) {
+#       if ( !(thisVar %in% colnames(mass_spec)) ) {
+#         stop(paste("invalid column name given for", names(varList)[i], "\n"))
+#       }
+#       outDat[[i]]$loc <- which(thisVar == colnames(mass_spec))
+#       outDat[[i]]$val <- mass_spec[, thisVar]
+#     }
+#     else {
+#       # Should not reach here.  All cases should be covered either in the error
+#       # checking or conditionals.
+#     }
+#   } # End loop entering data into outDat
 
-  names(outDat) <- names(varList)
+#   names(outDat) <- names(varList)
 
-  return (outDat)
-}
+#   return (outDat)
+# }
 
 
 

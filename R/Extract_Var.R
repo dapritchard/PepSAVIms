@@ -55,14 +55,22 @@ extract_null <- function(dataObs, arg_nm, ...) {
       return ( extract_char_to_idx(callArg, dataObs, "other var") )
     }
     else {
-      stop("other var" , " is not of the right type")
+      stop("other var is not of the right type", call.=FALSE)
     }
   })
   # Obtain an integer vector
   other_idx <- unlist(other_idx_list)
 
-  # Return dataObs after removing non-ms columns and converting to a matrix
+  # Obtain variable indices after removing indices corresponding to other variables
   varIdx <- setdiff(seq_len( NCOL(dataObs) ), other_idx)
+
+  # Check that we haven't used all the data on other variables
+  if (identical(length(varIdx), 0L)) {
+    stop("There cannot be 0 columns left for ", arg_nm,
+         " after removing data for other variables", call.=FALSE)
+  }
+
+  # Return dataObs after removing non-ms columns and converting to a matrix
   extract_idx_to_data(varIdx, dataObs, arg_nm, TRUE)
 }
 
@@ -72,7 +80,7 @@ extract_null <- function(dataObs, arg_nm, ...) {
 extract_data <- function(callArg, arg_nm) {
   
   if (!is.numeric(callArg)) {
-    stop("If ", var_nm, " is the same length of the data then it must be of ",
+    stop("If ", arg_nm, " is the same length of the data then it must be of ",
          "mode numeric", call.=FALSE)
   }
 
@@ -109,8 +117,10 @@ extract_char <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
 extract_num_to_idx <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
 
   # Check valid input values
-  if ((min(callArg) < 1) || (max(callArg) > NCOL(dataObs))) {
-    stop("out of bounds value provided for ", arg_nm, call.=FALSE)
+  for (k in callArg) {
+    if ((k < 1) || (k > NCOL(dataObs))) {
+      stop("out of bounds value ", k, " provided for ", arg_nm, call.=FALSE)
+    }
   }
 
   return (callArg)
@@ -123,7 +133,7 @@ extract_char_to_idx <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
 
   var_nm <- colnames(dataObs)
   if (is.null(var_nm)) {
-    stop("Variable specified by name but data columns not equipped with names")
+    stop("Variable specified by name but data columns not equipped with names", call.=FALSE)
   }
 
   varIdx <- sapply(callArg, function(nm) {
@@ -152,7 +162,7 @@ extract_check_valid <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
 
   # Check that data is of the right type
   if (!is.matrix(dataObs) && !is.data.frame(dataObs)) {
-    stop("data must be a matrix or data.frame")
+    stop("data must be a matrix or data.frame", call.=FALSE)
   }
   
   # Check that there are no duplicates
@@ -160,9 +170,15 @@ extract_check_valid <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
     stop(arg_nm, " cannot have any duplicate values", call.=FALSE)
   }
   
-  # Check that vector data has only 1 entry
+  # Check that input corresponding to vector data has exactly 1 entry (assume we
+  # already know it is not n-length)
   else if (!expect_matr_bool && !identical(length(callArg), 1L)) {
-    stop(arg_nm, " must have length 1", call.=FALSE)
+    stop(arg_nm, " must have length 1 or length equal to the number of observations", call.=FALSE)
+  }
+
+  # Check that input corresponding to matrix data has at least 1 entry
+  else if (expect_matr_bool && !(length(callArg) >= 1L)) {
+    stop("If non-NULL, then ", arg_nm, " must have length >= 1", call.=FALSE)
   }
 }
 
@@ -190,7 +206,7 @@ extract_idx_to_data <- function(varIdx, dataObs, arg_nm, expect_matr_bool) {
 
   # Data may not have any missingness
   if (any( is.na(outDat) )) {
-    stop("Data corresponding to ", arg_nm, " contains missing")
+    stop("Data corresponding to ", arg_nm, " contains missing", call.=FALSE)
   }
   
   return (outDat)

@@ -126,6 +126,20 @@
 #'   other observation left in the working set satisfies the merging criteria,
 #'   then this consolidated observation can be removed from consideration for
 #'   all future merges.
+
+#' @return Returns an object of class \code{binMS}.  This object is a
+#'   \code{list} with elements described below.  The class is equipped with a
+#'   \code{print}, code{summary}, and \code{extractMS} function.
+#'
+#'   \describe{
+#'
+#'   \item{\code{msObj}}{ An object of class \code{\link{msDat}} that
+#'   encapsulates the mass spectrometry data for the consolidated data. }
+#'
+#'   \item{\code{summ_info}}{ A list containing information pertaining to the
+#'   consolidation process; for use by the summary function. }
+#'
+#'   }
 #'
 #' @export
 
@@ -354,7 +368,7 @@ print.binMS <- function(binObj) {
         NCOL(msObj$ms), " fractions.\n", sep="")
   }
   cat("Use summary.binMS to see more details regarding the consolidation process.\n",
-      "Use extractMS to extract the binned mass spectrometry data\n\n")
+      "Use extractMS to extract the consolidated mass spectrometry data.\n\n")
 }
 
 
@@ -417,5 +431,4 @@ summary.binMS <- function(binObj) {
       "-----------------------------------------------\n",
       "    ", formatC(n_binned, format="d", big.mark=","), " levels\n",
       "\n", sep="")
-  
 }

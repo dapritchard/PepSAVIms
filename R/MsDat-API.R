@@ -71,4 +71,37 @@ namesMS <- function(msObj) {
 }
 
 
+`namesMS<-` <- function(msObj, value) {
+  
+  # Check args are of the right type
+  if (missing(msObj)) {
+    stop("Must provide an argument for msObj")
+  }
+  
+  # class() returns a character vector regardless of input
+  class_nm <- class(msObj)
+  if (!identical(class_nm, "binMS")
+      && !identical(class_nm, "filterMS")
+      && !identical(class_nm, "msDat")) {
+    stop("msObj must be an object of class \"binMS\", \"filterMS\", or \"msDat\"")
+  }
 
+  # Code adapted from `colnames<-`
+  dn <- ifelse(identical(class_nm, "msDat"), dimnames(msObj$ms), dimnames(msObj$msObj$ms))
+  print(dn)
+  
+  if (is.null(dn)) {
+    if (is.null(value)) {
+      return(msDatObj)
+    }
+    dn <- vector("list", nd)
+  }
+  # 
+  if (is.null(value)) {
+    dn[2L] <- list(NULL)
+  }
+  else dn[[2L]] <- value
+  
+  dimnames(get(msDat_nm)[["ms"]]) <- dn
+  return (msObj)
+}

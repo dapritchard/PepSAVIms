@@ -38,9 +38,9 @@ filterMS(msObj, region, border = "all", bord_ratio = 0.05,
   compound may exhibit (see criterion 5)}
 }
 \value{
-Returns an object of classes \code{filterMS} and \code{\link{msDat}}.
-  This object is a \code{list} with elements described below.  The classes
-  are equipped with a summary function.
+Returns an object of class \code{filterMS}.  This object is a
+  \code{list} with elements described below.  The class is equipped with a
+  \code{print}, code{summary}, and \code{extractMS} function.
 
   \describe{
 

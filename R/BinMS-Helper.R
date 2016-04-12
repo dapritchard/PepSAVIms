@@ -24,7 +24,7 @@ binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_ret
   for (var_nm in c("mtoz", "charge", "time_peak_reten")) {
     x <- get(var_nm)
     if (!is.numeric(x) && !is.character(x)) {
-      stop(paste0(var_nm, " must be either of mode numeric or character"), call.=FALSE)
+      stop(var_nm, " must be either of mode numeric or character", call.=FALSE)
     }
   }
 
@@ -33,7 +33,7 @@ binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_ret
   for (var_nm in c("mass", "ms_inten")) {
     x <- get(var_nm)
     if (!is.null(x) && !is.numeric(x) && !is.character(x)) {
-      stop(paste0(var_nm, " must be either NULL or of mode numeric or character"), call.=FALSE)
+      stop(var_nm, " must be either NULL or of mode numeric or character", call.=FALSE)
     }
   }
 
@@ -42,13 +42,13 @@ binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_ret
   for (var_nm in c("time_range", "mass_range", "charge_range")) {
     x <- get(var_nm)
     if (!is.numeric(x)) {
-      stop(paste0(var_nm, " must be of mode numeric"), call.=FALSE)
+      stop(var_nm, " must be of mode numeric", call.=FALSE)
     }
     else if (!identical(length(x), 2L)) {
-      stop(paste0(var_nm, " must have a length of 2"), call.=FALSE)
+      stop(var_nm, " must have a length of 2", call.=FALSE)
     }
     else if (isTRUE(x[1] >= x[2])) {
-      stop(paste0("The values of ", var_nm, " must be in increasing order"), call.=FALSE)
+      stop("The values of ", var_nm, " must be in increasing order", call.=FALSE)
     }
   }
 
@@ -57,10 +57,10 @@ binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_ret
   for (var_nm in c("mtoz_diff", "time_diff")) {
     x <- get(var_nm)
     if (!is.numeric(x)) {
-      stop(paste0(var_nm, " must be of mode numeric"), call.=FALSE)
+      stop(var_nm, " must be of mode numeric", call.=FALSE)
     }
     else if (!identical(length(x), 1L)) {
-      stop(paste0(var_nm, " must have a length of 1"), call.=FALSE)
+      stop(var_nm, " must have a length of 1", call.=FALSE)
     }
   }
 }

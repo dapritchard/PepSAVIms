@@ -98,6 +98,21 @@ binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
   times could potentially be considered to originate from the same underlying
   compound, contingent on other criteria also being met.}
 }
+\value{
+Returns an object of class \code{binMS}.  This object is a
+  \code{list} with elements described below.  The class is equipped with a
+  \code{print}, code{summary}, and \code{extractMS} function.
+
+  \describe{
+
+  \item{\code{msObj}}{ An object of class \code{\link{msDat}} that
+  encapsulates the mass spectrometry data for the consolidated data. }
+
+  \item{\code{summ_info}}{ A list containing information pertaining to the
+  consolidation process; for use by the summary function. }
+
+  }
+}
 \description{
 Combines mass spectrometry observations that are believed to belong to the
 same underlying compound into a single observation.  In concept, the data
