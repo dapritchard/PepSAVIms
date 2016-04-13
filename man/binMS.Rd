@@ -106,7 +106,7 @@ Returns an object of class \code{binMS}.  This object is a
 
   \describe{
 
-  \item{\code{msObj}}{ An object of class \code{\link{msDat}} that
+  \item{\code{msDatObj}}{ An object of class \code{\link{msDat}} that
   encapsulates the mass spectrometry data for the consolidated data. }
 
   \item{\code{summ_info}}{ A list containing information pertaining to the

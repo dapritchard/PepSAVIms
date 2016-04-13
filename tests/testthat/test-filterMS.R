@@ -78,7 +78,7 @@ true_summ_info <- list(
   max_chg    = max_chg
 )
 
-true_filterMS <- list( msObj     = true_msObj,
+true_filterMS <- list( msDatObj     = true_msObj,
                        cmp_by_cr = true_cmp_by_cr,
                        summ_info = true_summ_info )
 class(true_filterMS) <- c("filterMS", "msDat")
@@ -106,7 +106,7 @@ cmp_by_empty5 <- true_cmp_by_cr
 cmp_by_empty5$c5 <- data.frame( mtoz = mtoz_vals[integer(0)],
                                 chg  = chg_vals[integer(0)] )
 
-true_filterMS_noCmp <- list( msObj   = NULL,
+true_filterMS_noCmp <- list( msDatObj  = NULL,
                              cmp_by_cr = cmp_by_empty5,
                              summ_info = summ_info_chg_sm )
 class(true_filterMS_noCmp) <- c("filterMS", "msDat")
@@ -114,8 +114,8 @@ class(true_filterMS_noCmp) <- c("filterMS", "msDat")
 
 # Create filterMS object from function -----------------------------------------
 
-msObj <- msDat(ms, mtoz_vals, chg_vals)
-fobj <- filterMS(msObj, region, border, bord_ratio, min_inten, max_chg)
+msDatObj <- msDat(ms, mtoz_vals, chg_vals)
+fobj <- filterMS(msDatObj, region, border, bord_ratio, min_inten, max_chg)
 
 fobj_noCmp <- suppressWarnings( filterMS(msObj, region, border, bord_ratio, min_inten, max_chg=0L) )
 
@@ -131,10 +131,10 @@ context("filterMS method")
 # Test for simple dataset ------------------------------------------------------
 
 test_that("filterMS: msDat obj", {
-  expect_identical( fobj$msObj$ms,   true_msObj$ms )
-  expect_identical( fobj$msObj$mtoz, true_msObj$mtoz )
-  expect_identical( fobj$msObj$chg,  true_msObj$chg )
-  expect_identical( fobj$msObj,      true_msObj )
+  expect_identical( fobj$msDatObj$ms,   true_msObj$ms )
+  expect_identical( fobj$msDatObj$mtoz, true_msObj$mtoz )
+  expect_identical( fobj$msDatObj$chg,  true_msObj$chg )
+  expect_identical( fobj$msDatObj,      true_msObj )
 })
 
 test_that("filterMS: cmp_by_cr", {
@@ -159,10 +159,10 @@ test_that("filterMS: summ_info", {
 
 test_that("filterMS: overall", {
   expect_identical( fobj,                              true_filterMS )
-  expect_identical( filterMS(msObj, c("ac3", "ac4")),  true_filterMS )
-  expect_identical( filterMS(msObj, c(3, 4)),          true_filterMS )
-  expect_identical( filterMS(msObj, c(3, 4), 2),       true_filterMS_num1 )
-  expect_identical( filterMS(msObj, c(3, 4), c(6, 7)), true_filterMS_num2 )
+  expect_identical( filterMS(msDatObj, c("ac3", "ac4")),  true_filterMS )
+  expect_identical( filterMS(msDatObj, c(3, 4)),          true_filterMS )
+  expect_identical( filterMS(msDatObj, c(3, 4), 2),       true_filterMS_num1 )
+  expect_identical( filterMS(msDatObj, c(3, 4), c(6, 7)), true_filterMS_num2 )
   expect_identical( fobj_noCmp,                        true_filterMS_noCmp )
 })
 
@@ -172,15 +172,15 @@ test_that("filterMS: overall", {
 ms2 <- matrix(1:36, ncol=12)
 ms2[13:18] <- 1500
 colnames(ms2) <- paste0("ms_chr_", 1:12)
-msObj2 <- msDat(ms2, 1:3, rep(3L, 3))
+msDatObj2 <- msDat(ms2, 1:3, rep(3L, 3))
 
-fobj_region_char <- filterMS(msObj2, paste0("chr_", 5:6))
-fobj_region_nume <- filterMS(msObj2, 5:6)
-fobj_border_all <- filterMS(msObj2, 5:6, "all")
-fobj_border_none <- filterMS(msObj2, 5:6, "none")
-fobj_border_num1 <- filterMS(msObj2, 5:6, 3)
-fobj_border_num2 <- filterMS(msObj2, 5:6, c(3, 4))
-fobj_border_0 <- filterMS(msObj2, 5:6, 0)
+fobj_region_char <- filterMS(msDatObj2, paste0("chr_", 5:6))
+fobj_region_nume <- filterMS(msDatObj2, 5:6)
+fobj_border_all <- filterMS(msDatObj2, 5:6, "all")
+fobj_border_none <- filterMS(msDatObj2, 5:6, "none")
+fobj_border_num1 <- filterMS(msDatObj2, 5:6, 3)
+fobj_border_num2 <- filterMS(msDatObj2, 5:6, c(3, 4))
+fobj_border_0 <- filterMS(msDatObj2, 5:6, 0)
 
 test_that("filterMS: region and borders", {
   expect_identical( fobj_region_char$summ_info$reg_nm, paste0("ms_chr_", 5:6) )
@@ -221,9 +221,9 @@ test_that("filterMS: invalid region", {
   expect_error( filterMS(msObj, c("a", "a")),
                 "region cannot have any duplicate values" )
   expect_error( filterMS(msObj, -99),
-                "out of bounds value provided for region" )
-  expect_error( filterMS(msObj, 1e10),
-                "out of bounds value provided for region" )
+                "out of bounds value -99 provided for region" )
+  expect_error( filterMS(msObj, 300),
+                "out of bounds value 300 provided for region" )
   expect_error( filterMS(msObj, c("frac1", "frac_not_in_ms")),
                 "name provided not in data - frac_not_in_ms element in region" )
   expect_error( filterMS(msObj, "frac"),

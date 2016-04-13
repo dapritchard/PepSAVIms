@@ -43,19 +43,18 @@ extractMS <- function(msObj, type="matrix") {
   }
 
   # class() returns a character vector regardless of input
-  class_nm <- class(msObj)
+  class_nm <- class(msObj)[1]
   msDatObj <- switch(class_nm,
                      binMS    = msObj$msObj,
                      filterMS = msObj$msObj,
                      msDat    = msObj,
-                     stop("msObj must be an object of class ",
-                          "\"binMS\", \"filterMS\", or \"msDat\""))
+                     stop("msObj must be an object of class \"msDat\"", call.=FALSE))
 
   # Return data in the desired form
   switch(type,
          matrix = with(msDatObj, cbind(mtoz, chg, ms)),
          msDat  = msDatObj,
-         stop("type must have a value of \"matrix\" or \"msDat\""))
+         stop("type must have a value of \"matrix\" or \"msDat\"", call.=FALSE))
 }
 
 
@@ -147,4 +146,116 @@ colnamesMS <- function(msObj) {
   }
   
   return (msObj)
+}
+
+
+
+
+dimnames.msDat <- function(msObj) {
+  
+  x <- extractMS(msObj, "msDat")
+  dimnames(x$ms)
+}
+
+
+`dimnames<-.msDat` <- function(msObj, value) {
+  
+  # case: one of the classes that decorates msDat object.  Recursively call
+  # with inner msDat object
+  if (!identical(class(msObj), "msDat")) {
+    dimnames(msObj$msDatObj) <- value
+    return (msObj)
+  }
+
+  ## else: msObj is strictly of class msDat
+  dimnames(msObj$ms) <- value
+  names(msObj$mtoz) <- value[[1]]
+  names(msObj$chg) <- value[[1]]
+
+  return (msObj)
+
+  # # Get matrix dimensions
+  # nr <- nrow(ms)
+  # nc <- ncol(ms)
+
+  # # case: dimnames from ms matrix are null; if value is null then just return,
+  # # otherwise create container to store new values
+  # if (is.null(dn)) {
+  #   if (is.null(value)) {
+  #     return(msObj)
+  #   }
+  #   dn <- vector("list", 2)
+  # }
+
+  
+  # if (!is.null(value)) {
+
+  #   # Since value is non-NULL, it must be a list with exactly 2 elements
+  #   if (!is.list(value)) {
+  #     stop("replacement value must either be NULL or a list")
+  #   }
+  #   else if (!identical(length(value), 2L)) {
+  #     stop("if a list then replacement value must have exactly 2 elements")
+  #   }
+
+  #   x <- value[[1L]]
+  #   else if (!is.null(x)) {
+  #     # case: x is not a character vector; try to coerce
+  #     if (!is.character(x)) {
+  #       nm <- tryCatch({
+  #         as.character(x)
+  #       }, error = function() {
+  #         stop("element 1 of replacement value unable to be coerced to character")
+  #       })
+  #     }
+  #     # case: x is a character vector
+  #     else {
+  #       nm <- x
+  #     }
+
+  #     msDatObj <- switch(class_nm,
+  #                    binMS    = msObj$msObj,
+  #                    filterMS = msObj$msObj,
+  #                    msDat    = msObj,
+  #                    stop("msObj must be an object of class \"msDat\""))
+
+  #   }
+        
+      
+  # }
+
+  # Ch
+
+  # Check that list elements are character or can be coerced to character
+  
+
+}
+
+
+
+
+# `[.data.frame`
+
+`[.msDat` <- function(msObj, i, j) {
+
+  # case: one of the classes that decorates msDat object.  Recursively call
+  # with inner msDat object
+  # if (!identical(class(msObj), "msDat")) {
+  #   msObj$msDatObj[i, j] <- value
+  #   return (msObj)
+  # }
+
+  msObj$ms <- msObj$ms[i, j, drop=FALSE]
+  msObj$mtoz <- msObj$mtoz[i]
+  msObj$chg <- msObj$chg[i]
+
+  msObj
+}
+
+
+`[<-.msDat` <- function(msObj, i, j, value) {
+
+  msObj$ms[i, j] <- value
+
+  msObj
 }

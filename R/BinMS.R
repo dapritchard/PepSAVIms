@@ -133,7 +133,7 @@
 #'
 #'   \describe{
 #'
-#'   \item{\code{msObj}}{ An object of class \code{\link{msDat}} that
+#'   \item{\code{msDatObj}}{ An object of class \code{\link{msDat}} that
 #'   encapsulates the mass spectrometry data for the consolidated data. }
 #'
 #'   \item{\code{summ_info}}{ A list containing information pertaining to the
@@ -318,32 +318,33 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
                        info_bin[rchg, 1:nbinned])
 
     # Construct msDat object
-    msObj <- msDat(t(ms_bin[, resortIdx,  drop=FALSE]),
-                   info_bin[rmtoz, resortIdx],
-                   info_bin[rchg, resortIdx])
+    msDatObj <- msDat(t(ms_bin[, resortIdx,  drop=FALSE]),
+                      info_bin[rmtoz, resortIdx],
+                      info_bin[rchg, resortIdx])
   }
   else {
     warning("No observations satisfied all of the inclusion criteria", call.=FALSE)
-    msObj <- NULL
+    msDatObj <- NULL
   }
 
   # Info for use by summary.binMS to describe binning process
-  summ_info <- list(n_tot = nrow(mass_spec),
-                    n_time_pr = sum(time_pr_bool),
-                    n_mass = sum(mass_bool),
-                    n_charge = sum(charge_bool),
-                    n_tiMaCh = length(keepIdx),
-                    n_binned = nbinned,
-                    time_range = time_range,
-                    mass_range = mass_range,
+  summ_info <- list(n_tot        = nrow(mass_spec),
+                    n_time_pr    = sum(time_pr_bool),
+                    n_mass       = sum(mass_bool),
+                    n_charge     = sum(charge_bool),
+                    n_tiMaCh     = length(keepIdx),
+                    n_binned     = nbinned,
+                    time_range   = time_range,
+                    mass_range   = mass_range,
                     charge_range = charge_range,
-                    mtoz_diff = mtoz_diff,
-                    time_diff = time_diff)
+                    mtoz_diff    = mtoz_diff,
+                    time_diff    = time_diff)
 
   # Construct binMS object
-  outObj <- list(msObj     = msObj,
+  outObj <- list(msDatObj  = msDatObj,
                  summ_info = summ_info)
-  structure(outObj, class="binMS")
+  
+  structure(outObj, class=c("binMS", "msDat"))
 }
 
 
@@ -358,14 +359,14 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
 #' @export
 
 print.binMS <- function(binObj) {
-  msObj <- binObj$msObj
+  msDatObj <- binObj$msDatObj
 
-  if (is.null(msObj)) {
+  if (is.null(msDatObj)) {
     cat("An object of class \"binMS\"; no observations satisfied all of the inclusion criteria.\n")
   }
   else {
-    cat("An object of class \"binMS\" with ", NROW(msObj$ms), " compounds and ",
-        NCOL(msObj$ms), " fractions.\n", sep="")
+    cat("An object of class \"binMS\" with ", NROW(msDatObj$ms), " compounds and ",
+        NCOL(msDatObj$ms), " fractions.\n", sep="")
   }
   cat("Use summary.binMS to see more details regarding the consolidation process.\n",
       "Use extractMS to extract the consolidated mass spectrometry data.\n\n")

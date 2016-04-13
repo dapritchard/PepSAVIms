@@ -121,11 +121,16 @@ msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
 #'
 #' @export
 
-print.msDat <- function(msDat) {
+print.msDat <- function(msDat, asis=FALSE) {
 
-  cat("An object of class \"msDat\" with ", format(NROW(msDat$ms), big.mark=","),
+  if (asis) {
+    print.default(msDat)
+  }
+  else{ 
+    cat("An object of class \"msDat\" with ", format(NROW(msDat$ms), big.mark=","),
         " compounds and ", NCOL(msDat$ms), " fractions.\n", sep="")
-  cat("Use extractMS to extract the mass spectrometry data.\n\n")
+    cat("Use extractMS to extract the mass spectrometry data.\n\n")
+  }
 }
 
 

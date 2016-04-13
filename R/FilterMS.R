@@ -60,16 +60,16 @@
 #'
 #'   }
 #'
-#' @return Returns an object of class \code{filterMS}.  This object is a
-#'   \code{list} with elements described below.  The class is equipped with a
-#'   \code{print}, code{summary}, and \code{extractMS} function.
+#' @return Returns an object of class \code{filterMS} and \code{msDat}.  This
+#'   object is a \code{list} with elements described below.  The class is
+#'   equipped with a \code{print}, code{summary}, and \code{extractMS} function.
 #'
 #'   \describe{
 #'
-#'   \item{\code{msObj}}{ An object of class \code{\link{msDat}} such that the
-#'   encapsulated mass spectrometry data corresponds to each of the candidate
-#'   compounds that satisfed each of the criteria.  If no criteria are satisfied
-#'   then \code{NULL} is returned. }
+#'   \item{\code{msDatObj}}{ An object of class \code{\link{msDat}} such that
+#'   the encapsulated mass spectrometry data corresponds to each of the
+#'   candidate compounds that satisfed each of the criteria.  If no criteria are
+#'   satisfied then \code{NULL} is returned. }
 #'
 #'   \item{\code{cmp_by_crit}}{ A list containing \code{data.frame}s, one for
 #'   each criterion. Each row (if any) in one of the sub-\code{data.frame}s
@@ -134,10 +134,10 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
 
   # Create filtered mass spectrometry data
   if (length(keepIdx) > 0) {
-    msObj <- msDat(ms[keepIdx, , drop=FALSE], mtoz[keepIdx], chg[keepIdx])
+    msDatObj <- msDat(ms[keepIdx, , drop=FALSE], mtoz[keepIdx], chg[keepIdx])
   }
   else {
-    msObj <- NULL
+    msDatObj <- NULL
     warning("There are no compounds that met all of the criteria\n", call.=FALSE)
   }
 
@@ -151,7 +151,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   }
 
   # Construct return object
-  outObj <- list( msObj    = msObj,
+  outObj <- list( msDatObj  = msDatObj,
                   cmp_by_cr = cmp_by_cr,
                   summ_info = list( orig_dim   = c(ms_nr, ms_nc),
                                     reg_nm     = ms_nm[regIdx],
@@ -161,7 +161,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
                                     min_inten  = min_inten,
                                     max_chg    = max_chg ) )
 
-  structure(outObj, class="filterMS")
+  structure(outObj, class=c("filterMS", "msDat"))
 }
 
 
@@ -174,15 +174,15 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
 #' @export
 
 print.filterMS <- function(filtObj) {
-  msObj <- binObj$msObj
+  msDatObj <- filtObj$msDatObj
 
-  if (is.null(msObj)) {
+  if (is.null(msDatObj)) {
     cat("An object of class \"filterMS\"; no observations ",
         "satisfied all of the inclusion criteria.\n")
   }
   else {
-    cat("An object of class \"filterMS\" with ", format(NROW(msObj$ms), big.mark=","),
-        " compounds and ", NCOL(msObj$ms), " fractions.\n", sep="")
+    cat("An object of class \"filterMS\" with ", format(NROW(msDatObj$ms), big.mark=","),
+        " compounds and ", NCOL(msDatObj$ms), " fractions.\n", sep="")
   }
   cat("Use summary.filterMS to see more details regarding the filtering process.\n",
       "Use extractMS to extract the filtered mass spectrometry data\n\n")
@@ -276,7 +276,7 @@ summary.filterMS <- function(filtObj) {
       "    (must have charge <= ", max_chg, ")\n",
       "\n", sep="")
 
-  totcmp <- ifelse(is.null(filtObj$msObj), 0, format(nrow(filtObj$msObj$ms), big.mark=","))
+  totcmp <- ifelse(is.null(filtObj$msDatObj), 0, format(nrow(filtObj$msDatObj$ms), big.mark=","))
   cat("The total number of candidate compounds was reduced to:\n",
       "-------------------------------------------------------\n",
       rep(" ", 14 + mlen - nchar(totcmp)), totcmp,      

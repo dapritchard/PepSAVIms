@@ -38,7 +38,7 @@ binDat[, "ms"] <- 5
 
 # Construct msDat object
 # msObj <- msDat(binDat[, "ms", drop=FALSE], binDat[, "mtoz"], binDat[, "chg"])
-msObj <- msDat(binDat, "mtoz", "chg", "ms")
+msDatObj <- msDat(binDat, "mtoz", "chg", "ms")
 # Construct summary function information.  See Construct-Data-BinMS.R for where
 # these values come from.
 summ_info <- list(n_tot = 55L,
@@ -53,9 +53,9 @@ summ_info <- list(n_tot = 55L,
                   mtoz_diff = 0.05,
                   time_diff = 1)
 
-trueBin <- list(msObj     = msObj,
+trueBin <- list(msDatObj  = msDatObj,
                 summ_info = summ_info)
-class(trueBin) <- "binMS"
+class(trueBin) <- c("binMS", "msDat")
 
 # Randomly permute the testMS data; the binning algorithm should be invariant
 # to this
@@ -236,7 +236,7 @@ test_that("binMS: arguments of the right type but illegal values", {
                      time_peak_reten="time", ms_inten="ms", time_range=c(14, 45),
                      mass_range=c(2e3, 15e3), charge_range=c(2, 10), mtoz_diff=1,
                      time_diff=1),
-               "out of bounds value provided for charge")
+               "out of bounds value 543 provided for charge")
 
   expect_error(binMS(mass_spec=testMS, mtoz="mtoz", charge="chg", mass="mass",
                      time_peak_reten="time", ms_inten="ms", time_range=c(45, 45),

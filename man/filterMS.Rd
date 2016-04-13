@@ -38,16 +38,16 @@ filterMS(msObj, region, border = "all", bord_ratio = 0.05,
   compound may exhibit (see criterion 5)}
 }
 \value{
-Returns an object of class \code{filterMS}.  This object is a
-  \code{list} with elements described below.  The class is equipped with a
-  \code{print}, code{summary}, and \code{extractMS} function.
+Returns an object of class \code{filterMS} and \code{msDat}.  This
+  object is a \code{list} with elements described below.  The class is
+  equipped with a \code{print}, code{summary}, and \code{extractMS} function.
 
   \describe{
 
-  \item{\code{msObj}}{ An object of class \code{\link{msDat}} such that the
-  encapsulated mass spectrometry data corresponds to each of the candidate
-  compounds that satisfed each of the criteria.  If no criteria are satisfied
-  then \code{NULL} is returned. }
+  \item{\code{msDatObj}}{ An object of class \code{\link{msDat}} such that
+  the encapsulated mass spectrometry data corresponds to each of the
+  candidate compounds that satisfed each of the criteria.  If no criteria are
+  satisfied then \code{NULL} is returned. }
 
   \item{\code{cmp_by_crit}}{ A list containing \code{data.frame}s, one for
   each criterion. Each row (if any) in one of the sub-\code{data.frame}s
