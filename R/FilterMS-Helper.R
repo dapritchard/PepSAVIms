@@ -1,23 +1,23 @@
 
-filterMS_getRegionIdx <- function(region, ms) {
+# filterMS_getRegionIdx <- function(region, ms) {
   
-  extract_check_valid(region, ms, "region", TRUE)
+#   extract_check_valid(region, ms, "region", TRUE)
   
-  if (is.character(region)) {
-    regIdx <- extract_char_to_idx(region, ms, "region", TRUE)
-  } else if (is.numeric(region)) {
-    regIdx <- extract_num_to_idx(region, ms, "region", TRUE)
-  } else {
-    stop("Shouldn't reach here!  Please send a bug report")
-  }
+#   if (is.character(region)) {
+#     regIdx <- extract_char_to_idx(region, ms, "region", TRUE)
+#   } else if (is.numeric(region)) {
+#     regIdx <- extract_num_to_idx(region, ms, "region", TRUE)
+#   } else {
+#     stop("Shouldn't reach here!  Please send a bug report")
+#   }
   
-  return (regIdx)
-}
+#   return (regIdx)
+# }
 
 
 
 
-filterMS_getBorderIdx <- function(border, regIdx, ms_nc) {
+filterMS_border_idx <- function(border, regIdx, ms_nc) {
 
   if ( is.character(border) ) {
     if ( identical(border, "all") ) {
@@ -33,7 +33,7 @@ filterMS_getBorderIdx <- function(border, regIdx, ms_nc) {
   # case: border is numeric
   else {
     bsize <- as.integer(border)
-    borIdx <- filterMS_getBorderIdx_numeric(bsize, regIdx, ms_nc)
+    borIdx <- filterMS_border_idx_num(bsize, regIdx, ms_nc)
   }
 
   return (borIdx)
@@ -42,7 +42,7 @@ filterMS_getBorderIdx <- function(border, regIdx, ms_nc) {
 
 
 
-filterMS_getBorderIdx_numeric <- function(bsize, regIdx, ms_nc) {
+filterMS_border_idx_num <- function(bsize, regIdx, ms_nc) {
 
   if ( !(identical(length(bsize), 1L) || identical(length(bsize), 2L)) ) {
     stop("If border is of mode numeric then it must have length 1 or 2", call.=FALSE)

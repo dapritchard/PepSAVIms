@@ -78,7 +78,7 @@ true_summ_info <- list(
   max_chg    = max_chg
 )
 
-true_filterMS <- list( msDatObj     = true_msObj,
+true_filterMS <- list( msDatObj  = true_msObj,
                        cmp_by_cr = true_cmp_by_cr,
                        summ_info = true_summ_info )
 class(true_filterMS) <- c("filterMS", "msDat")

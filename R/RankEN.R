@@ -71,56 +71,83 @@
 
 
 
-rankEN <- function(msDat, bioact, region=NULL) {
+rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
+                   ncomp=NULL, pos_only=TRUE) {
 
-  # Set useAve to true since it is cheaper and result is invariant to choice.
-  # See details in documentation for more information.
-  useAve <- TRUE
+  # Mung data into the right form ----------------------------------------------
+  
+  # Obtain msDat obj.  Error checking performed in extractMS.
+  msDatObj <- extractMS(msObj, type="msDat")
 
-  # Check that data arguments are of the right type
-  checkValInp_rankLasso(msDat, bioact, region, useAve)
+  # Check that remaining arguments are of the right type
+  rankEN_check_valid_input(bioact, region_ms, region_bio, lambda, ncomp)
+  
+  # Ensure (by coercion if necessary) that bioact is in matrix form
+  bioMat <- rankEN_bioact_to_matrix(bioact)
+  
+  # Extract the region of interest for the ms data and the bioactivity data
+  ms <- extract_var(region_ms, msDatObj$ms, TRUE)
+  bio <- extract_var(region_bio, bioMat, TRUE)
+  # Check for missing and that dimensions match
+  rankEN_check_regr_args(ms, bio)
 
-  # Convert (if necessary) bioact to matrix form.  Data is guaranteed to be
-  # numeric with no missing.
-  bioMat <- format_bio(bioact)
+  # Convert ms to form with rows are an observation (i.e. fraction) and cols are
+  # a variable (i.e. a compound)
+  ms_t <- t(ms)
+  
+  # Obtain the mean of the bioactivity replicates and convert to a vector
+  bio_vec <- colMeans(bio)
+  
 
-  # Convert (if necessary) region to either a list containing exactly two
-  # vectors, or NULL.  If applicable, each vector is guaranteed to be numeric or
-  # character with no missing.
-  regList <- format_reg(region)
+  # Fit model ------------------------------------------------------------------
 
-  # Creates region indices for the mass spec and bioactivity data based on the
-  # region input.  Also checks to see if the input matches the data.
-  regionIdx <- getRegionIdx(msDat, bioMat, regList)
+  # Calculate the elastic net path
+  enet_fit <- elasticnet::enet(ms_t, bio_vec, lambda)
+  
 
-  # Puts the data into a form where the rows are the fractions of interest and
-  # columns are the compounds.  This is done so as to cast the problem as a
-  # regression problem where the fractions are the observations and the
-  # compounds are the potential predictor variables.  In addition, if useAve is
-  # FALSE then replicates of the observations are created a la an ANOVA setting.
-  ms_regr <- conv_ms(msDat$ms, regionIdx$ms, nrow(bioact), useAve)
-
-  # Creates a numeric vector for the bioactivity response
-  bio_regr <- conv_bioact(bioMat, regionIdx$bio, useAve)
-
-  # Calculate the Lasso path
-  lars_fit <- lars::lars(x=ms_regr, y=bio_regr)
+  # Extract compound entrance results ------------------------------------------
 
   # Obtain indices for compounds as they first enter the model
-  cmpIdx <- getCmpIdx(lars_fit)
+  comp_idx <- rankEN_comp_entrance(enet_fit, ncmp)
 
   # Correlation of chosen compounds
-  cmp_cor <- getCmpCor(msDat, bioMat, regionIdx, cmpIdx)
+  comp_cor <- rankEN_comp_cor(ms_t, bio_vec)
 
-  # Record some summary statistics for the data for use by bioact.summary
-  data_desc <- get_data_desc(msDat$ms, bioMat, regionIdx, cmpIdx)
+  # Filter compounds by correlation and by how many we wish to keep
+  comp_idx_out <- rankEN_filter_compIdx(comp_idx, comp_cor, ncomp, pos_only)
+
+
+  # Construct return object ----------------------------------------------------
+
+  # Extract mass spec and bioactivity fraction names  
+  ms_nm <- colnames(ms)
+  if (is.null(ms_nm)) {
+    ms_nm <- as.character(seq_len(ms_nc))
+  }
+  bio_nm <- colnames(bio)
+  if (is.null(bio_nm)) {
+    bio_nm <- as.character(seq_len(bio_nc))
+  }  
+
+  # Create info for the summary function
+  summ_info <- list(
+    orig_dim  = list(ms  = dim(msDatObj$ms),
+                     bio = dim(bioMat)),
+    reduc_dim = list(ms  = dim(ms),
+                     bio = dim(bio)),
+    region_nm = list(ms  = ms_nm,
+                     bio = bio_nm),
+    lambda    = lambda,
+    ncomp     = ncomp,
+    pos_only  = pos_only
+  )
 
   # Construct output object
-  outDat <- list( mtoz      = msDat$mtoz[cmpIdx],
-                  charge    = msDat$chg[cmpIdx],
-                  cmp_cor   = cmp_cor,
-                  data_desc = data_desc,
-                  lars_fit  = lars_fit )
+  outDat <- list( mtoz      = msDatObj$mtoz[comp_idx_out],
+                  charge    = msDatObj$chg[comp_idx_out],
+                  comp_cor  = comp_cor[comp_idx_out],
+                  enet_fit  = enet_fit,
+                  summ_info = summ_info )
 
   structure(outDat, class="rankLasso")
 }

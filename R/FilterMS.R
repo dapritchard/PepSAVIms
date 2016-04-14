@@ -106,10 +106,10 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   ms_nc <- NCOL(ms)
 
   # Create region index variable
-  regIdx <- filterMS_getRegionIdx(region, ms)
+  regIdx <- extract_idx(region, ms, TRUE)
   
   # Create border index, i.e. the indices that surround the region of interest
-  borIdx <- filterMS_getBorderIdx(border, regIdx, ms_nc)
+  borIdx <- filterMS_border_idx(border, regIdx, ms_nc)
 
   # maxIdx: the column index per row (i.e. per observation) of the fraction
   # containing the maximum intensity level.  The rightmost column index is
@@ -127,6 +127,8 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
 
   # Create a vector of indices which satisfy every criterion
   keepIdx <- which( Reduce("&", critBool) )
+
+  # Extract mass spec fraction names
   ms_nm <- colnames(ms)
   if (is.null(ms_nm)) {
     ms_nm <- as.character(seq_len(ms_nc))

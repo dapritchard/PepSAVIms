@@ -259,3 +259,8 @@ dimnames.msDat <- function(msObj) {
 
   msObj
 }
+
+
+
+
+# TODO: dim
