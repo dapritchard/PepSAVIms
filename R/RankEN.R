@@ -7,7 +7,7 @@
 #' @param msDat An object of class \code{\link{msDat}} containing the mass
 #'   spectrometry data and identifying information
 #'
-#' @param bioact Either a numeric vector, a matrix, or a data frame providing
+#' @param bioact Either a numeric vector or matrix, or a data frame providing
 #'   bioactivity data.  If a numeric vector, then it is assumed that each entry
 #'   corresponds to a particular fraction.  If the data is 2-dimensional, then
 #'   it is assumed that each column corresponds to a particular fraction, and
@@ -78,6 +78,9 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
   
   # Obtain msDat obj.  Error checking performed in extractMS.
   msDatObj <- extractMS(msObj, type="msDat")
+  if (is.null(msDatObj)) {
+    stop("mass spec object encapsulated by msObj cannot be NULL", call.=FALSE)
+  }
 
   # Check that remaining arguments are of the right type
   rankEN_check_valid_input(bioact, region_ms, region_bio, lambda, ncomp)
@@ -110,7 +113,7 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
   # Obtain indices for compounds as they first enter the model
   comp_idx <- rankEN_comp_entrance(enet_fit, ncmp)
 
-  # Correlation of chosen compounds
+  # Correlation between chosen compounds and mean bioact levels in region
   comp_cor <- rankEN_comp_cor(ms_t, bio_vec)
 
   # Filter compounds by correlation and by how many we wish to keep
@@ -131,10 +134,9 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
 
   # Create info for the summary function
   summ_info <- list(
-    orig_dim  = list(ms  = dim(msDatObj$ms),
-                     bio = dim(bioMat)),
-    reduc_dim = list(ms  = dim(ms),
-                     bio = dim(bio)),
+    data_dim  = list(reg  = ncol(ms),
+                     comp = nrow(ms),
+                     repl = nrow(bio)),
     region_nm = list(ms  = ms_nm,
                      bio = bio_nm),
     lambda    = lambda,
@@ -149,65 +151,120 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
                   enet_fit  = enet_fit,
                   summ_info = summ_info )
 
-  structure(outDat, class="rankLasso")
+  structure(outDat, class="rankEN")
 }
 
 
 
 
-summary.rankLasso <- function(rl_out) {
+extract_candidates <- function(rankEN_obj, include_cor=TRUE) {
 
-  # Create a link for convenience
-  data_desc <- rl_out$data_desc
+  if (!identical(class(rankEN_obj), "rankEN")) {
+    stop("rankEN_obj must be of class rankEN")
+  }
+  else if (!identical(include_cor, TRUE) && !identical(include_cor, FALSE)) {
+    stop("include_cor must be either TRUE or FALSE")
+  }
 
-  # Print mass spectrometry and bioactivity data dimensions
+  if (include_cor) {
+    out_df <- data.frame(mtoz, charge, comp_cor)
+  }
+  else {
+    out_df <- data.frame(mtoz, charge)
+  }
+
+  return (out_df)
+}
+
+
+
+
+print.rankEN <- function(rankEN_obj) {
+
+  cat(sep="",
+      "An object of class rankEN.\n",
+      "Use summary.rankEN to print a list of the compounds entering the model.\n",
+      "Use extract_candidates to extract the compound info as a data.frame.\n")
+}
+
+
+
+
+summary.rankEN <- function(rankEN_obj, max_comp_print=20L) {
+
+  # Check argument to max_comp_print
+  if (!is.numeric(max_comp_print)) {
+    stop("max_comp_print mus be of mode numeric")
+  }
+  else if ( !identical(length(max_comp_print), 1L) ) {
+    stop("max_comp_print must have length 1")
+  }
+  else if (max_comp_print < 1L) {
+    stop("max_comp_print cannot have value less than 1")
+  }
+
+  # Create links for convenience
+  summ_info <- rankEN_obj$summ_info
+  mtoz <- rankEN_obj$mtoz
+  chg <- rankEN_obj$charge
+  ccor <- rankEN_obj$comp_cor
+  
+  # Print original mass spectrometry and bioactivity data dimensions
+  dd_char <- format(unlist(summ_info$data_dim), big.mark=",", justify="right")
   cat(sep="",
       "\n",
-      "Mass spectrometry data:\n",
-      "-----------------------\n",
-      "  ", format(data_desc$msDim[1], width=6, big.mark=","), " compounds\n",
-      "  ", format(data_desc$msDim[2], width=6, big.mark=","), " fractions\n",
-      "\n",
-      "Bioactivity data:\n",
-      "-----------------\n",
-      "  ", format(data_desc$bioDim[1], width=6, big.mark=","), " replicates\n",
-      "  ", format(data_desc$bioDim[2], width=6, big.mark=","), " fractions\n",
-      "\n")
-
-
-  # TODO: have to consider case where (data_desc$regionNm$ms == NULL) and similarly for bio
-
-  blkCol <- rep("    ", length(data_desc$regionIdx$ms))
-  regDat <- setNames( data.frame( data_desc$regionNm$ms,
-                                  data_desc$regionIdx$ms,
-                                  blkCol,
-                                  data_desc$regionNm$bio,
-                                  data_desc$regionIdx$bio ),
-                      c("M.S. Names", "  M.S. Index", "", "Bio. Names", "  Bio. Index") )
-
-  # Print a table with the names and indices for mass spectrometry and bioactivity data
+      "Data dimensions:\n",
+      "----------------\n",
+      "    region of interest:     ", dd_char[1], "\n",
+      "    candidate compounds:    ", dd_char[2], "\n",
+      "    bioactivity replicates: ", dd_char[3], "\n\n")
+  
+  # Print a table with the names and indices for mass spectrometry and
+  # bioactivity data
+  region_nm_df <- data.frame(summ_info$region_nm)
+  colnames(region_nm_df) <- c("Mass spec", "Bioactivity")
+  region_table <- capture.output( print(region_nm_df, row.names=FALSE, print.gap=2)  )
+  lead_blanks <- rep(" ", min(getOption("width") - max(nchar(region_table)), 2L))
   cat(sep="",
       "Fractions included in region of interest:\n",
       "-----------------------------------------\n")
-  print(regDat, row.names=FALSE)
+  for (row_entry in region_table) {
+    cat(lead_blanks, row_entry, "\n", sep="")
+  }
   cat("\n")
 
-  # Create a table with the mass-to-charge, charge, and correlation values for
-  # chosen compounds
-  sigCmp <- setNames( data.frame(rl_out$mtoz,
-                                 rl_out$charge,
-                                 rl_out$cmp_cor),
-                      c("Mass-to-charge", "  Charge", "  Correlation") )
-  sig_dig <- nchar( length( data_desc$cmpIdx ) )
-
-  # Print a table with the mass-to-charge, charge, and correlation values for
-  # chosen compounds
+  # Print arguments to rankEN
+  parm_char <- format(c(format(summ_info$lambda, digits=4),
+                        ifelse(summ_info$pos_only, "yes", "no"),
+                        ifelse(summ_info$pos_only, "yes", "no")),
+                      justify="right")
   cat(sep="",
-      "Compounds chosen by the model (", length(data_desc$cmpIdx), " total):\n",
-      "-------------------------------",        rep("-", sig_dig), "--------\n")
-  print(sigCmp, row.names=FALSE, digits=4)
-  cat("\n")
+      "Parameter arguments provided to rankEN:\n",
+      "---------------------------------------\n",
+      "    Quadratic penalty parameter:          ", parm_char[1], "\n",
+      "    Consider only positive correlations:  ", parm_char[2], "\n",
+      "    Max number of candidate compounds:    ", parm_char[3], "\n\n")
 
+  # Print a table of the m/z, charge, and correlation values for selected comps
+  maxpr_char <- format(as.integer(max_comp_print), big.mark=",")
+  if (length(mtoz) <= max_comp_print) {
+    cat(sep="",
+        "Compounds in order of entrance (all compounds, earliest at top):\n",
+        "----------------------------------------------------------------\n")
+  }
+  else {
+    cat(sep="",
+        "Compounds in order of entrance (first ", maxpr_char, " compounds, earliest at top):\n",
+        rep("-", 67 + nchar(maxpr_char)), "\n")
+  }
+  comp_df <- data.frame(mtoz, chg, format(round(ccor, 4), nsmall=4))
+  colnames(comp_df) <- c("Mass spec", "Charge", "Correlation")
+  comp_table <- capture.output( print(comp_df, row.names=FALSE, print.gap=2, digits=4) )
+  lead_blanks <- rep(" ", min(getOption("width") - max(nchar(comp_table)), 2L))
+  for (i in 1:min(max_comp_print, length(mtoz))) {
+    cat(lead_blanks, comp_table[i], "\n", sep="")
+  }
+  cat("\n")
 }
 
 
