@@ -100,9 +100,10 @@ binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
   compound, contingent on other criteria also being met.}
 }
 \value{
-Returns an object of class \code{binMS}.  This object is a
-  \code{list} with elements described below.  The class is equipped with a
-  \code{print}, code{summary}, and \code{extractMS} function.
+Returns an object of class \code{binMS} which inherits from
+  \code{msDat}.  This object is a \code{list} with elements described below.
+  The class is equipped with a \code{print}, \code{summary}, and
+  \code{extractMS} function.
 
   \describe{
 

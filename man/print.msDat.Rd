@@ -4,7 +4,7 @@
 \alias{print.msDat}
 \title{Basic information for class \code{msDat}}
 \usage{
-\method{print}{msDat}(msDat)
+\method{print}{msDat}(msDat, asis = FALSE)
 }
 \description{
 Displays the number of candidate compounds left in the data

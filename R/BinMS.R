@@ -127,9 +127,10 @@
 #'   then this consolidated observation can be removed from consideration for
 #'   all future merges.
 
-#' @return Returns an object of class \code{binMS}.  This object is a
-#'   \code{list} with elements described below.  The class is equipped with a
-#'   \code{print}, code{summary}, and \code{extractMS} function.
+#' @return Returns an object of class \code{binMS} which inherits from
+#'   \code{msDat}.  This object is a \code{list} with elements described below.
+#'   The class is equipped with a \code{print}, \code{summary}, and
+#'   \code{extractMS} function.
 #'
 #'   \describe{
 #'

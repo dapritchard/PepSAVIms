@@ -4,8 +4,10 @@
 #' Returns identifying information for the compounds in the order in which they
 #' first enter the Elastic Net model
 #'
-#' @param msDat An object of class \code{\link{msDat}} containing the mass
-#'   spectrometry data and identifying information
+#' @param msObj An object of class \code{\link{msDat}} containing mass
+#'   spectrometry abundances data and identifying information.  Note that this
+#'   includes objects created by \code{binMS}, \code{filterMS}, and
+#'   \code{msDat}.
 #'
 #' @param bioact Either a numeric vector or matrix, or a data frame providing
 #'   bioactivity data.  If a numeric vector, then it is assumed that each entry
@@ -13,66 +15,103 @@
 #'   it is assumed that each column corresponds to a particular fraction, and
 #'   that each row corresponds to a particular bioactivity replicate.
 #'
-#' @param region Either \code{NULL}, a non-list vector, a matrix, or a list
-#'   containing exactly two atomic vectors, providing information specifying
-#'   which fractions are to be included in the Lasso model.  Note that a data
-#'   frame satisfies these requirements.
+#' @param region_ms Either \code{NULL}, or a vector either of mode character or
+#'   mode numeric providing information specifying which fractions from the mass
+#'   spectrometry abundances data are to be included in the data analysis.  If
+#'   \code{NULL}, then it is assumed that the entirety of the mass spectrometry
+#'   abundances data encapsulated in the argument to \code{msObj} is to be
+#'   included in the analysis.  If numeric then the entries should provide the
+#'   indices for the region of interest in the mass spectrometry data (i.e. the
+#'   indices of the columns corresponding to the appropriate fractions in the
+#'   data).  If character then the entries should uniquely specify the region of
+#'   interest through partial string matching (i.e. the names of the columns
+#'   corresponding to the appropriate fractions in the data).  The methods
+#'   \code{dim}, \code{dimnames}, and \code{colnamesMS} can be used as
+#'   interfaces to the mass spectrometry data encapsulated in \code{msObj}.
 #'
-#'   If \code{NULL}, then it is assumed that all fractions included in the data
-#'   are to be used in the model.  This requires that the number of fractions in
-#'   the data for the parameter passed to \code{bioact} be the same as the
-#'   number of fractions in the mass spectrometry data for the paramter passed
-#'   to \code{msDat}.  It further assumes that the \code{k}-th column must refer
-#'   to the same fraction for both the mass spectrometry data and the
-#'   bioactivity data for every \code{k}.
+#' @param region_bio Either \code{NULL}, or a vector either of mode character or
+#'   mode numeric providing information specifying which fractions from the
+#'   bioactivity data are to be included in the data analysis.  If \code{NULL},
+#'   then it is assumed that the entirety of bioactivity data provided as the
+#'   argument to \code{bioact} is to be included in the analysis.  If numeric
+#'   then the entries should provide the indices for the region of interest in
+#'   the bioactivity data (i.e. the indices of the columns corresponding to the
+#'   appropriate fractions in the data).  If character then the entries should
+#'   uniquely specify the region of interest through partial string matching
+#'   (i.e. the names of the columns corresponding to the appropriate fractions
+#'   in the data).
 #'
-#'   If a non-list vector then it must be either a numeric or charcter vector,
-#'   such that the vector specifies which columns (and hence which fractions) to
-#'   include in the model.  If the vector is numeric, then the desired columns
-#'   are specified by number, and if the vector is character, then the desired
-#'   columns are specified by name (partial matching is allowed).  Note that
-#'   this assumes that the corresponding columns in the mass spectrometry data
-#'   and the bioactivity data refer to the same fractions.
+#' @param lambda A single numeric value belonging to the set [0, 1), providing
+#'   the quadratic penalty mixture parameter argument for the elastic net model.
+#'   The elastic net fits the least squares model subject to \deqn{(1 -
+#'   \lambda)|\beta|_1 + \lambda|\beta|^2 \le t} where \eqn{\beta} is the vector
+#'   of regression coefficients and \eqn{t \ge 0}.  \code{rankEN} constructs a
+#'   list of candidate compounds by tracking the entrance of compounds into the
+#'   elastic net model as \code{t} is increased from 0 to \eqn{\infty}.
 #'
-#'   If a matrix then it must be either numeric or character with exactly two
-#'   columns - one is to be named \code{ms} and the other is to be named
-#'   \code{bio}.  The \code{ms} column specifies the columns (and hence
-#'   fractions) to include in the model from the mass spectrometry data, either
-#'   as a vector of the column numbers or the column names.  The \code{bio}
-#'   vector specifies the columns (and hence fractions) to include in the model
-#'   from the bioactivity data, either as a vector of the column numbers or the
-#'   column names.  It is assumed that two entries from a given row refer to the
-#'   same fraction.
+#' @param pos_only Either \code{TRUE} or \code{FALSE}; specifies whether the
+#'   list of candidate compounds that the algorithm produces should include only
+#'   those compounds that are positively correlated with bioactivity levels, or
+#'   conversely should include all compounds.  The correlation is calculated
+#'   using only observations from the region of interest, and when bioactivity
+#'   replicates are present, the within-fraction replicates are averaged prior
+#'   to calculation.
 #'
-#'   If a list, then it must be a list with two named non-list vectors of equal
-#'   length - one is to be named \code{ms} and the other is to be named
-#'   \code{bio} (note that a \code{n x 2} data frame satisfies this
-#'   requirement).  The \code{ms} vector specifies the columns (and hence
-#'   fractions) to include in the model from the mass spectrometry data, either
-#'   as a vector of the column numbers or the column names.  The \code{bio}
-#'   vector specifies the columns (and hence fractions) to include in the model
-#'   from the bioactivity data, either as a vector of the column numbers or the
-#'   column names.  It is assumed that the column from the mass spectrometry
-#'   data specified by the \code{k}-th value in the \code{ms} vector corresponds
-#'   to the same fraction as the column specified by the \code{k}-th value in
-#'   the \code{bio} vector, for each \code{k}.
+#' @param ncomp Either \code{NULL}, or a numeric value no less than 1 specifying
+#'   the maximum number of candidate compounds that the function should report.
+#'   When \code{NULL}, this is taken to mean that all compounds that enter the
+#'   model should be reported, possibly after removing compounds nonpositively
+#'   correlated with bioactivity levels, as specified by \code{pos_only}.
 #'
-#' @details Note that in the current incarnation of rankLasso, the solution to
-#'   the Lasso path is the same when using either the average of bioactivity
-#'   replicates or individual replicates.  A parameter, useAve, used to be
-#'   offered - but since the result is the same either way, now it is just set
-#'   \code{TRUE}.  The rest of the code is left unchanged, in the event another
-#'   way is found to use individual replicates.
+#' @details \code{rankEN} prepares the data by extracting the region of interest
+#'   from the mass spectrometry abundance data and from the bioactivity data.
+#'   If bioactivity replicates are present, then the within-fraction replicates
+#'   are averaged.  Once the data has been converted into the appropriate form,
+#'   then an elastic net model is fitted by invoking the \code{enet} function
+#'   from the \code{elasticnet} package, and an ordered list of candidate
+#'   compounds is constructed such that compounds are ranked by the order in
+#'   which they first enter the model.  The list may be filtered and pruned
+#'   before being returned to the user.
+#'
+#' @return Returns an object of class \code{rankEN}.  This object is a
+#'   \code{list} with elements described below.  The class is equipped with a
+#'   \code{print}, \code{summary}, and \code{extract_candidates} function.
+#'
+#'   \describe{
+#'
+#'   \item{\code{mtoz}}{ A vector providing the mass-to-charge values of the
+#'   candidate compounds, such that the \code{k}-th element of the vector
+#'   provides the mass-to-charge value of the \code{k}-th compound to enter the
+#'   elastic net model, possibly after removing compounds nonpositively
+#'   correlated with bioactivity levels. }
+#'
+#'   \item{\code{charge}}{ A vector providing the charge state of the candidate
+#'   compounds, such that the \code{k}-th element of the vector provides the
+#'   charge state of the \code{k}-th compound to enter the elastic net model,
+#'   possibly after removing compounds nonpositively correlated with bioactivity
+#'   levels. }
+#'
+#'   \item{\code{comp_cor}}{ A vector providing the correlation between each of
+#'   the candidate compounds and the bioactivity levels, such that the
+#'   \code{k}-th element of the vector provides the correlation between the
+#'   \code{k}-th compound to enter the elastic net model and the bioactivity
+#'   levels, possibly after removing compounds nonpositively correlated with
+#'   bioactivity levels. }
+#'
+#'   \item{\code{enet_fit}}{ The fitted model object produced by \code{rankEN}'s
+#'   internal invokation of the \code{enet} function from the \code{elasticnet}
+#'   package.}
+#'
+#'   \item{\code{summ_info}}{ A list containing information related to the data
+#'   used to fit the elastic net model; used by the summary function. }
+#'
+#'   }
 #'
 #' @export
 
-# TODO: document function output
-
-
-
 
 rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
-                   ncomp=NULL, pos_only=TRUE) {
+                   pos_only=TRUE, ncomp=NULL) {
 
   # Mung data into the right form ----------------------------------------------
   
