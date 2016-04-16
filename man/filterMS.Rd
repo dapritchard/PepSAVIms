@@ -8,7 +8,8 @@ filterMS(msObj, region, border = "all", bord_ratio = 0.05,
   min_inten = 1000, max_chg = 7L)
 }
 \arguments{
-\item{msObj}{An object either of class \code{binMS} or of class \code{\link{msDat}}}
+\item{msObj}{An object class \code{\link{msDat}}.  Note that this includes
+  objects created by \code{binMS} and \code{msDat}.}
 
 \item{region}{A vector either of mode character or mode numeric.  If numeric
   then the entries should provide the indices for the region of interest in

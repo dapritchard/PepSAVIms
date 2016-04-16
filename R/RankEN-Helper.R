@@ -9,6 +9,7 @@ rankEN_bioact_to_matrix <- function(bioact) {
   else if (identical(attr(bioact, "dim"), NULL)) {
     attr(bioact, "dim") <- c(1, length(bioact))
   }
+  # else: bioact already a matrix
 
   # Ensure that number of rows > 0, number of cols > 0
   if ( !(nrow(bioact) >= 1L) ) {

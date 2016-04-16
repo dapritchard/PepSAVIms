@@ -2,7 +2,7 @@
 % Please edit documentation in R/RankEN.R
 \name{rankEN}
 \alias{rankEN}
-\title{Ranks compounds using the Elastic Net path}
+\title{Rank compounds using the Elastic Net path}
 \usage{
 rankEN(msObj, bioact, region_ms = NULL, region_bio = NULL, lambda,
   pos_only = TRUE, ncomp = NULL)

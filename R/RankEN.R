@@ -1,5 +1,5 @@
 
-#' Ranks compounds using the Elastic Net path
+#' Rank compounds using the Elastic Net path
 #'
 #' Returns identifying information for the compounds in the order in which they
 #' first enter the Elastic Net model
@@ -115,7 +115,7 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
 
   # Mung data into the right form ----------------------------------------------
   
-  # Obtain msDat obj.  Error checking performed in extractMS.
+  # Obtain msDat obj.  Type checking of msObj performed in extractMS.
   msDatObj <- extractMS(msObj, type="msDat")
   if (is.null(msDatObj)) {
     stop("mass spec object encapsulated by msObj cannot be NULL", call.=FALSE)
@@ -133,8 +133,8 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
   # Check for missing and that dimensions match
   rankEN_check_regr_args(ms, bio)
 
-  # Convert ms to form with rows are an observation (i.e. fraction) and cols are
-  # a variable (i.e. a compound)
+  # Convert ms to form where rows are an observation (i.e. fraction) and cols
+  # are a variable (i.e. a compound)
   ms_t <- t(ms)
   
   # Obtain the mean of the bioactivity replicates and convert to a vector
@@ -196,6 +196,28 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
 
 
 
+#' Extract candidate compounds
+#'
+#' Extract an ordered list of candidate compounds from a \code{rankEN} object.
+#' The list is presented in the form of a \code{data.frame}, such that each row
+#' provides the identifying information for a particular candidate compound, and
+#' with the rows arranged in the order that the compounds entered the elastic
+#' net model (i.e. row 1 is the earliest, row 2 the 2nd earliest, etc.).  The
+#' columns of the \code{data.frame} provide the mass-to-charge information,
+#' charge information, and possibly the correlation between the compound and the
+#' within-fraction average of the bioactivity replicates in the region of
+#' interest.
+#'
+#' @param rankEN_obj An object of class \code{rankEN}.
+#'
+#' @param include_cor Either \code{TRUE} or \code{FALSE}, specifying whether a
+#'   column should be included in the returning \code{data.frame} providing the
+#'   correlation between the compound and the within-fraction average of the
+#'   bioactivity replicates in the region of interest.
+#'
+#' @export
+
+
 extract_candidates <- function(rankEN_obj, include_cor=TRUE) {
 
   if (!identical(class(rankEN_obj), "rankEN")) {
@@ -218,16 +240,46 @@ extract_candidates <- function(rankEN_obj, include_cor=TRUE) {
 
 
 
+#' Basic information for class \code{rankEN}
+#'
+#' Displays the dimensions used to fit the elastic net model
+#'
+#' @export
+
+
 print.rankEN <- function(rankEN_obj) {
 
   cat(sep="",
       "An object of class rankEN.\n",
-      "Use summary.rankEN to print a list of the compounds entering the model.\n",
-      "Use extract_candidates to extract the compound info as a data.frame.\n")
+      "Use summary to print a list of the compounds entering the model.\n",
+      "Use extract_candidates to extract the compound info as a data.frame.\n\n")
+
+  dd_char <- format(unlist(summ_info$data_dim), big.mark=",", justify="right")
+  cat(sep="",
+      "Data dimensions:\n",
+      "----------------\n",
+      "    region of interest:     ", dd_char[1], "\n",
+      "    candidate compounds:    ", dd_char[2], "\n",
+      "    bioactivity replicates: ", dd_char[3], "\n\n")
 }
 
 
 
+
+#' Overview of the elastic net selection process
+#'
+#' Prints a description of the elastic net variable selection process.  Includes
+#' the dimensions used to fit the elastic net model, the fraction names for the
+#' mass spectrometry and the bioactivity data in the region of interest, the
+#' parameter specifications for the model, and a table with the identifying
+#' information of the candidate compounds produced by the model fit.
+#'
+#' @param rankEN_obj An object of class \code{rankEN}.
+#'
+#' @param max_comp_print A numeric value >= 1 specifying the maximum number of
+#'   compounds to print
+#'
+#' @export
 
 summary.rankEN <- function(rankEN_obj, max_comp_print=20L) {
 
@@ -248,7 +300,7 @@ summary.rankEN <- function(rankEN_obj, max_comp_print=20L) {
   chg <- rankEN_obj$charge
   ccor <- rankEN_obj$comp_cor
   
-  # Print original mass spectrometry and bioactivity data dimensions
+  # Print restricted mass spectrometry and bioactivity data dimensions
   dd_char <- format(unlist(summ_info$data_dim), big.mark=",", justify="right")
   cat(sep="",
       "\n",
@@ -258,7 +310,7 @@ summary.rankEN <- function(rankEN_obj, max_comp_print=20L) {
       "    candidate compounds:    ", dd_char[2], "\n",
       "    bioactivity replicates: ", dd_char[3], "\n\n")
   
-  # Print a table with the names and indices for mass spectrometry and
+  # Print a table with the fraction names used for the mass spectrometry and
   # bioactivity data
   region_nm_df <- data.frame(summ_info$region_nm)
   colnames(region_nm_df) <- c("Mass spec", "Bioactivity")

@@ -5,7 +5,8 @@
 #' \code{Details}. Returns an object of classes \code{\link{msDat}} and
 #' \code{filterMS}.
 #'
-#' @param msObj An object either of class \code{binMS} or of class \code{\link{msDat}}
+#' @param msObj An object class \code{\link{msDat}}.  Note that this includes
+#'   objects created by \code{binMS} and \code{msDat}.
 #'
 #' @param region A vector either of mode character or mode numeric.  If numeric
 #'   then the entries should provide the indices for the region of interest in
@@ -186,7 +187,7 @@ print.filterMS <- function(filtObj) {
     cat("An object of class \"filterMS\" with ", format(NROW(msDatObj$ms), big.mark=","),
         " compounds and ", NCOL(msDatObj$ms), " fractions.\n", sep="")
   }
-  cat("Use summary.filterMS to see more details regarding the filtering process.\n",
+  cat("Use summary to see more details regarding the filtering process.\n",
       "Use extractMS to extract the filtered mass spectrometry data\n\n")
 }
 
@@ -195,10 +196,9 @@ print.filterMS <- function(filtObj) {
 
 #' Overview of the filtering process
 #'
-#' Prints a text description of the filtering process.  Displays arguments
-#' chosen for the \code{filterMS} constructor, how many candidate compounds were
-#' chosen for each criterion, and how many candidate compounds were chosen
-#' overall.
+#' Prints a description of the filtering process.  Displays arguments chosen for
+#' the \code{filterMS} constructor, how many candidate compounds were chosen for
+#' each criterion, and how many candidate compounds were chosen overall.
 #'
 #' @export
 
