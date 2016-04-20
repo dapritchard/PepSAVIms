@@ -41,13 +41,14 @@
 #'   (i.e. the names of the columns corresponding to the appropriate fractions
 #'   in the data).
 #'
-#' @param lambda A single numeric value belonging to the set [0, 1), providing
-#'   the quadratic penalty mixture parameter argument for the elastic net model.
-#'   The elastic net fits the least squares model subject to \deqn{(1 -
-#'   \lambda)|\beta|_1 + \lambda|\beta|^2 \le t} where \eqn{\beta} is the vector
-#'   of regression coefficients and \eqn{t \ge 0}.  \code{rankEN} constructs a
-#'   list of candidate compounds by tracking the entrance of compounds into the
-#'   elastic net model as \code{t} is increased from 0 to \eqn{\infty}.
+#' @param lambda A single numeric value belonging to the set \eqn{[0, \infty)},
+#'   providing the quadratic penalty mixture parameter argument for the elastic
+#'   net model.  The elastic net fits the least squares model with penalty
+#'   function \deqn{\gamma|\beta|_1 + \lambda|\beta|^2} where \eqn{\beta} is the
+#'   vector of regression coefficients and \eqn{\gamma, \lambda \ge 0}.
+#'   \code{rankEN} constructs a list of candidate compounds by tracking the
+#'   entrance of compounds into the elastic net model as \eqn{\gamma} is
+#'   decreased from \eqn{\infty} to \eqn{0}.
 #'
 #' @param pos_only Either \code{TRUE} or \code{FALSE}; specifies whether the
 #'   list of candidate compounds that the algorithm produces should include only
@@ -122,38 +123,48 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
   }
 
   # Check that remaining arguments are of the right type
-  rankEN_check_valid_input(bioact, region_ms, region_bio, lambda, ncomp)
+  rankEN_check_valid_input(bioact, region_ms, region_bio, lambda, pos_only, ncomp)
   
-  # Ensure (by coercion if necessary) that bioact is in matrix form
-  bioMat <- rankEN_bioact_to_matrix(bioact)
+  # # Ensure (by coercion if necessary) that bioact is in matrix form
+  # bioMat <- rankEN_bioact_to_matrix(bioact)
+
+  # If we have a vector convert to a 1-row matrix.  Leave unchanged otherwise.
+  bioact <- rankEN_vector_to_matrix(bioact)
   
-  # Extract the region of interest for the ms data and the bioactivity data
+  # Extract the region of interest for the ms data
   ms <- extract_var(region_ms, msDatObj$ms, TRUE)
-  bio <- extract_var(region_bio, bioMat, TRUE)
+  bio <- extract_var(region_bio, bioact, TRUE)
+  
   # Check for missing and that dimensions match
   rankEN_check_regr_args(ms, bio)
 
   # Convert ms to form where rows are an observation (i.e. fraction) and cols
-  # are a variable (i.e. a compound)
-  ms_t <- t(ms)
+  # arms_te a variable (i.e. a compound)
+  ms_regr <- t(ms)
   
   # Obtain the mean of the bioactivity replicates and convert to a vector
-  bio_vec <- colMeans(bio)
+  bio_regr <- colMeans(bio)
   
 
   # Fit model ------------------------------------------------------------------
 
   # Calculate the elastic net path
-  enet_fit <- elasticnet::enet(ms_t, bio_vec, lambda)
+  enet_fit <- tryCatch({
+    elasticnet::enet(ms_regr, bio_regr, lambda)
+  }, warning = function(war) {
+    warning("message produced by call to enet from package elasticnet ==>\n", war, call.=FALSE)
+  }, error = function(err) {
+    stop("message produced by call to enet from package elasticnet ==>\n", err, call.=FALSE)
+  })
   
 
   # Extract compound entrance results ------------------------------------------
 
   # Obtain indices for compounds as they first enter the model
-  comp_idx <- rankEN_comp_entrance(enet_fit, ncmp)
+  comp_idx <- rankEN_comp_entrance(enet_fit)
 
   # Correlation between chosen compounds and mean bioact levels in region
-  comp_cor <- rankEN_comp_cor(ms_t, bio_vec)
+  comp_cor <- rankEN_comp_cor(ms_regr, bio_regr)
 
   # Filter compounds by correlation and by how many we wish to keep
   comp_idx_out <- rankEN_filter_compIdx(comp_idx, comp_cor, ncomp, pos_only)
@@ -164,11 +175,11 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
   # Extract mass spec and bioactivity fraction names  
   ms_nm <- colnames(ms)
   if (is.null(ms_nm)) {
-    ms_nm <- as.character(seq_len(ms_nc))
+    ms_nm <- paste0("ms", 1:ncol(ms))
   }
   bio_nm <- colnames(bio)
   if (is.null(bio_nm)) {
-    bio_nm <- as.character(seq_len(bio_nc))
+    bio_nm <- paste0("bio", 1:ncol(bio))
   }  
 
   # Create info for the summary function
@@ -242,7 +253,7 @@ extract_candidates <- function(rankEN_obj, include_cor=TRUE) {
 
 #' Basic information for class \code{rankEN}
 #'
-#' Displays the dimensions used to fit the elastic net model
+#' Displays the data dimensions used to fit the elastic net model
 #'
 #' @export
 
@@ -254,7 +265,7 @@ print.rankEN <- function(rankEN_obj) {
       "Use summary to print a list of the compounds entering the model.\n",
       "Use extract_candidates to extract the compound info as a data.frame.\n\n")
 
-  dd_char <- format(unlist(summ_info$data_dim), big.mark=",", justify="right")
+  dd_char <- format(unlist(rankEN_obj$summ_info$data_dim), big.mark=",", justify="right")
   cat(sep="",
       "Data dimensions:\n",
       "----------------\n",
@@ -327,7 +338,9 @@ summary.rankEN <- function(rankEN_obj, max_comp_print=20L) {
   # Print arguments to rankEN
   parm_char <- format(c(format(summ_info$lambda, digits=4),
                         ifelse(summ_info$pos_only, "yes", "no"),
-                        ifelse(summ_info$pos_only, "yes", "no")),
+                        ifelse(is.null(summ_info$ncomp),
+                               "all",
+                               as.character(summ_info$ncomp))),
                       justify="right")
   cat(sep="",
       "Parameter arguments provided to rankEN:\n",
@@ -350,9 +363,9 @@ summary.rankEN <- function(rankEN_obj, max_comp_print=20L) {
   }
   comp_df <- data.frame(mtoz, chg, format(round(ccor, 4), nsmall=4))
   colnames(comp_df) <- c("Mass spec", "Charge", "Correlation")
-  comp_table <- capture.output( print(comp_df, row.names=FALSE, print.gap=2, digits=4) )
+  comp_table <- capture.output( print(comp_df, row.names=FALSE, print.gap=2) )
   lead_blanks <- rep(" ", min(getOption("width") - max(nchar(comp_table)), 2L))
-  for (i in 1:min(max_comp_print, length(mtoz))) {
+  for (i in 1:(min(max_comp_print, length(mtoz)) + 1)) {
     cat(lead_blanks, comp_table[i], "\n", sep="")
   }
   cat("\n")

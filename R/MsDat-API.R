@@ -103,7 +103,7 @@ colnamesMS <- function(msObj) {
   if (!identical(class_nm, "binMS")
       && !identical(class_nm, "filterMS")
       && !identical(class_nm, "msDat")) {
-    stop("msObj must be an object of class \"binMS\", \"filterMS\", or \"msDat\"")
+    stop("msObj must be an object of class \"binMS\", \"filterMS\", or \"msDat\"", call.=FALSE)
   }
 
   # Extract dimnames from mass spectrometry abundances matrix

@@ -6,8 +6,9 @@
 
 extract_var <- function(callArg, dataObs, expect_matr_bool=FALSE, ...) {
   
-  # Extract variable name from callArg; used for error messages
+  # Extract variable name from callArg and dataObs; used for error messages
   arg_nm <- deparse( substitute(callArg) )
+  dat_nm <- deparse( substitute(dataObs) )
 
   ## Figure out in which way the data is presented to us
 
@@ -32,8 +33,8 @@ extract_var <- function(callArg, dataObs, expect_matr_bool=FALSE, ...) {
   switch(argType,
          null = extract_null(dataObs, arg_nm, ...),
          data = extract_data(callArg, arg_nm),
-         num  = extract_num(callArg, dataObs, arg_nm, expect_matr_bool),
-         char = extract_char(callArg, dataObs, arg_nm, expect_matr_bool),
+         num  = extract_num(callArg, dataObs, expect_matr_bool, arg_nm, dat_nm),
+         char = extract_char(callArg, dataObs, expect_matr_bool, arg_nm, dat_nm),
          stop("Invalid switch type"))
 }
 
@@ -77,7 +78,7 @@ extract_null <- function(dataObs, arg_nm, ...) {
   }
 
   # Return dataObs after removing non-ms columns and converting to a matrix
-  extract_idx_to_data(varIdx, dataObs, arg_nm, TRUE)
+  extract_idx_to_data(varIdx, dataObs, TRUE, arg_nm, dat_nm)
 }
 
 
@@ -99,42 +100,44 @@ extract_data <- function(callArg, arg_nm) {
 
 
 
-extract_num <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
+extract_num <- function(callArg, dataObs, expect_matr_bool, arg_nm, dat_nm) {
 
-  extract_check_valid(callArg, dataObs, arg_nm, expect_matr_bool)
+  extract_check_valid(callArg, dataObs, expect_matr_bool, arg_nm, dat_nm)
 
   varIdx <- extract_num_to_idx(callArg, dataObs, arg_nm)
 
-  extract_idx_to_data(varIdx, dataObs, arg_nm, expect_matr_bool)
+  extract_idx_to_data(varIdx, dataObs, expect_matr_bool, arg_nm, dat_nm)
 }
 
 
 
 
-extract_char <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
+extract_char <- function(callArg, dataObs, expect_matr_bool, arg_nm, dat_nm) {
 
-  extract_check_valid(callArg, dataObs, arg_nm, expect_matr_bool)
+  extract_check_valid(callArg, dataObs, expect_matr_bool, arg_nm, dat_nm)
 
   varIdx <- extract_char_to_idx(callArg, dataObs, arg_nm)
   
-  extract_idx_to_data(varIdx, dataObs, arg_nm, expect_matr_bool)
+  extract_idx_to_data(varIdx, dataObs, expect_matr_bool, arg_nm, dat_nm)
 }
 
 
 
 
-extract_idx_to_data <- function(varIdx, dataObs, arg_nm, expect_matr_bool) {
+extract_idx_to_data <- function(varIdx, dataObs, expect_matr_bool, arg_nm, dat_nm) {
 
   # Subset to desired data
   outDat <- dataObs[, varIdx, drop=!expect_matr_bool]
 
-  # Ensure that data is numeric
-  extract_checkifnumeric(outDat, arg_nm)
+  # Ensure that data is numeric and w/o missing
+  extract_check_if_numer_nomiss(outDat, arg_nm, dat_nm)
 
-  # case: dataObs is a data.frame; convert to matrix.  However, row names are
-  # lost in coercion from data.frame to atomic so we have to recover manually.
+  # case: dataObs is a data.frame; convert to matrix or vector.  However, row
+  # names are lost in coercion from data.frame to atomic so we have to recover
+  # manually.
   if (is.data.frame(dataObs)) {
-    # case: outDat not a matrix; the vector elements can be named using names
+    # case: return object is to be a vector; the elements can be accessed named
+    # using names()
     if (!expect_matr_bool) {
       names(outDat) <- row.names(dataObs)
     }
@@ -145,10 +148,10 @@ extract_idx_to_data <- function(varIdx, dataObs, arg_nm, expect_matr_bool) {
     }
   }
 
-  # Ensure that data does not have any missingness
-  if (any( is.na(outDat) )) {
-    stop("Data corresponding to ", arg_nm, " contains missing", call.=FALSE)
-  }
+  # # Ensure that data does not have any missingness
+  # if (anyNA(outDat)) {
+  #   stop("Data corresponding to ", arg_nm, " contains missing", call.=FALSE)
+  # }
   
   return (outDat)
 }
@@ -158,15 +161,15 @@ extract_idx_to_data <- function(varIdx, dataObs, arg_nm, expect_matr_bool) {
 
 # Extracting indices section ---------------------------------------------------
 
-# extract_idx is the interface that user-level routines will likely call when
-# they need an index set of the columns in dataObs that are specified by callArg
+# extract_idx is the interface that internal routines will likely call when they
+# need an index set of the columns in dataObs that are specified by callArg
 
 extract_idx <- function(callArg, dataObs, expect_matr_bool=FALSE, ...) {
 
   # Extract variable name from callArg; used for error messages
   arg_nm <- deparse( substitute(callArg) )
   
-  extract_check_valid(callArg, dataObs, arg_nm, expect_matr_bool)
+  extract_check_valid(callArg, dataObs, expect_matr_bool, arg_nm, dat_nm)
 
   ## Figure out in which way the data is presented to us
   
@@ -187,8 +190,8 @@ extract_idx <- function(callArg, dataObs, expect_matr_bool=FALSE, ...) {
   
   switch(argType,
          null = extract_null_to_idx(callArg, dataObs, arg_nm, ...),
-         num  = extract_num_to_idx(callArg, dataObs, arg_nm, expect_matr_bool),
-         char = extract_char_to_idx(callArg, dataObs, arg_nm, expect_matr_bool),
+         num  = extract_num_to_idx(callArg, dataObs, expect_matr_bool, arg_nm, dat_nm),
+         char = extract_char_to_idx(callArg, dataObs, expect_matr_bool, arg_nm, dat_nm),
          stop("Invalid switch type"))
 }
 
@@ -228,7 +231,7 @@ extract_null_to_idx <- function(dataObs, arg_nm, ...) {
 
 
 
-extract_num_to_idx <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
+extract_num_to_idx <- function(callArg, dataObs, arg_nm) {
 
   # Check valid input values
   for (k in callArg) {
@@ -243,7 +246,7 @@ extract_num_to_idx <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
 
 
 
-extract_char_to_idx <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
+extract_char_to_idx <- function(callArg, dataObs, arg_nm) {
 
   var_nm <- colnames(dataObs)
   if (is.null(var_nm)) {
@@ -274,11 +277,11 @@ extract_char_to_idx <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
 
 # Argument validity checking ---------------------------------------------------
 
-extract_check_valid <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
+extract_check_valid <- function(callArg, dataObs, expect_matr_bool, arg_nm, dat_nm) {
 
   # Check that data is of the right type
   if (!is.matrix(dataObs) && !is.data.frame(dataObs)) {
-    stop("data must be a matrix or data.frame", call.=FALSE)
+    stop(dat_nm, " must be a matrix or data.frame", call.=FALSE)
   }
   
   # Check that there are no duplicates
@@ -301,24 +304,24 @@ extract_check_valid <- function(callArg, dataObs, arg_nm, expect_matr_bool) {
 
 
 
-extract_checkifnumeric <- function(outDat, arg_nm) {
+extract_check_if_numer_nomiss <- function(outDat, arg_nm, dat_nm) {
 
   # case: data is a data.frame; ensure each column is numeric w/o NAs
   if (is.data.frame(outDat)) {
     if ( !all( sapply(outDat, is.numeric) ) ) {
-      stop("The data specified for ", arg_nm, " must be numeric", call.=FALSE)
+      stop(dat_nm, " cannot have any non-numeric in the region provided by ", arg_nm, call.=FALSE)
     }
     else if ( any( sapply(outDat, anyNA) ) ) {
-      stop("The data specified for ", arg_nm, " cannot have any missing", call.=FALSE)
+      stop(dat_nm, " cannot have any missing in the region provided by ", arg_nm, call.=FALSE)
     }
   }
   # case: data is atomic
   else {
     if ( !is.numeric(outDat) ) {
-      stop("The data specified for ", arg_nm, " must be numeric", call.=FALSE)
+      stop(dat_nm, " cannot have any non-numeric in the region provided by ", arg_nm, call.=FALSE)
     }
     else if (anyNA(outDat)) {
-      stop("The data specified for ", arg_nm, " cannot have any missing", call.=FALSE)
+      stop(dat_nm, " cannot have any missing in the region provided by ", arg_nm, call.=FALSE)
     }
   }
 }
