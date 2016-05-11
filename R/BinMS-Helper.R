@@ -11,6 +11,7 @@ binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_ret
     if (!eval(substitute(hasArg(var_nm)))) {
       stop("Must provide an argument for ", var_nm, call.=FALSE)
     }
+    tryCatch(get(var_nm), error = function(err) stop(paste(err), call.=FALSE))
   }
 
   ## Check mass_spec
@@ -47,6 +48,9 @@ binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_ret
     else if (!identical(length(x), 2L)) {
       stop(var_nm, " must have a length of 2", call.=FALSE)
     }
+    else if (anyNA(x)) {
+      stop(var_nm, " cannot have any missing", call.=FALSE)
+    }
     else if (isTRUE(x[1] >= x[2])) {
       stop("The values of ", var_nm, " must be in increasing order", call.=FALSE)
     }
@@ -61,6 +65,9 @@ binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_ret
     }
     else if (!identical(length(x), 1L)) {
       stop(var_nm, " must have a length of 1", call.=FALSE)
+    }
+    else if (anyNA(x)) {
+      stop(var_nm, " cannot have any missing", call.=FALSE)
     }
   }
 }

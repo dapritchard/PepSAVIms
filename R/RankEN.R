@@ -122,11 +122,8 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
     stop("mass spec object encapsulated by msObj cannot be NULL", call.=FALSE)
   }
 
-  # Check that remaining arguments are of the right type
+  # Ensure that arguments are of the right type
   rankEN_check_valid_input(bioact, region_ms, region_bio, lambda, pos_only, ncomp)
-  
-  # # Ensure (by coercion if necessary) that bioact is in matrix form
-  # bioMat <- rankEN_bioact_to_matrix(bioact)
 
   # If we have a vector convert to a 1-row matrix.  Leave unchanged otherwise.
   bioact <- rankEN_vector_to_matrix(bioact)

@@ -152,18 +152,18 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
                           mass_range, charge_range, mtoz_diff, time_diff)
 
   # Translate arguments to values
-  dmtoz <- extract_var(mtoz, mass_spec)
-  dcharge <- extract_var(charge, mass_spec)
-  dtime_pr <- extract_var(time_peak_reten, mass_spec)
+  dmtoz <- extract_var(mass_spec, mtoz)
+  dcharge <- extract_var(mass_spec, charge)
+  dtime_pr <- extract_var(mass_spec, time_peak_reten)
   # Check if we need to calculate mass from scratch
   if (is.null(mass)) {
     dmass <- charge * (dmtoz - 1.007825)
     # Can't pass NULL to extract_var so create a variable
     mass <- dmass
   } else {
-    dmass <- extract_var(mass, mass_spec)
+    dmass <- extract_var(mass_spec, mass)
   }
-  dms_inten <- extract_var(ms_inten, mass_spec, TRUE, mtoz, charge, mass, time_peak_reten)
+  dms_inten <- extract_var(mass_spec, ms_inten, TRUE, mtoz, charge, mass, time_peak_reten)
   
   ## Step 1: construct sorted indices of rows in the data that satisfy the
   ## mass, time of peak retention, and charge criteria

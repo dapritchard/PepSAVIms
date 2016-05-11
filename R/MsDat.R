@@ -97,9 +97,9 @@ msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
   msDat_check_valid_input(mass_spec, mtoz, charge, ms_inten)
 
   # Obtain mass-to-charge, charge, and mass spectrometry abundances variables
-  dmtoz <- extract_var(mtoz, mass_spec)
-  dcharge <- extract_var(charge, mass_spec)
-  ms_inten <- extract_var(ms_inten, mass_spec, TRUE, mtoz, charge)
+  dmtoz <- extract_var(mass_spec, mtoz)
+  dcharge <- extract_var(mass_spec, charge)
+  ms_inten <- extract_var(mass_spec, ms_inten, TRUE, mtoz, charge)
 
   # Construct msDat object
   outDat <- list( ms   = ms_inten,
