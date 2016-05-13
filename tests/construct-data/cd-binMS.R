@@ -1,5 +1,11 @@
 
-# Assuming throughout that we consider the following settings for consolidation:
+# Create a small data set imitating the form of mass spectrometry data prior to
+# any binning or filtering.  Additionally create some derived forms of this
+# first data set such as a data.frame version, data with missing values, and so
+# on.  Also hand-construct a filtered and binned 'true' data set which is used
+# to compare the results from the binning function against.
+#
+# Assume throughout the following settings for consolidation:
 #
 #   peak retention time:  14 - 45
 #   mass:  2000 - 15000
@@ -13,7 +19,7 @@
 # ........................... #
 
 # Hand constructed test data.  Note that m/z and mass values do not agree (but
-# this is okay, in the sense that agreement not checked for in binMS).
+# this is okay, in the sense that agreement is not checked for in binMS).
 
 test_dat_1 <- matrix(
   c(235,		4,	12,		  10,	
@@ -86,7 +92,11 @@ n_repl <- 5L
 
 # Sample n_repl samples for each row of baseline_dat.  Returns a (n_repl * 4) x
 # nrow(baseline) matrix, where each column is a concatenated set of observations
-# from the corresponding row of baseline_dat.
+# from the corresponding row of baseline_dat.  Recall that the relationship
+# between m/z and mass is:
+#
+#   mass = (m/z - 1.007825) * charge
+
 test_dat_2 <- apply(baseline_dat, 1, function(x)
   replicate(n_repl, {
     mtoz <- (x[["mass"]] / x[["chg"]]) + 1.007825 + rnorm(1, sd=sd_mtoz)
@@ -181,9 +191,9 @@ summ_info <- list(n_tot        = nrow(testMS),
                   time_diff    = 1)
 
 # Construct 'true' consolidated object
-trueBin <- list(msDatObj  = msDatObj,
+true_bin <- list(msDatObj  = msDatObj,
                 summ_info = summ_info)
-class(trueBin) <- c("binMS", "msDat")
+class(true_bin) <- c("binMS", "msDat")
 
 
 
@@ -198,12 +208,14 @@ nr <- nrow(testMS)
 testMS <- testMS[sample.int(nr, nr), ]
 
 # Add some superfluous data columns to testMS
-superfluous_data <- matrix(rnorm(2 * nr), ncol=2, dimnames=list(NULL, c("a", "b")))
+superfluous_data <- matrix(rnorm(2 * nr),
+                           ncol = 2,
+                           dimnames = list(NULL, c("extra_dat_1", "extra_dat_2")))
 testMS <- cbind(testMS, superfluous_data)
 
 # Create a data.frame, and add a character column
 testdf <- data.frame(testMS)
-testdf$inten3 <- "c"
+testdf$extra_dat_3 <- "z"
 
 #
 n_datacols <- 6L
@@ -212,8 +224,21 @@ numer_NA <- replace(numeric(1), 1, NA)
 char_NA <- replace(character(1), 1, NA)
 
 
+test_NA <- testMS
+test_NA[1, "ms1"] <- NA
+
+test_no_colnames <- testMS
+colnames(test_no_colnames) <- NULL
+
+test_dup_colnames <- testMS
+colnames(test_dup_colnames)[2] <- "mtoz"
+
+
 
 
 # ````````````````````````````````````````````` #
 #  Save data to file for use by testing script  #
 # ............................................. #
+
+save(testMS, testdf, test_NA, test_no_colnames, test_dup_colnames, true_bin,
+     numer_NA, char_NA, n_datacols, file="tests/data/data-binMS.RData")

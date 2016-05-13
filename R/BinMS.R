@@ -41,13 +41,18 @@
 #'   observations with a smaller absolute difference between their
 #'   mass-to-charge values could potentially be considered to originate from the
 #'   same underlying compound, contingent on other criteria also being met.
+#'   Nonnegative values are allowed; such a value has the effect of not
+#'   consolidating any groups, and consequently reduces the function to a
+#'   filtering routine only.
 #'
 #' @param time_pr_diff A single numerical value such that any two observations
 #'   with a larger absolute difference between their peak elution times are
 #'   considered to have originated from different underlying compounds.  Two
 #'   observations with a smaller absolute difference between their peak elution
 #'   times could potentially be considered to originate from the same underlying
-#'   compound, contingent on other criteria also being met.
+#'   compound, contingent on other criteria also being met.  Nonnegative values
+#'   are allowed; such a value has the effect of not consolidating any groups,
+#'   and consequently reduces the function to a filtering routine only.
 #'
 #' @details The algorithm described in what follows attempts to combines mass
 #'   spectrometry observations that are believed to belong to the same

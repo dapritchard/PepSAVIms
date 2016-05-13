@@ -11,7 +11,12 @@ binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_ret
     if (!eval(substitute(hasArg(var_nm)))) {
       stop("Must provide an argument for ", var_nm, call.=FALSE)
     }
-    tryCatch(get(var_nm), error = function(err) stop(paste(err), call.=FALSE))
+    # Check that an object exists for provided argument 
+    tryCatch(get(var_nm), error = function(err) {
+      err <- as.character(err)
+      obj_nm <- regmatches(err, gregexpr("(?<=\')(.*?)(?=\')", err, perl=TRUE))[[1L]]
+      stop("object \'", obj_nm, "\' not found for ", var_nm, call.=FALSE)
+    })
   }
 
   ## Check mass_spec

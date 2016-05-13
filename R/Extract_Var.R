@@ -91,9 +91,11 @@ extract_null <- function(data_obs, dat_nm, spec_nm, ...) {
   # variables (as passed on through variadic arg)
   var_idx <- extract_null_to_idx(data_obs, dat_nm, ...)
 
-  # Check that we haven't used all the data on other variables
-  if (identical(length(var_idx), 0L)) {
-    stop("There cannot be 0 columns left for ", dat_nm,
+  # Check that we haven't used all the data on other variables.  Require 2
+  # columns for consistency since we demand this for the following call to
+  # extract_idx_to_data.
+  if (length(var_idx) < 2L) {
+    stop("There must be at least 2 columns left for ", dat_nm,
          " after removing data for other variables", call.=FALSE)
   }
 
