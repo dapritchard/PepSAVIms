@@ -5,7 +5,7 @@
 
 # Load saved simulated data ----------------------------------------------------
 
-load("tests/Data/Sim_Ms_Bio.RData")
+load("tests/data/data-rankEN.RData")
 # load("tests/Sim_Ms_Bio.RData")
 #load("../Sim_Ms_Bio.RData")
 
@@ -148,11 +148,11 @@ rankEN_biovec_default <- rankEN(msDatObj, colMeans(bioact), region_idx, region_i
 
 # region specifiers as character vectors
 rankEN_ms_reg_char_default <-
-  rankEN(msDatObj, bioact, paste0("mass_spec", 21:30), region_idx, lambda)
+  rankEN(msDatObj, bioact, paste0("ms", 21:30), region_idx, lambda)
 rankEN_bio_reg_char_default <-
-  rankEN(msDatObj, bioact, region_idx, paste0("act", 21:30), lambda)
+  rankEN(msDatObj, bioact, region_idx, paste0("bio", 21:30), lambda)
 rankEN_biovec_reg_char_default <-
-  rankEN(msDatObj, colMeans(bioact), region_idx, paste0("act", 21:30), lambda)
+  rankEN(msDatObj, colMeans(bioact), region_idx, paste0("bio", 21:30), lambda)
 
 # region specifiers as NULL
 rankEN_ms_region_null_allcomp <-
@@ -166,9 +166,9 @@ rankEN_biovec_region_null_default <-
 
 # bioact as data.frame / vector + character region specifier
 rankEN_biodf_region_char_default <-
-  rankEN(msDatObj, data.frame(bioact), region_idx, paste0("act", 21:30), lambda)
+  rankEN(msDatObj, data.frame(bioact), region_idx, paste0("bio", 21:30), lambda)
 rankEN_biovec_region_char_default <-
-  rankEN(msDatObj, colMeans(bioact), region_idx, paste0("act", 21:30), lambda)
+  rankEN(msDatObj, colMeans(bioact), region_idx, paste0("bio", 21:30), lambda)
 
 # bioact with missing or character outside region of interest
 rankEN_NA_outside_default <-
@@ -303,8 +303,9 @@ expect_error( rankEN(msDatObj, bioact, region_idx, region_idx, lambda, na_log),
               "pos_only must be either TRUE or FALSE" )
 expect_error( rankEN(msDatObj, bioact, region_idx, region_idx, lambda, , na_num),
               "If non-NULL then ncomp cannot contain any missing" )
-expect_error( rankEN(msDatObj, bioact, region_idx, region_idx[-1], lambda),
-              paste0("Number of fractions for mass spectrometry)") )
+expect_error( rankEN(msDatObj, bioact, region_idx, region_idx[-1L], lambda),
+              paste0("Number of fractions for mass spectrometry (10) does not ",
+                     "match the number of fractions for bioactivity (9)"), fixed=TRUE )
 
 
 # Assume that region_ms and region_bio will provide appropriate errors when they

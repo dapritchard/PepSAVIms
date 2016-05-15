@@ -6,20 +6,20 @@
 #' \code{filterMS}.
 #'
 #' @param msObj An object class \code{\link{msDat}}.  Note that this includes
-#'   objects created by \code{binMS} and \code{msDat}.
+#'   objects created by the functions \code{binMS} and \code{msDat}.
 #'
 #' @param region A vector either of mode character or mode numeric.  If numeric
 #'   then the entries should provide the indices for the region of interest in
-#'   the mass spectrometry data in the argument for \code{msObj}.  If character
-#'   then the entries should uniquely specify the region of interest through
-#'   partial string matching (see criterion 1, 4).
+#'   the mass spectrometry data provided as the argument for \code{msObj}.  If
+#'   character then the entries should uniquely specify the region of interest
+#'   through partial string matching (see criterion 1, 4).
 #'
 #' @param border Either a character string \code{"all"}, or a character string
 #'   \code{"none"}, or a length-1 or length-2 numeric value specifying the
 #'   number of fractions to either side of the region of interest to comprise
-#'   the bordering region.  If a single numeric value, then this is number of
-#'   fractions to each side of the region of interest; if it is two values, the
-#'   the first value is the number of fractions to the left, and the second
+#'   the bordering region.  If a single numeric value, then this is the number
+#'   of fractions to each side of the region of interest; if it is two values,
+#'   then the first value is the number of fractions to the left, and the second
 #'   value is the number of fractions to the right.  If there are not enough
 #'   fractions in either direction to completely span the number of specified
 #'   fractions, then all of the available fractions to the side in question are
@@ -61,9 +61,10 @@
 #'
 #'   }
 #'
-#' @return Returns an object of class \code{filterMS} and \code{msDat}.  This
-#'   object is a \code{list} with elements described below.  The class is
-#'   equipped with a \code{print}, code{summary}, and \code{extractMS} function.
+#' @return Returns an object of class \code{filterMS} which inherits from
+#'   \code{msDat}.  This object is a \code{list} with elements described below.
+#'   The class is equipped with a \code{print}, \code{summary}, and
+#'   \code{extractMS} function.
 #'
 #'   \describe{
 #'
@@ -94,7 +95,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   filterMS_check_valid(msObj, region, border, bord_ratio, min_inten, max_chg)
 
   # Number of criterion
-  nCrit <- 5
+  nCrit <- 5L
 
   # Create pointers to mass spec variables for convenience
   msDatObj <- extractMS(msObj, "msDat")
@@ -107,7 +108,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   ms_nc <- NCOL(ms)
 
   # Create region index variable
-  regIdx <- extract_idx(region, ms, TRUE)
+  regIdx <- extract_idx(ms, region, TRUE)
   
   # Create border index, i.e. the indices that surround the region of interest
   borIdx <- filterMS_border_idx(border, regIdx, ms_nc)
@@ -115,16 +116,16 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   # maxIdx: the column index per row (i.e. per observation) of the fraction
   # containing the maximum intensity level.  The rightmost column index is
   # chosen in the case of ties.
-  maxIdx <- apply(ms, 1, function(x) tail(which(x == max(x)), 1))
+  maxIdx <- apply(ms, 1, function(x) tail(which(x == max(x)), 1L))
 
   # Evaluate criteria predicates
   critBool <- data.frame( array(dim=c(ms_nr, nCrit)) )
   row_seq <- seq_len(ms_nr)
-  critBool[, 1] <- maxIdx %in% regIdx
-  critBool[, 2] <- sapply(row_seq, function(i) all(ms[i, borIdx] < bord_ratio * ms[i, maxIdx[i]]))
-  critBool[, 3] <- sapply(row_seq, function(i) (ms[i, min(maxIdx[i] + 1, ms_nc)] > 0))
-  critBool[, 4] <- sapply(row_seq, function(i) any(ms[i, regIdx] > min_inten))
-  critBool[, 5] <- (chg <= max_chg)
+  critBool[, 1L] <- maxIdx %in% regIdx
+  critBool[, 2L] <- sapply(row_seq, function(i) all(ms[i, borIdx] < bord_ratio * ms[i, maxIdx[i]]))
+  critBool[, 3L] <- sapply(row_seq, function(i) (ms[i, min(maxIdx[i] + 1, ms_nc)] > 0))
+  critBool[, 4L] <- sapply(row_seq, function(i) any(ms[i, regIdx] > min_inten))
+  critBool[, 5L] <- (chg <= max_chg)
 
   # Create a vector of indices which satisfy every criterion
   keepIdx <- which( Reduce("&", critBool) )

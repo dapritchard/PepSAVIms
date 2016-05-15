@@ -21,8 +21,8 @@ binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
   \code{matrix} or \code{data.frame} with 20,000 rows and 50 or more columns.
   The additional columns beyond the 50 containing the mass spectrometry
   intensities can be the mass-to-charge data, the charge data, or other
-  extraneous variables (which will be ignored when constructing the
-  \code{msDat} object).}
+  extraneous variables (the extraneous variables will be discarded when
+  constructing the \code{msDat} object).}
 
 \item{mtoz}{A vector of either length 1 or length equal to the number of
   mass-to-charge values for which mass spectrometry data was collected, and
@@ -35,14 +35,14 @@ binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
   provide the mass-to-charge value for the \code{k}-th row of the mass
   spectrometry data.
 
-  A second way is to provide a single number which specifies the column
-  number in the \code{matrix} or \code{data.frame} provided as the argument
-  for the \code{mass_spec} parameter such that this column contains the
+  A second way is to provide a single number which specifies the column index
+  in the \code{matrix} or \code{data.frame} provided as the argument for the
+  \code{mass_spec} parameter, such that this column contains the
   mass-to-charge information.
 
   A third way is provide a single character string which provides the column
   name in the \code{matrix} or \code{data.frame} provided as the argument for
-  the \code{mass_spec} parameter such that this column contains the
+  the \code{mass_spec} parameter, such that this column contains the
   mass-to-charge information.  Partial matching is supported.}
 
 \item{charge}{The information for the \code{charge} parameter can be provided
@@ -50,7 +50,7 @@ binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
 
 \item{mass}{The information for the mass need not be provided, as it can be
   derived using the mass-to-charge and charge information; in this case the
-  parameter should be given its default, \code{NULL}.  If however the
+  parameter should be given its default, i.e. \code{NULL}.  If however the
   information for mass is already included in the dataset in hand, then
   providing it to the function will be slightly more efficient then
   re-performing the calculations.  The information for the \code{charge}
@@ -73,6 +73,10 @@ binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
   \code{msObj}. If it is a character vector, then the entries should uniquely
   specify the region of interest through partial string matching.}
 
+\item{time_range}{A length-2 numeric vector specifying the lower bound and
+  upper bound (inclusive) of allowed peak retention time occurance for an
+  observation to be included in the consolidation process.}
+
 \item{mass_range}{A length-2 numeric vector specifying the lower bound and
   upper bound (inclusive) of allowed mass for an observation to be included
   in the consolidation process.}
@@ -86,18 +90,19 @@ binMS(mass_spec, mtoz, charge, mass = NULL, time_peak_reten,
   considered to have originated from different underlying compounds.  Two
   observations with a smaller absolute difference between their
   mass-to-charge values could potentially be considered to originate from the
-  same underlying compound, contingent on other criteria also being met.}
+  same underlying compound, contingent on other criteria also being met.
+  Nonnegative values are allowed; such a value has the effect of not
+  consolidating any groups, and consequently reduces the function to a
+  filtering routine only.}
 
-\item{time_pr_range}{A length-2 numeric vector specifying the lower bound and
-  upper bound (inclusive) of allowed peak retention time occurance for an
-  observation to be included in the consolidation process.}
-
-\item{time_pr_diff}{A single numerical value such that any two observations
-  with a larger absolute difference between their peak elution times are
+\item{time_diff}{A single numerical value such that any two observations with
+  a larger absolute difference between their peak elution times are
   considered to have originated from different underlying compounds.  Two
   observations with a smaller absolute difference between their peak elution
   times could potentially be considered to originate from the same underlying
-  compound, contingent on other criteria also being met.}
+  compound, contingent on other criteria also being met.  Nonnegative values
+  are allowed; such a value has the effect of not consolidating any groups,
+  and consequently reduces the function to a filtering routine only.}
 }
 \value{
 Returns an object of class \code{binMS} which inherits from
@@ -134,7 +139,7 @@ The algorithm described in what follows attempts to combines mass
   \enumerate{
 
   \item Each observation must have its peak elution time occur during the
-  interval specified by \code{time_pr_range}
+  interval specified by \code{time_range}
 
   \item Each observation must have a mass that falls within the interval
   specified by \code{mass_range}
@@ -184,7 +189,8 @@ The algorithm described in what follows attempts to combines mass
   observation is merged with the new observation created by combining the
   original two, then the mass-to-charge value and peak elution time values of
   the new observation are obtained by summing the values for each of the
-  three original observations and dividing by three.
+  three original observations and dividing by three.  The merging process for
+  more than three observations is conducted similarly.
 
   Having described the binning algorithm, it is apparent that there are
   scenarios in which the order in which observations are merged affects the

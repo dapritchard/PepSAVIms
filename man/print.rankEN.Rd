@@ -7,6 +7,6 @@
 \method{print}{rankEN}(rankEN_obj)
 }
 \description{
-Displays the dimensions used to fit the elastic net model
+Displays the data dimensions used to fit the elastic net model
 }
 

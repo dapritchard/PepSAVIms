@@ -117,7 +117,8 @@ class(true_filterMS_noCmp) <- c("filterMS", "msDat")
 msDatObj <- msDat(ms, mtoz_vals, chg_vals)
 fobj <- filterMS(msDatObj, region, border, bord_ratio, min_inten, max_chg)
 
-fobj_noCmp <- suppressWarnings( filterMS(msObj, region, border, bord_ratio, min_inten, max_chg=0L) )
+fobj_noCmp <- suppressWarnings(
+  filterMS(msDatObj, region, border, bord_ratio, min_inten, max_chg=0L) )
 
 
 
@@ -203,66 +204,66 @@ test_that("filterMS: region and borders", {
 test_that("filterMS: missing input", {
   expect_error( filterMS(region=region),
                 "Must provide an argument for msObj" )
-  expect_error( filterMS(msObj),
+  expect_error( filterMS(msDatObj),
                 "Must provide an argument for region" )
   expect_error( filterMS(22, region),
                 "msObj must be of class \"msDat\"" )
 })
 
 test_that("filterMS: invalid region", {
-  expect_error( filterMS(msObj, list()),
+  expect_error( filterMS(msDatObj, list()),
                 "region must be either of mode character or numeric" )
-  expect_error( filterMS(msObj, integer(0)),
+  expect_error( filterMS(msDatObj, integer(0)),
                 "region must have length > 0" )
-  expect_error( filterMS(msObj, character(0)),
+  expect_error( filterMS(msDatObj, character(0)),
                 "region must have length > 0" )
-  expect_error( filterMS(msObj, c(1, 1)),
+  expect_error( filterMS(msDatObj, c(1, 1)),
                 "region cannot have any duplicate values" )
-  expect_error( filterMS(msObj, c("a", "a")),
+  expect_error( filterMS(msDatObj, c("a", "a")),
                 "region cannot have any duplicate values" )
-  expect_error( filterMS(msObj, -99),
-                "out of bounds value -99 provided for region" )
-  expect_error( filterMS(msObj, 300),
-                "out of bounds value 300 provided for region" )
-  expect_error( filterMS(msObj, c("frac1", "frac_not_in_ms")),
-                "name provided not in data - frac_not_in_ms element in region" )
-  expect_error( filterMS(msObj, "frac"),
+  expect_error( filterMS(msDatObj, -99),
+                "out of bounds index -99 provided for region relative to ms" )
+  expect_error( filterMS(msDatObj, 300),
+                "out of bounds index 300 provided for region relative to ms" )
+  expect_error( filterMS(msDatObj, c("frac1", "frac_not_in_ms")),
+                "column names in ms do not contain frac_not_in_ms element in region" )
+  expect_error( filterMS(msDatObj, "frac"),
                 "name provided had multiple matches in data - frac element in region" )
 })
 
 test_that("filterMS: invalid border", {
-  expect_error( filterMS(msObj, 3:4, list()),
+  expect_error( filterMS(msDatObj, 3:4, list()),
                 "border must be an atomic vector with either mode character or mode numeric" )
-  expect_error( filterMS(msObj, 3:4, "some"),
+  expect_error( filterMS(msDatObj, 3:4, "some"),
                 "If border is of type character, then it must have value \"all\" or \"none\"" )
-  expect_error( filterMS(msObj, 3:4, c("all", "none")),
+  expect_error( filterMS(msDatObj, 3:4, c("all", "none")),
                 "If border is of type character, then it must have value \"all\" or \"none\"" )
-  expect_error( filterMS(msObj, 3:4, 1:3),
+  expect_error( filterMS(msDatObj, 3:4, 1:3),
                 "border must have length 1 or 2" )
-  expect_error( filterMS(msObj, 3:4, -3),
+  expect_error( filterMS(msDatObj, 3:4, -3),
                 "The value of border must be greater than or equal to 0" )
-  expect_error( filterMS(msObj, 3:4, c(3, -9)),
+  expect_error( filterMS(msDatObj, 3:4, c(3, -9)),
                 "The value of border must be greater than or equal to 0" )
 })
 
 test_that("filterMS: invalid bord_ratio", {
-  expect_error( filterMS(msObj, 3:4, bord_ratio=list()), "bord_ratio must be of mode numeric" )
-  expect_error( filterMS(msObj, 3:4, bord_ratio="none"), "bord_ratio must be of mode numeric" )
-  expect_error( filterMS(msObj, 3:4, bord_ratio=-1), "bord_ratio must be nonnegative" )
+  expect_error( filterMS(msDatObj, 3:4, bord_ratio=list()), "bord_ratio must be of mode numeric" )
+  expect_error( filterMS(msDatObj, 3:4, bord_ratio="none"), "bord_ratio must be of mode numeric" )
+  expect_error( filterMS(msDatObj, 3:4, bord_ratio=-1), "bord_ratio must be nonnegative" )
 })
 
 test_that("filterMS: invalid min_inten", {
-  expect_error( filterMS(msObj, 3:4, min_inten=list()), "min_inten must be of mode numeric" )
-  expect_error( filterMS(msObj, 3:4, min_inten="no_inten"), "min_inten must be of mode numeric" )
-  expect_error( filterMS(msObj, 3:4, min_inten=numeric(0)), "min_inten must be of length 1" )
-  expect_error( filterMS(msObj, 3:4, min_inten=1:2), "min_inten must be of length 1" )
+  expect_error( filterMS(msDatObj, 3:4, min_inten=list()), "min_inten must be of mode numeric" )
+  expect_error( filterMS(msDatObj, 3:4, min_inten="no_inten"), "min_inten must be of mode numeric" )
+  expect_error( filterMS(msDatObj, 3:4, min_inten=numeric(0)), "min_inten must be of length 1" )
+  expect_error( filterMS(msDatObj, 3:4, min_inten=1:2), "min_inten must be of length 1" )
 })
 
 test_that("filterMS: max_chg", {
-  expect_error( filterMS(msObj, 3:4, max_chg=list()), "max_chg must be of mode numeric" )
-  expect_error( filterMS(msObj, 3:4, max_chg="no_inten"), "max_chg must be of mode numeric" )
-  expect_error( filterMS(msObj, 3:4, max_chg=integer(0)), "max_chg must be of length 1" )
-  expect_error( filterMS(msObj, 3:4, max_chg=1:2), "max_chg must be of length 1" )
+  expect_error( filterMS(msDatObj, 3:4, max_chg=list()), "max_chg must be of mode numeric" )
+  expect_error( filterMS(msDatObj, 3:4, max_chg="no_inten"), "max_chg must be of mode numeric" )
+  expect_error( filterMS(msDatObj, 3:4, max_chg=integer(0)), "max_chg must be of length 1" )
+  expect_error( filterMS(msDatObj, 3:4, max_chg=1:2), "max_chg must be of length 1" )
 })
 
 

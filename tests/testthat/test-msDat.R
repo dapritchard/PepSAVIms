@@ -12,8 +12,8 @@
 
 msMat <- matrix(1:25, nrow=5, dimnames=list(paste0(1:5), c("mtoz", "chg", "ms1", "ms2", "ms3")))
 msDf <- data.frame(msMat)
-mtoz <- msMat[, 1]
-chg <- msMat[, 2]
+mtoz <- msMat[, 1L]
+chg <- msMat[, 2L]
 
 
 # Manually construct "true" msDat object ---------------------------------------
@@ -49,16 +49,16 @@ context("msDat constructor")
 test_that("msDat: use matrix as input", {
   
   # Check various combinations of supplying columns, column names, indices, NULL
-  expect_identical( msDat(msMat, 1, 2),                              trueDatOut )
-  expect_identical( msDat(msMat[, -1], mtoz, 1),                     trueDatOut )
-  expect_identical( msDat(msMat, mtoz, 2, c("ms1", "ms2", "ms3")),   trueDatOut )
-  expect_identical( msDat(msMat[, -2], 1, chg),                      trueDatOut )
-  expect_identical( msDat(msMat, 1, chg, c("ms1", "ms2", "ms3")),    trueDatOut )
-  expect_identical( msDat(msMat[, -c(1, 2)], mtoz, chg),             trueDatOut )
+  expect_identical( msDat(msMat, 1L, 2L),                            trueDatOut )
+  expect_identical( msDat(msMat[, -1L], mtoz, 1L),                   trueDatOut )
+  expect_identical( msDat(msMat, mtoz, 2L, c("ms1", "ms2", "ms3")),  trueDatOut )
+  expect_identical( msDat(msMat[, -2L], 1L, chg),                    trueDatOut )
+  expect_identical( msDat(msMat, 1L, chg, c("ms1", "ms2", "ms3")),   trueDatOut )
+  expect_identical( msDat(msMat[, -c(1L, 2L)], mtoz, chg),           trueDatOut )
   expect_identical( msDat(msMat, mtoz, chg, c("ms1", "ms2", "ms3")), trueDatOut )
   expect_identical( msDat(msMat, mtoz, chg, 3:5),                    trueDatOut )
   expect_identical( msDat(msMat, "mtoz", 2),                         trueDatOut )
-  expect_identical( msDat(msMat, 1, "chg"),                          trueDatOut )
+  expect_identical( msDat(msMat, 1L, "chg"),                         trueDatOut )
   expect_identical( msDat(msMat, "mtoz", "chg"),                     trueDatOut )
   
   # Intensity matrix has 1 dimension (should still be a matrix in msDat obj)
@@ -124,11 +124,11 @@ test_that("msDat: input that doesn't make sense", {
   expect_error(msDat(ms_true, 1:100, chg),
                "mtoz must have length 1 or length equal to the number of observations")
   expect_error(msDat(ms_true, integer(0), chg),
-               "mtoz must have length 1 or length equal to the number of observations")
+               "If non-NULL, then mtoz must have length no less than 1")
   expect_error(msDat(ms_true, mtoz, 1:100),
                "charge must have length 1 or length equal to the number of observations")
   expect_error(msDat(ms_true, mtoz, integer(0)),
-               "charge must have length 1 or length equal to the number of observations")
+               "If non-NULL, then charge must have length no less than 1")
   expect_error(msDat(ms_true[, integer(0)], "mtoz", "chg"),
                "mass_spec cannot have 0 columns")
   expect_error(msDat(ms_true[, integer(0)], mtoz, chg),
@@ -140,23 +140,24 @@ test_that("msDat: input that doesn't make sense", {
   expect_error(msDat(ms_true[, integer(0)], mtoz, chg),
                "mass_spec cannot have 0 columns")
   expect_error(msDat(msMat, 0, 2),
-               "out of bounds value 0 provided for mtoz")
+               "out of bounds index 0 provided for mtoz relative to mass_spec")
   expect_error(msDat(msMat, 1000, 2),
-               "out of bounds value 1000 provided for mtoz")
+               "out of bounds index 1000 provided for mtoz relative to mass_spec")
   expect_error(msDat(msMat, 1, -100),
-               "out of bounds value -100 provided for charge")
+               "out of bounds index -100 provided for charge relative to mass_spec")
   expect_error(msDat(msMat, 1, 2, 3:6),
-               "out of bounds value 6 provided for ms_inten")
+               "out of bounds index 6 provided for ms_inten relative to mass_spec")
   expect_error(msDat(msMat, "nomatch", "chg"),
-               "name provided not in data - nomatch element in mtoz")
+               "column names in mass_spec do not contain nomatch element in mtoz")
   expect_error(msDat(msMat, "", "chg"),
                "name provided had multiple matches in data -  element in mtoz")
   expect_error(msDat(msMat, "mtoz", "chg", c("ms1", "ms2", "ms1")),
                "ms_inten cannot have any duplicate values")
   expect_error(msDat(msMat, "mtoz", "chg", character(0)),
-               "If non-NULL, then ms_inten must have length >= 1")
+               "If non-NULL, then ms_inten must have length no less than 1")
   expect_error(msDat(msMat, character(0), "chg"),
-               "mtoz must have length 1 or length equal to the number of observations")
+               "If non-NULL, then mtoz must have length no less than 1")
   expect_error(msDat(msMat[, c("mtoz", "chg")], "mtoz", "chg"),
-               "There cannot be 0 columns left for ms_inten after removing data for other variables")
+               paste0("There must be at least 2 columns left for mass_spec ",
+                      "after removing data for other variables"))
 })

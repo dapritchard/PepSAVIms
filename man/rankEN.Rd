@@ -10,8 +10,8 @@ rankEN(msObj, bioact, region_ms = NULL, region_bio = NULL, lambda,
 \arguments{
 \item{msObj}{An object of class \code{\link{msDat}} containing mass
   spectrometry abundances data and identifying information.  Note that this
-  includes objects created by \code{binMS}, \code{filterMS}, and
-  \code{msDat}.}
+  includes objects created by the functions \code{binMS}, \code{filterMS},
+  and \code{msDat}.}
 
 \item{bioact}{Either a numeric vector or matrix, or a data frame providing
   bioactivity data.  If a numeric vector, then it is assumed that each entry
@@ -45,13 +45,14 @@ rankEN(msObj, bioact, region_ms = NULL, region_bio = NULL, lambda,
   (i.e. the names of the columns corresponding to the appropriate fractions
   in the data).}
 
-\item{lambda}{A single numeric value belonging to the set [0, 1), providing
-  the quadratic penalty mixture parameter argument for the elastic net model.
-  The elastic net fits the least squares model subject to \deqn{(1 -
-  \lambda)|\beta|_1 + \lambda|\beta|^2 \le t} where \eqn{\beta} is the vector
-  of regression coefficients and \eqn{t \ge 0}.  \code{rankEN} constructs a
-  list of candidate compounds by tracking the entrance of compounds into the
-  elastic net model as \code{t} is increased from 0 to \eqn{\infty}.}
+\item{lambda}{A single nonnegative numeric value providing the quadratic
+  penalty mixture parameter argument for the elastic net model.  The elastic
+  net fits the least squares model with penalty function
+  \deqn{\gamma|\beta|_1 + \lambda|\beta|^2} where \eqn{\beta} is the vector
+  of regression coefficients and \eqn{\gamma, \lambda \ge 0}.  \code{rankEN}
+  constructs a list of candidate compounds by tracking the entrance of
+  compounds into the elastic net model as \eqn{\gamma} is decreased from
+  \eqn{\infty} to \eqn{0}.}
 
 \item{pos_only}{Either \code{TRUE} or \code{FALSE}; specifies whether the
   list of candidate compounds that the algorithm produces should include only
@@ -114,7 +115,8 @@ first enter the Elastic Net model
   then an elastic net model is fitted by invoking the \code{enet} function
   from the \code{elasticnet} package, and an ordered list of candidate
   compounds is constructed such that compounds are ranked by the order in
-  which they first enter the model.  The list may be filtered and pruned
-  before being returned to the user.
+  which they first enter the model.  The list may be filtered and / or pruned
+  before being returned to the user, as determined by the arguments to
+  \code{pos_only} and \code{ncomp}.
 }
 

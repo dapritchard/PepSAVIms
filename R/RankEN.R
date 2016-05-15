@@ -6,8 +6,8 @@
 #'
 #' @param msObj An object of class \code{\link{msDat}} containing mass
 #'   spectrometry abundances data and identifying information.  Note that this
-#'   includes objects created by \code{binMS}, \code{filterMS}, and
-#'   \code{msDat}.
+#'   includes objects created by the functions \code{binMS}, \code{filterMS},
+#'   and \code{msDat}.
 #'
 #' @param bioact Either a numeric vector or matrix, or a data frame providing
 #'   bioactivity data.  If a numeric vector, then it is assumed that each entry
@@ -41,14 +41,14 @@
 #'   (i.e. the names of the columns corresponding to the appropriate fractions
 #'   in the data).
 #'
-#' @param lambda A single numeric value belonging to the set \eqn{[0, \infty)},
-#'   providing the quadratic penalty mixture parameter argument for the elastic
-#'   net model.  The elastic net fits the least squares model with penalty
-#'   function \deqn{\gamma|\beta|_1 + \lambda|\beta|^2} where \eqn{\beta} is the
-#'   vector of regression coefficients and \eqn{\gamma, \lambda \ge 0}.
-#'   \code{rankEN} constructs a list of candidate compounds by tracking the
-#'   entrance of compounds into the elastic net model as \eqn{\gamma} is
-#'   decreased from \eqn{\infty} to \eqn{0}.
+#' @param lambda A single nonnegative numeric value providing the quadratic
+#'   penalty mixture parameter argument for the elastic net model.  The elastic
+#'   net fits the least squares model with penalty function
+#'   \deqn{\gamma|\beta|_1 + \lambda|\beta|^2} where \eqn{\beta} is the vector
+#'   of regression coefficients and \eqn{\gamma, \lambda \ge 0}.  \code{rankEN}
+#'   constructs a list of candidate compounds by tracking the entrance of
+#'   compounds into the elastic net model as \eqn{\gamma} is decreased from
+#'   \eqn{\infty} to \eqn{0}.
 #'
 #' @param pos_only Either \code{TRUE} or \code{FALSE}; specifies whether the
 #'   list of candidate compounds that the algorithm produces should include only
@@ -71,8 +71,9 @@
 #'   then an elastic net model is fitted by invoking the \code{enet} function
 #'   from the \code{elasticnet} package, and an ordered list of candidate
 #'   compounds is constructed such that compounds are ranked by the order in
-#'   which they first enter the model.  The list may be filtered and pruned
-#'   before being returned to the user.
+#'   which they first enter the model.  The list may be filtered and / or pruned
+#'   before being returned to the user, as determined by the arguments to
+#'   \code{pos_only} and \code{ncomp}.
 #'
 #' @return Returns an object of class \code{rankEN}.  This object is a
 #'   \code{list} with elements described below.  The class is equipped with a
@@ -129,8 +130,8 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
   bioact <- rankEN_vector_to_matrix(bioact)
   
   # Extract the region of interest for the ms data
-  ms <- extract_var(region_ms, msDatObj$ms, TRUE)
-  bio <- extract_var(region_bio, bioact, TRUE)
+  ms <- extract_var(msDatObj$ms, region_ms, TRUE)
+  bio <- extract_var(bioact, region_bio, TRUE)
   
   # Check for missing and that dimensions match
   rankEN_check_regr_args(ms, bio)

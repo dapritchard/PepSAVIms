@@ -9,20 +9,20 @@ filterMS(msObj, region, border = "all", bord_ratio = 0.05,
 }
 \arguments{
 \item{msObj}{An object class \code{\link{msDat}}.  Note that this includes
-  objects created by \code{binMS} and \code{msDat}.}
+  objects created by the functions \code{binMS} and \code{msDat}.}
 
 \item{region}{A vector either of mode character or mode numeric.  If numeric
   then the entries should provide the indices for the region of interest in
-  the mass spectrometry data in the argument for \code{msObj}.  If character
-  then the entries should uniquely specify the region of interest through
-  partial string matching (see criterion 1, 4).}
+  the mass spectrometry data provided as the argument for \code{msObj}.  If
+  character then the entries should uniquely specify the region of interest
+  through partial string matching (see criterion 1, 4).}
 
 \item{border}{Either a character string \code{"all"}, or a character string
   \code{"none"}, or a length-1 or length-2 numeric value specifying the
   number of fractions to either side of the region of interest to comprise
-  the bordering region.  If a single numeric value, then this is number of
-  fractions to each side of the region of interest; if it is two values, the
-  the first value is the number of fractions to the left, and the second
+  the bordering region.  If a single numeric value, then this is the number
+  of fractions to each side of the region of interest; if it is two values,
+  then the first value is the number of fractions to the left, and the second
   value is the number of fractions to the right.  If there are not enough
   fractions in either direction to completely span the number of specified
   fractions, then all of the available fractions to the side in question are

@@ -11,7 +11,7 @@
 #'
 #' @param mass The information for the mass need not be provided, as it can be
 #'   derived using the mass-to-charge and charge information; in this case the
-#'   parameter should be given its default, \code{NULL}.  If however the
+#'   parameter should be given its default, i.e. \code{NULL}.  If however the
 #'   information for mass is already included in the dataset in hand, then
 #'   providing it to the function will be slightly more efficient then
 #'   re-performing the calculations.  The information for the \code{charge}
@@ -23,7 +23,7 @@
 #'   other information; this paramater specifies the time at which the peak
 #'   retention level of the compound was achieved.
 #'
-#' @param time_pr_range A length-2 numeric vector specifying the lower bound and
+#' @param time_range A length-2 numeric vector specifying the lower bound and
 #'   upper bound (inclusive) of allowed peak retention time occurance for an
 #'   observation to be included in the consolidation process.
 #'
@@ -45,8 +45,8 @@
 #'   consolidating any groups, and consequently reduces the function to a
 #'   filtering routine only.
 #'
-#' @param time_pr_diff A single numerical value such that any two observations
-#'   with a larger absolute difference between their peak elution times are
+#' @param time_diff A single numerical value such that any two observations with
+#'   a larger absolute difference between their peak elution times are
 #'   considered to have originated from different underlying compounds.  Two
 #'   observations with a smaller absolute difference between their peak elution
 #'   times could potentially be considered to originate from the same underlying
@@ -65,7 +65,7 @@
 #'   \enumerate{
 #'
 #'   \item Each observation must have its peak elution time occur during the
-#'   interval specified by \code{time_pr_range}
+#'   interval specified by \code{time_range}
 #'
 #'   \item Each observation must have a mass that falls within the interval
 #'   specified by \code{mass_range}
@@ -115,7 +115,8 @@
 #'   observation is merged with the new observation created by combining the
 #'   original two, then the mass-to-charge value and peak elution time values of
 #'   the new observation are obtained by summing the values for each of the
-#'   three original observations and dividing by three.
+#'   three original observations and dividing by three.  The merging process for
+#'   more than three observations is conducted similarly.
 #'
 #'   Having described the binning algorithm, it is apparent that there are
 #'   scenarios in which the order in which observations are merged affects the

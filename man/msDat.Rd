@@ -20,8 +20,8 @@ msDat(mass_spec, mtoz, charge, ms_inten = NULL)
   \code{matrix} or \code{data.frame} with 20,000 rows and 50 or more columns.
   The additional columns beyond the 50 containing the mass spectrometry
   intensities can be the mass-to-charge data, the charge data, or other
-  extraneous variables (which will be ignored when constructing the
-  \code{msDat} object).}
+  extraneous variables (the extraneous variables will be discarded when
+  constructing the \code{msDat} object).}
 
 \item{mtoz}{A vector of either length 1 or length equal to the number of
   mass-to-charge values for which mass spectrometry data was collected, and
@@ -34,14 +34,14 @@ msDat(mass_spec, mtoz, charge, ms_inten = NULL)
   provide the mass-to-charge value for the \code{k}-th row of the mass
   spectrometry data.
 
-  A second way is to provide a single number which specifies the column
-  number in the \code{matrix} or \code{data.frame} provided as the argument
-  for the \code{mass_spec} parameter such that this column contains the
+  A second way is to provide a single number which specifies the column index
+  in the \code{matrix} or \code{data.frame} provided as the argument for the
+  \code{mass_spec} parameter, such that this column contains the
   mass-to-charge information.
 
   A third way is provide a single character string which provides the column
   name in the \code{matrix} or \code{data.frame} provided as the argument for
-  the \code{mass_spec} parameter such that this column contains the
+  the \code{mass_spec} parameter, such that this column contains the
   mass-to-charge information.  Partial matching is supported.}
 
 \item{charge}{The information for the \code{charge} parameter can be provided
@@ -91,10 +91,10 @@ Since the mass spectrometry data could conceivably be available to
   the researcher in a variety forms, this function attempts to provide a
   uniform data structure for encapsulating this information.  It is the
   fundamental data structure containing the mass spectrometry data used
-  internally by the \code{binMS} and \code{filterMS} routines.  The external
+  internally by the \code{filterMS} and \code{rankEN} routines.  The external
   interface for \code{msDat} is provided to the user so that specifying the
   mass spectrometry information can be made in a distinct step from
-  performing statistical analyses, which it is hoped makes the downstream
-  analysis routines simpler and more intuitive to use.
+  performing statistical analyses, which it is hoped makes interfaces for the
+  downstream analysis routines simpler and more intuitive to use.
 }
 
