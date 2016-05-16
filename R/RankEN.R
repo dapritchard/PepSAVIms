@@ -236,14 +236,12 @@ extract_candidates <- function(rankEN_obj, include_cor=TRUE) {
     stop("include_cor must be either TRUE or FALSE")
   }
 
+  out <- data.frame(rankEN_obj$mtoz, rankEN_obj$charge)
   if (include_cor) {
-    out_df <- data.frame(mtoz, charge, comp_cor)
-  }
-  else {
-    out_df <- data.frame(mtoz, charge)
+    out$comp_cor <- rankEN_obj$comp_cor
   }
 
-  return (out_df)
+  return (out)
 }
 
 

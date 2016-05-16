@@ -42,11 +42,12 @@ extractMS <- function(msObj, type="matrix") {
     stop("type must have mode character")
   }
 
-  # class() returns a character vector regardless of input
+  # Note: class() returns a character vector regardless of input, so the
+  # following is always valid
   class_nm <- class(msObj)[1]
   msDatObj <- switch(class_nm,
-                     binMS    = msObj$msObj,
-                     filterMS = msObj$msObj,
+                     binMS    = msObj$msDatObj,
+                     filterMS = msObj$msDatObj,
                      msDat    = msObj,
                      stop("msObj must be an object of class \"msDat\"", call.=FALSE))
 
@@ -263,4 +264,4 @@ dimnames.msDat <- function(msObj) {
 
 
 
-# TODO: dim
+# TODO: dim, nrow, ncol
