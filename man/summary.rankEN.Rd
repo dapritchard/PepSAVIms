@@ -4,13 +4,15 @@
 \alias{summary.rankEN}
 \title{Overview of the elastic net selection process}
 \usage{
-\method{summary}{rankEN}(rankEN_obj, max_comp_print = 20L)
+\method{summary}{rankEN}(object, max_comp_print = 20L, ...)
 }
 \arguments{
-\item{rankEN_obj}{An object of class \code{rankEN}.}
+\item{object}{An object of class \code{rankEN}.}
 
 \item{max_comp_print}{A numeric value >= 1 specifying the maximum number of
   compounds to print}
+
+\item{...}{Arguments passed to dot-dot-dot are ignored}
 }
 \description{
 Prints a description of the elastic net variable selection process.  Includes

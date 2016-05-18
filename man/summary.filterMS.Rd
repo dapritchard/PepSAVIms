@@ -4,7 +4,12 @@
 \alias{summary.filterMS}
 \title{Overview of the filtering process}
 \usage{
-\method{summary}{filterMS}(filtObj)
+\method{summary}{filterMS}(object, ...)
+}
+\arguments{
+\item{object}{An object of class \code{\link{filterMS}}}
+
+\item{...}{Arguments passed to dot-dot-dot are ignored}
 }
 \description{
 Prints a description of the filtering process.  Displays arguments chosen for

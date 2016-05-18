@@ -7,15 +7,29 @@
 # sampled from N(0, 1) distributions independent across both compounds and
 # fractions, and hence does not have the structure characteristic of mass
 # spectrometry intensities.
+#
+# @param nCmp number of mass spec compounds to similate
+#
+# @param nFrac number of mass spec fractions to simulate
+#
+# @param nRepl number of bioactivity replicates to simulate
+#
+# @param nPred number of compounds with nonzero association
+#
+# @param regIdx the region of interest (i.e. which fractions / cols)
+#
+# @param sigma the random noise (stand. dev.) when calculating X*beta + epsilon
 
 
 simData <- function(nCmp, nFrac, nRepl, nPred, regIdx, sigma) {
 
-  # Mass spec data
+  # Mass spec data as a (nCmp x nFrac) matrix, sampled as indepent N(0, 1)'s
   ms <- matrix(rnorm(nCmp * nFrac), nrow=nCmp, ncol=nFrac)
   colnames(ms) <- paste0("ms", seq_len(nFrac))
 
-  # Define true beta (just the nonzero part of beta)
+  # Define true beta (just the nonzero part of beta).  The first nPred values of
+  # beta are the nonzero values (as specified by beta$idx), and the values of
+  # beta are specified as 1, 1/2, 1/3, ..., 1/nPred.
   beta <- list( idx = seq_len(nPred),
                 val = seq(1, 1 / nPred, length.out=nPred) )
 
@@ -30,26 +44,26 @@ simData <- function(nCmp, nFrac, nRepl, nPred, regIdx, sigma) {
   nfrac_assoc <- length(regIdx)
   bio_resp <- t( replicate(nRepl, repl_mean + rnorm(nfrac_assoc, sd=sigma)) )
 
-  # Column indexes for the non-associative fractions before and after the
-  # associative region
-  non_assoc_idx <- list( bef = seq(1, head(regIdx, 1) - 1),
-                         aft = seq(tail(regIdx, 1) + 1, nFrac) )
+  # Number of columns (fractions) before and after the region of interest
+  nbef <- head(regIdx, 1L) - 1L
+  naft <- nFrac - tail(regIdx, 1L)
 
   # Sample bioactivity matrix
-  bio <- matrix( c( rnorm(nRepl * length(non_assoc_idx$bef)),
-                    bio_resp,
-                    rnorm(nRepl * length(non_assoc_idx$aft) ) ),
+  bio <- matrix( c(rnorm(nRepl * nbef),
+                   bio_resp,
+                   rnorm(nRepl * naft)),
                  nrow=nRepl,
                  ncol=nFrac )
   colnames(bio) <- paste0("bio", seq_len(nFrac))
 
-  # Construct msDat object with arbitrary mtoz and charge values
+  # Construct msDat object with arbitrary values provided for mtoz and charge
   msDat_out <- msDat(ms, seq_len(nCmp), rep(1, nCmp))
 
-  out <- list( msDat   = msDat_out,
-               bioact  = bio,
-               region  = regIdx,
-               beta    = beta )
+  # Construct output object
+  out <- list( msDatObj = msDat_out,
+               bioact   = bio,
+               region   = regIdx,
+               beta     = beta )
 
   return (out)
 }

@@ -47,12 +47,16 @@
 #'
 #'   \item The ratio of the m/z intensity of a species in the areas bordering
 #'   the region of interest and the species maximum intensity must be less than
-#'   \code{bord_ratio}
+#'   \code{bord_ratio}.  When there is no bordering area then it is taken to
+#'   mean that all observations satisfy this criterion.
 #'
 #'   \item The immediately right adjacent fraction to its maximum intensity
 #'   fraction for a species must have a non-zero abundance.  In the case of ties
 #'   for the maximum, it is the fraction immediately to the right of the
-#'   rightmost maximum fraction which cannot have zero abundance.
+#'   rightmost maximum fraction which cannot have zero abundance.  When the
+#'   fraction with maximum intensity is the rightmost fraction in the data for
+#'   an observation, then it is taken to mean that the observation satisfies
+#'   this criterion.
 #'
 #'   \item At least 1 fraction in the region of interest must have intensity
 #'   greater than \code{min_inten}
@@ -113,17 +117,27 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   # Create border index, i.e. the indices that surround the region of interest
   borIdx <- filterMS_border_idx(border, regIdx, ms_nc)
 
+  # All indices in either region or border
+  allIdx <- union(regIdx, borIdx)
+  lastIdx <- max(allIdx)
+
   # maxIdx: the column index per row (i.e. per observation) of the fraction
   # containing the maximum intensity level.  The rightmost column index is
-  # chosen in the case of ties.
-  maxIdx <- apply(ms, 1, function(x) tail(which(x == max(x)), 1L))
+  # chosen in the case of ties.  Note that we only consider columns in either
+  # the region of interest or the bordering region.
+  maxIdx <- apply(ms[, allIdx, drop=FALSE], 1, function(x) {
+    last_in_allIdx <- tail(which(x == max(x)), 1L)
+    allIdx[last_in_allIdx]
+  })
 
-  # Evaluate criteria predicates
+  # Evaluate criteria predicates.  Note that all() returns true when there are
+  # no values as happens for criteria 2 when borIdx is integer(0), which is the
+  # desired behavior.
   critBool <- data.frame( array(dim=c(ms_nr, nCrit)) )
   row_seq <- seq_len(ms_nr)
   critBool[, 1L] <- maxIdx %in% regIdx
   critBool[, 2L] <- sapply(row_seq, function(i) all(ms[i, borIdx] < bord_ratio * ms[i, maxIdx[i]]))
-  critBool[, 3L] <- sapply(row_seq, function(i) (ms[i, min(maxIdx[i] + 1, ms_nc)] > 0))
+  critBool[, 3L] <- sapply(row_seq, function(i) (ms[i, min(maxIdx[i] + 1L, lastIdx)] > 0))
   critBool[, 4L] <- sapply(row_seq, function(i) any(ms[i, regIdx] > min_inten))
   critBool[, 5L] <- (chg <= max_chg)
 
@@ -175,21 +189,24 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
 #'
 #' Displays the number of candidate compounds left in the data after filtering
 #'
+#' @param x An object of class \code{\link{filterMS}}
+#'
+#' @param ... Arguments passed to dot-dot-dot are ignored
+#'
 #' @export
 
-print.filterMS <- function(filtObj) {
-  msDatObj <- filtObj$msDatObj
-
-  if (is.null(msDatObj)) {
+print.filterMS <- function(x, ...) {
+  
+  if (is.null(x$msDatObj)) {
     cat("An object of class \"filterMS\"; no observations ",
-        "satisfied all of the inclusion criteria.\n")
+        "satisfied all of the inclusion criteria.\n", sep="")
   }
   else {
-    cat("An object of class \"filterMS\" with ", format(NROW(msDatObj$ms), big.mark=","),
-        " compounds and ", NCOL(msDatObj$ms), " fractions.\n", sep="")
+    cat("An object of class \"filterMS\" with ", format(NROW(x$msDatObj$ms), big.mark=","),
+        " compounds and ", NCOL(x$msDatObj$ms), " fractions.\n", sep="")
   }
   cat("Use summary to see more details regarding the filtering process.\n",
-      "Use extractMS to extract the filtered mass spectrometry data\n\n")
+      "Use extractMS to extract the filtered mass spectrometry data\n\n", sep="")
 }
 
 
@@ -201,14 +218,23 @@ print.filterMS <- function(filtObj) {
 #' the \code{filterMS} constructor, how many candidate compounds were chosen for
 #' each criterion, and how many candidate compounds were chosen overall.
 #'
+#' @param object An object of class \code{\link{filterMS}}
+#'
+#' @param ... Arguments passed to dot-dot-dot are ignored
+#'
 #' @export
 
 
-summary.filterMS <- function(filtObj) {
+summary.filterMS <- function(object, ...) {
 
-  # Add variables to current environment for convenience: orig_dim, reg_nm,
-  # bor_nm, border, bord_ratio, min_inten, max_chg
-  list2env(filtObj$summ_info, envir=environment())
+  # Add pointers to summ_info variables for convenience
+  orig_dim   <- object$summ_info$orig_dim
+  reg_nm     <- object$summ_info$reg_nm
+  bor_nm     <- object$summ_info$bor_nm
+  border     <- object$summ_info$border
+  bord_ratio <- object$summ_info$bord_ratio
+  min_inten  <- object$summ_info$min_inten
+  max_chg    <- object$summ_info$max_chg
 
   cat("\n",
       "The mass spectrometry data prior to filtering had:\n",
@@ -262,7 +288,7 @@ summary.filterMS <- function(filtObj) {
       " fractions to the following number:\n", sep="")
   cat(rep("-", 80 + length(q)), "\n", sep="")
 
-  ncri <- sapply(filtObj$cmp_by_cr, function(x) format(nrow(x), big.mark=","))
+  ncri <- sapply(object$cmp_by_cr, function(x) format(nrow(x), big.mark=","))
   plen <- sapply(ncri, nchar)
   mlen <- max(plen)
   bordperc <- paste0(format(100 * bord_ratio, digits=0), "%")
@@ -279,7 +305,7 @@ summary.filterMS <- function(filtObj) {
       "    (must have charge <= ", max_chg, ")\n",
       "\n", sep="")
 
-  totcmp <- ifelse(is.null(filtObj$msDatObj), 0, format(nrow(filtObj$msDatObj$ms), big.mark=","))
+  totcmp <- ifelse(is.null(object$msDatObj), 0, format(nrow(object$msDatObj$ms), big.mark=","))
   cat("The total number of candidate compounds was reduced to:\n",
       "-------------------------------------------------------\n",
       rep(" ", 14 + mlen - nchar(totcmp)), totcmp,      

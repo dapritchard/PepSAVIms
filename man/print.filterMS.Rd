@@ -4,7 +4,12 @@
 \alias{print.filterMS}
 \title{Basic information for class \code{filterMS}}
 \usage{
-\method{print}{filterMS}(filtObj)
+\method{print}{filterMS}(x, ...)
+}
+\arguments{
+\item{x}{An object of class \code{\link{filterMS}}}
+
+\item{...}{Arguments passed to dot-dot-dot are ignored}
 }
 \description{
 Displays the number of candidate compounds left in the data after filtering

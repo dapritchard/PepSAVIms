@@ -4,10 +4,12 @@
 \alias{summary.binMS}
 \title{Overview of the binning process}
 \usage{
-\method{summary}{binMS}(binObj)
+\method{summary}{binMS}(object, ...)
 }
 \arguments{
-\item{binObj}{An object of class \code{\link{binMS}}}
+\item{object}{An object of class \code{\link{binMS}}}
+
+\item{...}{Arguments passed to dot-dot-dot are ignored}
 }
 \description{
 Prints a text description of the binning process.  Displays arguments passed

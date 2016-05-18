@@ -4,10 +4,10 @@
 #' Returns identifying information for the compounds in the order in which they
 #' first enter the Elastic Net model
 #'
-#' @param msObj An object of class \code{\link{msDat}} containing mass
-#'   spectrometry abundances data and identifying information.  Note that this
-#'   includes objects created by the functions \code{binMS}, \code{filterMS},
-#'   and \code{msDat}.
+#' @param msObj An object of class \code{{msDat} containing mass spectrometry
+#'   abundances data and identifying information.  Note that this includes
+#'   objects created by the functions \code{binMS}, \code{filterMS}, and
+#'   \code{msDat}.
 #'
 #' @param bioact Either a numeric vector or matrix, or a data frame providing
 #'   bioactivity data.  If a numeric vector, then it is assumed that each entry
@@ -188,8 +188,8 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
     region_nm = list(ms  = ms_nm,
                      bio = bio_nm),
     lambda    = lambda,
-    ncomp     = ncomp,
-    pos_only  = pos_only
+    pos_only  = pos_only,
+    ncomp     = ncomp
   )
 
   # Construct output object
@@ -251,17 +251,21 @@ extract_candidates <- function(rankEN_obj, include_cor=TRUE) {
 #'
 #' Displays the data dimensions used to fit the elastic net model
 #'
+#' @param x An object of class \code{\link{rankEN}}
+#'
+#' @param ... Arguments passed to dot-dot-dot are ignored
+#'
 #' @export
 
 
-print.rankEN <- function(rankEN_obj) {
+print.rankEN <- function(x, ...) {
 
   cat(sep="",
       "An object of class rankEN.\n",
       "Use summary to print a list of the compounds entering the model.\n",
       "Use extract_candidates to extract the compound info as a data.frame.\n\n")
 
-  dd_char <- format(unlist(rankEN_obj$summ_info$data_dim), big.mark=",", justify="right")
+  dd_char <- format(unlist(x$summ_info$data_dim), big.mark=",", justify="right")
   cat(sep="",
       "Data dimensions:\n",
       "----------------\n",
@@ -281,14 +285,16 @@ print.rankEN <- function(rankEN_obj) {
 #' parameter specifications for the model, and a table with the identifying
 #' information of the candidate compounds produced by the model fit.
 #'
-#' @param rankEN_obj An object of class \code{rankEN}.
+#' @param object An object of class \code{rankEN}.
 #'
 #' @param max_comp_print A numeric value >= 1 specifying the maximum number of
 #'   compounds to print
 #'
+#' @param ... Arguments passed to dot-dot-dot are ignored
+#'
 #' @export
 
-summary.rankEN <- function(rankEN_obj, max_comp_print=20L) {
+summary.rankEN <- function(object, max_comp_print=20L, ...) {
 
   # Check argument to max_comp_print
   if (!is.numeric(max_comp_print)) {
@@ -302,10 +308,10 @@ summary.rankEN <- function(rankEN_obj, max_comp_print=20L) {
   }
 
   # Create links for convenience
-  summ_info <- rankEN_obj$summ_info
-  mtoz <- rankEN_obj$mtoz
-  chg <- rankEN_obj$charge
-  ccor <- rankEN_obj$comp_cor
+  summ_info <- object$summ_info
+  mtoz      <- object$mtoz
+  chg       <- object$charge
+  ccor      <- object$comp_cor
   
   # Print restricted mass spectrometry and bioactivity data dimensions
   dd_char <- format(unlist(summ_info$data_dim), big.mark=",", justify="right")

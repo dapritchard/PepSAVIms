@@ -4,7 +4,12 @@
 \alias{print.rankEN}
 \title{Basic information for class \code{rankEN}}
 \usage{
-\method{print}{rankEN}(rankEN_obj)
+\method{print}{rankEN}(x, ...)
+}
+\arguments{
+\item{x}{An object of class \code{\link{rankEN}}}
+
+\item{...}{Arguments passed to dot-dot-dot are ignored}
 }
 \description{
 Displays the data dimensions used to fit the elastic net model

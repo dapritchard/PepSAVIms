@@ -4,10 +4,12 @@
 \alias{print.binMS}
 \title{Print routine for class \code{binMS}}
 \usage{
-\method{print}{binMS}(binObj)
+\method{print}{binMS}(x, ...)
 }
 \arguments{
-\item{binObj}{An object of class \code{\link{binMS}}}
+\item{x}{An object of class \code{\link{binMS}}}
+
+\item{...}{Arguments passed to dot-dot-dot are ignored}
 }
 \description{
 Prints the number of m/z levels and fractions of the resultant mass spectrometry data

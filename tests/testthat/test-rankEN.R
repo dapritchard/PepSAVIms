@@ -1,186 +1,4 @@
 
-# `````````````````````````````````` #
-#  Load a saved dataset for testing  #
-# .................................. #
-
-# Load saved simulated data ----------------------------------------------------
-
-load("tests/data/data-rankEN.RData")
-# load("tests/Sim_Ms_Bio.RData")
-#load("../Sim_Ms_Bio.RData")
-
-# Create links for convenience for data from tests/Sim_Ms_Bio.RData
-msDatObj <- testDat$msDat
-bioact <- testDat$bioact
-
-region_idx <- sim_args$regIdx
-region_idx_matr <- matrix(region_idx, nrow=2)
-region_idx_NA <- replace(region_idx, 1, NA)
-
-
-
-biodf_NA_out_region <- biodf_NA_in_region <-
-  biodf_char_out_region <- biodf_char_in_region <- data.frame(bioact)
-biodf_NA_out_region[1, 1] <- NA
-biodf_char_out_region$char_col <- rep("a", nrow(bioact))
-biodf_NA_in_region[1, region_idx[1]] <- NA
-biodf_char_in_region[, region_idx[1]] <- rep("a", nrow(bioact))
-
-# Create a single numeric value with missing
-na_num <- numeric(1)
-na_num[1] <- NA
-
-na_log <- logical(1)
-na_log[1] <- NA
-
-# Create data restriced to region of interest
-msDat_region_only <- msDatObj[, region_idx]
-bioact_region_only <- bioact[, region_idx]
-
-# colnamesMS(testDat$msDat) <- paste0("mass_spec", 1:50)
-# colnames(testDat$bioact) <- paste0("bioact", 1:50)
-
-
-
-# `````````````````````````````````` #
-#  Create a 'true' rankLasso object  #
-# .................................. #
-
-# Calculate model fits for comparison ------------------------------------------
-
-# Explanetory data
-ms_regr <- t( msDatObj$ms[, region_idx] )
-
-# Outcome values
-bio_regr <- colMeans(bioact[, region_idx])
-
-# Fit model
-lambda <- 0.1
-enet_default <- elasticnet::enet(x=ms_regr, y=bio_regr, lambda=lambda)
-# enet_all_cor <- elasticnet::enet(x=ms_regr, y=bio_regr, lambda=lambda, pos_only=FALSE)
-# enet_keep_10 <- elasticnet::enet(x=ms_regr, y=bio_regr, lambda=lambda, ncomp=10)
-
-# Obtain action index.  This is a vector of the compound indices as the enter /
-# leave the model - a positive value means it entered, a negative value means it
-# exited.
-actions <- unlist(enet_default$actions)
-actions <- actions[-length(actions)]
-
-# Indices in the order that the compounds first entered the model
-enter_idx <- unique( actions[actions > 0] )
-
-# Obtain correlation values of proposed compounds
-comp_cor <- apply(ms_regr, 2, function(x) cor(x, bio_regr))
-
-# Indices in the order that the compounds first entered the model, after
-# removing compounds that had a nonpositive correlation with the within-fraction
-# average bioactivity levels
-pos_idx <- enter_idx[comp_cor[enter_idx] > 0]
-pos_10_idx <- pos_idx[ 1:min(length(pos_idx), 10L) ]
-allcomp_10_idx <- enter_idx[ 1:min(length(pos_idx), 10L) ]
-
-## Begin constructing rankEN object
-
-# Dimensions of the data used for analysis
-data_dim  = list(reg  = nrow(ms_regr),
-                 comp = ncol(ms_regr),
-                 repl = nrow(bioact))
-
-# Column names for region of interest
-region_nm <- list(ms  = colnames(msDatObj$ms)[region_idx],
-                  bio = colnames(bioact)[region_idx])
-
-# Create info for the summary function
-summ_info_default <- list(
-  data_dim  = data_dim,
-  region_nm = region_nm,
-  lambda    = 0.1,
-  ncomp     = NULL,
-  pos_only  = TRUE
-)
-summ_info_pos_10 <- summ_info_allcomp <- summ_info_allcomp_10 <- summ_info_default
-summ_info_pos_10$ncomp <- summ_info_allcomp_10$ncomp <- 10L
-summ_info_allcomp$pos_only <- summ_info_allcomp_10$pos_only <- FALSE
-
-# Construct rankEN object using default settings
-true_default <- list(mtoz      = msDatObj$mtoz[pos_idx],
-                     charge    = msDatObj$chg[pos_idx],
-                     comp_cor  = comp_cor[pos_idx],
-                     enet_fit  = enet_default,
-                     summ_info = summ_info_default)
-class(true_default) <- "rankEN"
-
-true_biovec_default <- true_default
-true_biovec_default$summ_info$data_dim$repl <- 1L
-
-
-true_keep_10 <- list(mtoz      = msDatObj$mtoz[pos_10_idx],
-                     charge    = msDatObj$chg[pos_10_idx],
-                     comp_cor  = comp_cor[pos_10_idx],
-                     enet_fit  = enet_default,
-                     summ_info = summ_info_pos_10)
-true_allcomp <- list(mtoz      = msDatObj$mtoz[enter_idx],
-                     charge    = msDatObj$chg[enter_idx],
-                     comp_cor  = comp_cor[enter_idx],
-                     enet_fit  = enet_default,
-                     summ_info = summ_info_allcomp)
-true_keep_10_allcomp <- list(mtoz      = msDatObj$mtoz[allcomp_10_idx],
-                             charge    = msDatObj$chg[allcomp_10_idx],
-                             comp_cor  = comp_cor[allcomp_10_idx],
-                             enet_fit  = enet_default,
-                             summ_info = summ_info_allcomp_10)
-class(true_keep_10) <- class(true_allcomp) <- class(true_keep_10_allcomp) <- "rankEN"
-
-
-
-# Create rankLasso object using function ---------------------------------------
-
-# A few variations of pos_only and ncomp; matrix for bioact and indices for
-# region specifiers
-rankEN_default <- rankEN(msDatObj, bioact, region_idx, region_idx, lambda)
-rankEN_keep_10 <- rankEN(msDatObj, bioact, region_idx, region_idx, lambda, , 10L)
-rankEN_allcomp <- rankEN(msDatObj, bioact, region_idx, region_idx, lambda, FALSE)
-rankEN_keep_10_allcomp <- rankEN(msDatObj, bioact, region_idx, region_idx, lambda, FALSE, 10L)
-
-# bioact as a data.frame or vector
-rankEN_biodf_default <- rankEN(msDatObj, data.frame(bioact), region_idx, region_idx, lambda)
-rankEN_biovec_default <- rankEN(msDatObj, colMeans(bioact), region_idx, region_idx, lambda)
-
-# region specifiers as character vectors
-rankEN_ms_reg_char_default <-
-  rankEN(msDatObj, bioact, paste0("ms", 21:30), region_idx, lambda)
-rankEN_bio_reg_char_default <-
-  rankEN(msDatObj, bioact, region_idx, paste0("bio", 21:30), lambda)
-rankEN_biovec_reg_char_default <-
-  rankEN(msDatObj, colMeans(bioact), region_idx, paste0("bio", 21:30), lambda)
-
-# region specifiers as NULL
-rankEN_ms_region_null_allcomp <-
-  rankEN(msDat_region_only, bioact, NULL, region_idx, lambda, FALSE)
-rankEN_bio_region_null_keep10 <-
-  rankEN(msDatObj, bioact_region_only, region_idx, NULL, lambda, , 10L)
-rankEN_biodf_region_null_default <-
-  rankEN(msDatObj, data.frame(bioact_region_only), region_idx, NULL, lambda)
-rankEN_biovec_region_null_default <-
-  rankEN(msDatObj, colMeans(bioact_region_only), region_idx, NULL, lambda)
-
-# bioact as data.frame / vector + character region specifier
-rankEN_biodf_region_char_default <-
-  rankEN(msDatObj, data.frame(bioact), region_idx, paste0("bio", 21:30), lambda)
-rankEN_biovec_region_char_default <-
-  rankEN(msDatObj, colMeans(bioact), region_idx, paste0("bio", 21:30), lambda)
-
-# bioact with missing or character outside region of interest
-rankEN_NA_outside_default <-
-  rankEN(msDatObj, biodf_NA_out_region, region_idx, region_idx, lambda)
-rankEN_char_outside_default <-
-  rankEN(msDatObj, biodf_char_out_region, region_idx, region_idx, lambda)
-
-# region as a matrix
-rankEN_ms_region_matr_default <-
-  rankEN(msDatObj, bioact, region_idx_matr, region_idx, lambda)
-rankEN_biovec_region_matr_default <-
-  rankEN(msDatObj, colMeans(bioact), region_idx, region_idx_matr, lambda)
 
 
 
@@ -190,14 +8,51 @@ rankEN_biovec_region_matr_default <-
 
 context("rankEN method")
 
-# Test list elements one-at-a-time for easier location of differences
-test_that("compare rankEN list elements one-by-one", {
-  expect_identical( rankEN_default$mtoz,      true_default$mtoz )
-  expect_identical( rankEN_default$charge,    true_default$charge )
-  expect_identical( rankEN_default$comp_cor,  true_default$comp_cor )
-  expect_identical( rankEN_default$enet_fit,  true_default$enet_fit )
-  expect_identical( rankEN_default$summ_info, true_default$summ_info )
-})
+# # Test list elements one-at-a-time for easier location of differences
+# test_that("compare rankEN list elements one-by-one", {
+#   expect_identical( rankEN_default$mtoz,      true_default$mtoz )
+#   expect_identical( rankEN_default$charge,    true_default$charge )
+#   expect_identical( rankEN_default$comp_cor,  true_default$comp_cor )
+#   expect_identical( rankEN_default$enet_fit,  true_default$enet_fit )
+#   expect_identical( rankEN_default$summ_info, true_default$summ_info )
+# })
+
+bio_df <- data.frame(bioact)
+bio_df[, "bio1"] <- "asdf"
+
+bio_vec <- colMeans(bioact)
+bio_matr_ave <- matrix(bio_vec, nrow=1, dimnames=list(NULL, colnames(bioact)))
+
+true_rankEN_bio_ave <- true_rankEN$pos
+true_rankEN_bio_ave$summ_info$data_dim$repl <- 1L
+
+
+
+
+
+
+# bioact args
+
+out <- rankEN(msDatObj, bioact, region_idx, region_idx, lambda)
+expect_identical(true_rankEN$pos, out)
+
+out <- rankEN(msDatObj, bio_df, region_idx, region_idx, lambda)
+expect_identical(true_rankEN$pos, out)
+
+out <- rankEN(msDatObj, bio_vec, region_idx, region_idx, lambda)
+expect_identical(true_rankEN_bio_ave, out)
+
+out <- rankEN(msDatObj, bio_matr_ave, region_idx, region_idx, lambda)
+expect_identical(true_rankEN_bio_ave, out)
+
+# region args
+
+
+
+
+
+
+                 
 
 # A few variations of pos_only and ncomp; matrix for bioact and indices for
 # region specifiers

@@ -83,21 +83,30 @@ filterMS_border_idx_num <- function(bsize, regIdx, ms_nc) {
 
 filterMS_check_valid <- function(msObj, region, border, bord_ratio, min_inten, max_chg) {
 
+  ## Check for missing arguments
+  
+  all_var_nm <- c("msObj", "region", "border", "bord_ratio", "min_inten", "max_chg")
+  for (var_nm in all_var_nm) {
+    if (!eval(substitute(hasArg(var_nm)))) {
+      stop("Must provide an argument for ", var_nm, call.=FALSE)
+    }
+    # Check that an object exists for provided argument 
+    tryCatch(get(var_nm), error = function(err) {
+      err <- as.character(err)
+      obj_nm <- regmatches(err, gregexpr("(?<=\')(.*?)(?=\')", err, perl=TRUE))[[1L]]
+      stop("object \'", obj_nm, "\' not found for ", var_nm, call.=FALSE)
+    })
+  }
+
   ## Check msObj
 
-  if (missing(msObj)) {
-    stop("Must provide an argument for msObj", call.=FALSE)
-  }
-  else if (!("msDat" %in% class(msObj))) {
+  if (! inherits(msObj, "msDat")) {
     stop("msObj must be of class \"msDat\"", call.=FALSE)
   }
 
   ## Check region
 
-  if (missing(region)) {
-    stop("Must provide an argument for region", call.=FALSE)
-  }
-  else if ( !(is.character(region) || is.numeric(region)) ) {
+  if ( !(is.character(region) || is.numeric(region)) ) {
     stop("region must be either of mode character or numeric", call.=FALSE)
   }
   else if (length(region) == 0L) {
@@ -118,6 +127,9 @@ filterMS_check_valid <- function(msObj, region, border, bord_ratio, min_inten, m
     if ( !(identical(length(border), 1L) || identical(length(border), 2L)) ) {
       stop("border must have length 1 or 2", call.=FALSE)
     }
+    else if (anyNA(border)) {
+      stop("border cannot contain any missing", call.=FALSE)
+    }
     else if ( any(as.integer(border) < 0L) ) {
       stop("The value of border must be greater than or equal to 0", call.=FALSE)
     }
@@ -131,6 +143,9 @@ filterMS_check_valid <- function(msObj, region, border, bord_ratio, min_inten, m
   else if ( !identical(length(bord_ratio), 1L) ) {
     stop("bord_ratio must be of length 1", call.=FALSE)
   }
+  else if (anyNA(bord_ratio)) {
+    stop("bord_ratio cannot contain any missing", call.=FALSE)
+  }
   else if (bord_ratio < 0) {
     stop("bord_ratio must be nonnegative", call.=FALSE)
   }
@@ -143,6 +158,9 @@ filterMS_check_valid <- function(msObj, region, border, bord_ratio, min_inten, m
   else if ( !identical(length(min_inten), 1L) ) {
     stop("min_inten must be of length 1", call.=FALSE)
   }
+  else if (anyNA(min_inten)) {
+    stop("min_inten cannot contain any missing", call.=FALSE)
+  }  
 
 
   ## Check max_chg
@@ -153,8 +171,7 @@ filterMS_check_valid <- function(msObj, region, border, bord_ratio, min_inten, m
   else if ( !identical(length(max_chg), 1L) ) {
     stop("max_chg must be of length 1", call.=FALSE)
   }
-
+  else if (anyNA(max_chg)) {
+    stop("max_chg cannot contain any missing", call.=FALSE)
+  }
 }
-
-
-

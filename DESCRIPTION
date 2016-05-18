@@ -6,12 +6,10 @@ Date: 2015-12-14
 Authors@R: c(
     person("Pritchard", "David", email="dpritch@live.unc.edu", role=c("aut", "cre")),
     person("Kirkpatrick", "Christine", email="ckirkpat@live.unc.edu", role="aut"))
-Description: More about what it does (maybe more than one line)
+Description: Suite of software to search for candidate compounds with an effect on bioactivity.
 License: GPL-3
 LazyData: TRUE
 Suggests: testthat,
-    knitr,
-    rmarkdown
-Imports: lars,
-    elasticnet
+    knitr
+Imports: elasticnet
 VignetteBuilder: knitr

@@ -39,9 +39,10 @@ filterMS(msObj, region, border = "all", bord_ratio = 0.05,
   compound may exhibit (see criterion 5)}
 }
 \value{
-Returns an object of class \code{filterMS} and \code{msDat}.  This
-  object is a \code{list} with elements described below.  The class is
-  equipped with a \code{print}, code{summary}, and \code{extractMS} function.
+Returns an object of class \code{filterMS} which inherits from
+  \code{msDat}.  This object is a \code{list} with elements described below.
+  The class is equipped with a \code{print}, \code{summary}, and
+  \code{extractMS} function.
 
   \describe{
 
@@ -81,12 +82,16 @@ Attempts to filter out candidate compounds via subject-matter
 
   \item The ratio of the m/z intensity of a species in the areas bordering
   the region of interest and the species maximum intensity must be less than
-  \code{bord_ratio}
+  \code{bord_ratio}.  When there is no bordering area then it is taken to
+  mean that all observations satisfy this criterion.
 
   \item The immediately right adjacent fraction to its maximum intensity
   fraction for a species must have a non-zero abundance.  In the case of ties
   for the maximum, it is the fraction immediately to the right of the
-  rightmost maximum fraction which cannot have zero abundance.
+  rightmost maximum fraction which cannot have zero abundance.  When the
+  fraction with maximum intensity is the rightmost fraction in the data for
+  an observation, then it is taken to mean that the observation satisfies
+  this criterion.
 
   \item At least 1 fraction in the region of interest must have intensity
   greater than \code{min_inten}

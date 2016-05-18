@@ -361,22 +361,23 @@ binMS <- function(mass_spec, mtoz, charge, mass=NULL, time_peak_reten, ms_inten=
 #' 
 #' Prints the number of m/z levels and fractions of the resultant mass spectrometry data
 #'
-#' @param binObj An object of class \code{\link{binMS}}
+#' @param x An object of class \code{\link{binMS}}
+#'
+#' @param ... Arguments passed to dot-dot-dot are ignored
 #' 
 #' @export
 
-print.binMS <- function(binObj) {
-  msDatObj <- binObj$msDatObj
+print.binMS <- function(x, ...) {
 
-  if (is.null(msDatObj)) {
+  if (is.null(x$msDatObj)) {
     cat("An object of class \"binMS\"; no observations satisfied all of the inclusion criteria.\n")
   }
   else {
-    cat("An object of class \"binMS\" with ", NROW(msDatObj$ms), " compounds and ",
-        NCOL(msDatObj$ms), " fractions.\n", sep="")
+    cat("An object of class \"binMS\" with ", NROW(x$msDatObj$ms), " compounds and ",
+        NCOL(x$msDatObj$ms), " fractions.\n", sep="")
   }
-  cat("Use summary.binMS to see more details regarding the consolidation process.\n",
-      "Use extractMS to extract the consolidated mass spectrometry data.\n\n")
+  cat("Use summary to see more details regarding the consolidation process.\n",
+      "Use extractMS to extract the consolidated mass spectrometry data.\n\n", sep="")
 }
 
 
@@ -389,17 +390,27 @@ print.binMS <- function(binObj) {
 #' criterion, how many candidate compounds were chosen overall, and how many
 #' candidate compounds were obtained after consolidation.
 #'
-#' @param binObj An object of class \code{\link{binMS}}
+#' @param object An object of class \code{\link{binMS}}
+#'
+#' @param ... Arguments passed to dot-dot-dot are ignored
 #'
 #' @export
 
 
-summary.binMS <- function(binObj) {
+summary.binMS <- function(object, ...) {
 
-  # Add variables to current environment for convenience: n_tot, n_time_pr,
-  # n_mass, n_charge, n_tiMaCh, n_binned, time_range, mass_range, charge_range,
-  # mtoz_diff, time_diff
-  list2env(binObj$summ_info, envir=environment())
+  # Add pointers to summ_info variables for convenience
+  n_tot        <- object$summ_info$n_tot
+  n_time_pr    <- object$summ_info$n_time_pr
+  n_mass       <- object$summ_info$n_mass
+  n_charge     <- object$summ_info$n_charge
+  n_tiMaCh     <- object$summ_info$n_tiMaCh
+  n_binned     <- object$summ_info$n_binned
+  time_range   <- object$summ_info$time_range
+  mass_range   <- object$summ_info$mass_range
+  charge_range <- object$summ_info$charge_range
+  mtoz_diff    <- object$summ_info$mtoz_diff
+  time_diff    <- object$summ_info$time_diff
 
   cat("\n",
       "The mass spectrometry data prior to binning had:\n",

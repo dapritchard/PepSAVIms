@@ -119,18 +119,18 @@ msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
 #'
 #' Displays the number of candidate compounds left in the data
 #'
+#' @param x An object of class \code{\link{msDat}}
+#'
+#' @param ... Arguments passed to dot-dot-dot are ignored
+#'
 #' @export
 
-print.msDat <- function(msDat, asis=FALSE) {
+print.msDat <- function(x, ...) {
+  
+  cat("An object of class \"msDat\" with ", format(NROW(msDat$ms), big.mark=","),
+      " compounds and ", NCOL(msDat$ms), " fractions.\n", sep="")
+  cat("Use extractMS to extract the mass spectrometry data.\n\n")
 
-  if (asis) {
-    print.default(msDat)
-  }
-  else{ 
-    cat("An object of class \"msDat\" with ", format(NROW(msDat$ms), big.mark=","),
-        " compounds and ", NCOL(msDat$ms), " fractions.\n", sep="")
-    cat("Use extractMS to extract the mass spectrometry data.\n\n")
-  }
 }
 
 

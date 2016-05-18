@@ -4,7 +4,7 @@
 # ................... #
 
 # See construct-data/cd-binMS.R for the file used to sample / create the data
-load("tests/data/data-binMS.RData")
+load("../data/data-binMS.RData")
 
 
 
@@ -279,7 +279,6 @@ test_that("binMS: wrong types of arguments", {
 
 
 
-
 # `````````````````````````````` #
 #  Args of the wrong dimensions  #
 # .............................. #
@@ -492,7 +491,6 @@ test_that("binMS: errors in specifying data in mass_spec by index", {
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "ms_inten cannot have any duplicate values")
 })
-
 
 
 

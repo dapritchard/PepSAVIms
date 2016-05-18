@@ -4,7 +4,12 @@
 \alias{print.msDat}
 \title{Basic information for class \code{msDat}}
 \usage{
-\method{print}{msDat}(msDat, asis = FALSE)
+\method{print}{msDat}(x, ...)
+}
+\arguments{
+\item{x}{An object of class \code{\link{msDat}}}
+
+\item{...}{Arguments passed to dot-dot-dot are ignored}
 }
 \description{
 Displays the number of candidate compounds left in the data

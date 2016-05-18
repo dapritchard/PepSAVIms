@@ -1,9 +1,10 @@
 
 # Create a small data set imitating the form of mass spectrometry data prior to
-# any binning or filtering.  Additionally create some derived forms of this
-# first data set such as a data.frame version, data with missing values, and so
-# on.  Also hand-construct a filtered and binned 'true' data set which is used
-# to compare the results from the binning function against.
+# any binning or filtering; hand-construct a consolidated 'true' data set which
+# is used to compare the results from the binning function against.
+#
+# Additionally create some derived forms of this first data set such as a
+# data.frame version, data with missing values, and so on.
 #
 # Assume throughout the following settings for consolidation:
 #
@@ -19,7 +20,8 @@
 # ........................... #
 
 # Hand constructed test data.  Note that m/z and mass values do not agree (but
-# this is okay, in the sense that agreement is not checked for in binMS).
+# this is okay, in the sense that agreement is not checked for in binMS).  See
+# dimnames argument for the meaning of the columns.
 
 test_dat_1 <- matrix(
   c(235,		4,	12,		  10,	
@@ -65,6 +67,8 @@ test_dat_1 <- matrix(
 # Data in each row is constructed be in a different consolidation group from
 # data sampled from another row (or to not be used), assuming small random
 # perturbations of the data when sampling.
+#
+# Mass-to-charge ratio will be derived from mass and charge
 
 baseline_dat <- matrix(
   c(# start with a set of values then change mass, charge, and peak time
@@ -174,8 +178,8 @@ binDat <- binDat[order(binDat[, "mtoz"], binDat[, "time"], binDat[, "chg"]), ]
 # Construct msDat object
 msDatObj <- msDat(binDat, "mtoz", "chg", c("ms1", "ms2"))
 # Calculate whether the observations satisfy the criteria
-time_pr_bool <- (14 < testMS[, "time"]) & (testMS[, "time"] < 45)
-mass_bool <- (2000 < testMS[, "mass"]) & (testMS[, "mass"] < 15000)
+time_pr_bool <- (14 <= testMS[, "time"]) & (testMS[, "time"] <= 45)
+mass_bool <- (2000 <= testMS[, "mass"]) & (testMS[, "mass"] <= 15000)
 charge_bool <- (2L <= testMS[, "chg"]) & (testMS[, "chg"] <= 10L)
 # Construct summary function information
 summ_info <- list(n_tot        = nrow(testMS),
@@ -198,9 +202,9 @@ class(true_bin) <- c("binMS", "msDat")
 
 
 
-#
-#  Section title here ******************
-#
+# ``````````````````````````````````````````````` #
+#  Permute observations and add superfluous data  #
+# ............................................... #
 
 # Randomly permute the testMS data; the binning algorithm should be invariant
 # to this
@@ -213,23 +217,33 @@ superfluous_data <- matrix(rnorm(2 * nr),
                            dimnames = list(NULL, c("extra_dat_1", "extra_dat_2")))
 testMS <- cbind(testMS, superfluous_data)
 
+
+
+
+# ``````````````````````````````````````` #
+#  Additional objects for use in testing  #
+# ....................................... #
+
 # Create a data.frame, and add a character column
 testdf <- data.frame(testMS)
 testdf$extra_dat_3 <- "z"
 
-#
+# The number of columns with real data (i.e. cols 1:6)
 n_datacols <- 6L
 
-numer_NA <- replace(numeric(1), 1, NA)
-char_NA <- replace(character(1), 1, NA)
+# Create length-1 vectors that are just a single NA
+numer_NA <- replace(numeric(1), 1, NA_real_)
+char_NA <- replace(character(1), 1, NA_character_)
 
-
+# Create data with an NA in the mass spec abundances data
 test_NA <- testMS
-test_NA[1, "ms1"] <- NA
+test_NA[1, "ms1"] <- NA_real_
 
+# Create a data set without any column names
 test_no_colnames <- testMS
 colnames(test_no_colnames) <- NULL
 
+# Create a data set with two columns that have the same name
 test_dup_colnames <- testMS
 colnames(test_dup_colnames)[2] <- "mtoz"
 
