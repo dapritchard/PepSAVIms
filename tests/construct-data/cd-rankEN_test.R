@@ -20,37 +20,6 @@ reg_idx <- sim_args$regIdx
 
 
 
-
-
-
-
-# reg_idx_NA <- replace(reg_idx, 1, NA)
-
-
-
-# biodf_NA_out_region <- biodf_NA_in_region <-
-#   biodf_char_out_region <- biodf_char_in_region <- data.frame(bioact)
-# biodf_NA_out_region[1, 1] <- NA
-# biodf_char_out_region$char_col <- rep("a", nrow(bioact))
-# biodf_NA_in_region[1, reg_idx[1]] <- NA
-# biodf_char_in_region[, reg_idx[1]] <- rep("a", nrow(bioact))
-
-# # Create a single numeric value with missing
-# na_num <- numeric(1)
-# na_num[1] <- NA
-
-# na_log <- logical(1)
-# na_log[1] <- NA
-
-# # Create data restriced to region of interest
-# msDat_region_only <- msDatObj[, reg_idx]
-# bioact_region_only <- bioact[, reg_idx]
-
-# colnamesMS(testDat$msDat) <- paste0("mass_spec", 1:50)
-# colnames(testDat$bioact) <- paste0("bioact", 1:50)
-
-
-
 # ``````````````````````` #
 #  Fit elastic net model  #
 # ....................... #
@@ -151,90 +120,63 @@ names(true_rankEN) <- names(cmpidx)
 # Equip objects with rankEN class attribute
 true_rankEN <- lapply(true_rankEN, structure, class="rankEN")
 
-# true_default <- list(mtoz      = msDatObj$mtoz[pos_idx],
-#                      charge    = msDatObj$chg[pos_idx],
-#                      comp_cor  = comp_cor[pos_idx],
-#                      enet_fit  = enet_default,
-#                      summ_info = summ_info_default)
-# class(true_default) <- "rankEN"
-
-# true_biovec_default <- true_default
-# true_biovec_default$summ_info$data_dim$repl <- 1L
-
-
-# true_keep_10 <- list(mtoz      = msDatObj$mtoz[pos_10_idx],
-#                      charge    = msDatObj$chg[pos_10_idx],
-#                      comp_cor  = comp_cor[pos_10_idx],
-#                      enet_fit  = enet_default,
-#                      summ_info = summ_info_pos_10)
-# true_allcomp <- list(mtoz      = msDatObj$mtoz[enter_idx],
-#                      charge    = msDatObj$chg[enter_idx],
-#                      comp_cor  = comp_cor[enter_idx],
-#                      enet_fit  = enet_default,
-#                      summ_info = summ_info_allcomp)
-# true_keep_10_allcomp <- list(mtoz      = msDatObj$mtoz[allcomp_10_idx],
-#                              charge    = msDatObj$chg[allcomp_10_idx],
-#                              comp_cor  = comp_cor[allcomp_10_idx],
-#                              enet_fit  = enet_default,
-#                              summ_info = summ_info_allcomp_10)
-# class(true_keep_10) <- class(true_allcomp) <- class(true_keep_10_allcomp) <- "rankEN"
 
 
 
-# Create rankLasso object using function ---------------------------------------
+# # Create rankLasso object using function ---------------------------------------
 
-# A few variations of pos_only and ncomp; matrix for bioact and indices for
-# region specifiers
-rankEN_default <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda)
-rankEN_keep_10 <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, , 10L)
-rankEN_allcomp <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, FALSE)
-rankEN_keep_10_allcomp <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, FALSE, 10L)
+# # A few variations of pos_only and ncomp; matrix for bioact and indices for
+# # region specifiers
+# rankEN_default <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda)
+# rankEN_keep_10 <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, , 10L)
+# rankEN_allcomp <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, FALSE)
+# rankEN_keep_10_allcomp <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, FALSE, 10L)
 
-# bioact as a data.frame or vector
-rankEN_biodf_default <- rankEN(msDatObj, data.frame(bioact), reg_idx, reg_idx, lambda)
-rankEN_biovec_default <- rankEN(msDatObj, colMeans(bioact), reg_idx, reg_idx, lambda)
+# # bioact as a data.frame or vector
+# rankEN_biodf_default <- rankEN(msDatObj, data.frame(bioact), reg_idx, reg_idx, lambda)
+# rankEN_biovec_default <- rankEN(msDatObj, colMeans(bioact), reg_idx, reg_idx, lambda)
 
-# region specifiers as character vectors
-rankEN_ms_reg_char_default <-
-  rankEN(msDatObj, bioact, paste0("ms", 21:30), reg_idx, lambda)
-rankEN_bio_reg_char_default <-
-  rankEN(msDatObj, bioact, reg_idx, paste0("bio", 21:30), lambda)
-rankEN_biovec_reg_char_default <-
-  rankEN(msDatObj, colMeans(bioact), reg_idx, paste0("bio", 21:30), lambda)
+# # region specifiers as character vectors
+# rankEN_ms_reg_char_default <-
+#   rankEN(msDatObj, bioact, paste0("ms", 21:30), reg_idx, lambda)
+# rankEN_bio_reg_char_default <-
+#   rankEN(msDatObj, bioact, reg_idx, paste0("bio", 21:30), lambda)
+# rankEN_biovec_reg_char_default <-
+#   rankEN(msDatObj, colMeans(bioact), reg_idx, paste0("bio", 21:30), lambda)
 
-# region specifiers as NULL
-rankEN_ms_region_null_allcomp <-
-  rankEN(msDat_region_only, bioact, NULL, reg_idx, lambda, FALSE)
-rankEN_bio_region_null_keep10 <-
-  rankEN(msDatObj, bioact_region_only, reg_idx, NULL, lambda, , 10L)
-rankEN_biodf_region_null_default <-
-  rankEN(msDatObj, data.frame(bioact_region_only), reg_idx, NULL, lambda)
-rankEN_biovec_region_null_default <-
-  rankEN(msDatObj, colMeans(bioact_region_only), reg_idx, NULL, lambda)
+# # region specifiers as NULL
+# rankEN_ms_region_null_allcomp <-
+#   rankEN(msDat_region_only, bioact, NULL, reg_idx, lambda, FALSE)
+# rankEN_bio_region_null_keep10 <-
+#   rankEN(msDatObj, bioact_region_only, reg_idx, NULL, lambda, , 10L)
+# rankEN_biodf_region_null_default <-
+#   rankEN(msDatObj, data.frame(bioact_region_only), reg_idx, NULL, lambda)
+# rankEN_biovec_region_null_default <-
+#   rankEN(msDatObj, colMeans(bioact_region_only), reg_idx, NULL, lambda)
 
-# bioact as data.frame / vector + character region specifier
-rankEN_biodf_region_char_default <-
-  rankEN(msDatObj, data.frame(bioact), reg_idx, paste0("bio", 21:30), lambda)
-rankEN_biovec_region_char_default <-
-  rankEN(msDatObj, colMeans(bioact), reg_idx, paste0("bio", 21:30), lambda)
+# # bioact as data.frame / vector + character region specifier
+# rankEN_biodf_region_char_default <-
+#   rankEN(msDatObj, data.frame(bioact), reg_idx, paste0("bio", 21:30), lambda)
+# rankEN_biovec_region_char_default <-
+#   rankEN(msDatObj, colMeans(bioact), reg_idx, paste0("bio", 21:30), lambda)
 
-# bioact with missing or character outside region of interest
-rankEN_NA_outside_default <-
-  rankEN(msDatObj, biodf_NA_out_region, reg_idx, reg_idx, lambda)
-rankEN_char_outside_default <-
-  rankEN(msDatObj, biodf_char_out_region, reg_idx, reg_idx, lambda)
+# # bioact with missing or character outside region of interest
+# rankEN_NA_outside_default <-
+#   rankEN(msDatObj, biodf_NA_out_region, reg_idx, reg_idx, lambda)
+# rankEN_char_outside_default <-
+#   rankEN(msDatObj, biodf_char_out_region, reg_idx, reg_idx, lambda)
 
-# region as a matrix
-# rankEN_ms_region_matr_default <-
-#   rankEN(msDatObj, bioact, reg_idx_matr, reg_idx, lambda)
-# rankEN_biovec_region_matr_default <-
-#   rankEN(msDatObj, colMeans(bioact), reg_idx, reg_idx_matr, lambda)
+# # region as a matrix
+# # rankEN_ms_region_matr_default <-
+# #   rankEN(msDatObj, bioact, reg_idx_matr, reg_idx, lambda)
+# # rankEN_biovec_region_matr_default <-
+# #   rankEN(msDatObj, colMeans(bioact), reg_idx, reg_idx_matr, lambda)
 
 
 
 
 # ``````````````````` #
-#    Begin testing    #
+#  Create related object for testing    #
 # ................... #
 
 filterMS_obj <- list(msDatObj    = msDatObj,
@@ -259,3 +201,36 @@ bio_vec_reg_only <- bio_vec[reg_idx]
 
 true_rankEN_bio_ave <- true_rankEN$pos
 true_rankEN_bio_ave$summ_info$data_dim$repl <- 1L
+
+
+
+
+
+
+
+
+
+# reg_idx_NA <- replace(reg_idx, 1, NA)
+
+
+
+# biodf_NA_out_region <- biodf_NA_in_region <-
+#   biodf_char_out_region <- biodf_char_in_region <- data.frame(bioact)
+# biodf_NA_out_region[1, 1] <- NA
+# biodf_char_out_region$char_col <- rep("a", nrow(bioact))
+# biodf_NA_in_region[1, reg_idx[1]] <- NA
+# biodf_char_in_region[, reg_idx[1]] <- rep("a", nrow(bioact))
+
+# # Create a single numeric value with missing
+# na_num <- numeric(1)
+# na_num[1] <- NA
+
+# na_log <- logical(1)
+# na_log[1] <- NA
+
+# # Create data restriced to region of interest
+# msDat_region_only <- msDatObj[, reg_idx]
+# bioact_region_only <- bioact[, reg_idx]
+
+# colnamesMS(testDat$msDat) <- paste0("mass_spec", 1:50)
+# colnames(testDat$bioact) <- paste0("bioact", 1:50)

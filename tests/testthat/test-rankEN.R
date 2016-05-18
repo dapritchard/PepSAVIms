@@ -128,6 +128,74 @@ test_that("filterMS: msObj with valid input", {
 
 
 
+# ``````````````````````````` #
+#  Missing param for formals  #
+# ........................... #
+
+test_that("rankEN: missing input", {
+  
+  # Note that the remaining formal args have defaults
+  
+  # msObj missing
+  expect_error(rankEN( , bioact, reg_idx, reg_idx, lambda),
+               "Must provide an argument for msObj" )
+  
+  # bioact missing
+  expect_error(rankEN(msDatObj, , reg_idx, reg_idx, lambda),
+               "Must provide an argument for bioact" )
+  
+  # lambda missing
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, ),
+               "Must provide an argument for lambda" )
+})
+
+
+
+
+# ```````````````````````````````` #
+#  Argument is nonexistent object  #
+# ................................ #
+
+test_that("rankEN: nonexistent object", {
+  
+  # msObj arg a nonexistent object
+  expect_error(rankEN(asdf, bioact, reg_idx, reg_idx, lambda),
+               "object 'asdf' not found for msObj")
+
+  # bioact arg a nonexistent object
+  expect_error(rankEN(filterMS_obj, asdf, reg_idx, reg_idx, lambda),
+               "object 'asdf' not found for bioact")
+
+  # region_ms arg a nonexistent object
+  expect_error(rankEN(filterMS_obj, bioact, asdf, reg_idx, lambda),
+               "object 'asdf' not found for region_ms")
+
+  # region_bio arg a nonexistent object
+  expect_error(rankEN(filterMS_obj, bioact, reg_idx, asdf, lambda),
+               "object 'asdf' not found for region_bio")
+
+  # lambda arg a nonexistent object
+  expect_error(rankEN(filterMS_obj, bioact, reg_idx, reg_idx, asdf),
+               "object 'asdf' not found for lambda")
+
+  # pos_only arg a nonexistent object
+  expect_error(rankEN(filterMS_obj, bioact, reg_idx, reg_idx, lambda, asdf),
+               "object 'asdf' not found for pos_only")
+
+  # ncomp arg a nonexistent object
+  expect_error(rankEN(filterMS_obj, bioact, reg_idx, reg_idx, lambda, , asdf),
+               "object 'asdf' not found for ncomp")
+})
+
+
+
+
+# ``````````````````````````````` #
+#  Argument is of the wrong type  #
+# ............................... #
+
+
+
 
 ## Invalid input
 
@@ -182,26 +250,6 @@ expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, , na_num),
 expect_error( rankEN(msDatObj, bioact, reg_idx, region_idx[-1L], lambda),
               paste0("Number of fractions for mass spectrometry (10) does not ",
                      "match the number of fractions for bioactivity (9)"), fixed=TRUE )
-
-
-# Assume that region_ms and region_bio will provide appropriate errors when they
-# are passed the right type
-
-
-
-# checkwhich <- function(curr, targ) {
-#   cat(sep="",
-#       identical(curr$mtoz, targ$mtoz), "\n",
-#       identical(curr$charge, targ$charge), "\n",
-#       identical(curr$comp_cor, targ$comp_cor), "\n",
-#       identical(curr$enet_fit, targ$enet_fit), "\n",
-#       identical(curr$summ_info, targ$summ_info), "\n")
-# }
-
-# checkwhich(rankEN_allcomp, true_allcomp)
-
-
-
 
 
 

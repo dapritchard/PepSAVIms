@@ -150,17 +150,23 @@ rankEN_filter_compIdx <- function(comp_idx, comp_cor, ncomp, pos_only) {
 
 
 
-rankEN_check_valid_input <- function(bioact, region_ms, region_bio, lambda, pos_only, ncomp) {
+rankEN_check_valid_input <- function(msObj, bioact, region_ms, region_bio,
+                                     lambda, pos_only, ncomp) {
 
   ## Check for missing arguments
-
-  # note: other vars have defaults
-  if (missing(bioact)) {
-    stop("Must provide an argument for bioact", call.=FALSE)
+  
+  all_var_nm <- c("msObj", "bioact", "region_ms", "region_bio", "lambda", "pos_only", "ncomp")
+  for (var_nm in all_var_nm) {
+    if (!eval(substitute(hasArg(var_nm)))) {
+      stop("Must provide an argument for ", var_nm, call.=FALSE)
+    }
+    # Check that an object exists for provided argument 
+    tryCatch(get(var_nm), error = function(err) {
+      err <- as.character(err)
+      obj_nm <- regmatches(err, gregexpr("(?<=\')(.*?)(?=\')", err, perl=TRUE))[[1L]]
+      stop("object \'", obj_nm, "\' not found for ", var_nm, call.=FALSE)
+    })
   }
-  else if (missing(lambda)) {
-    stop("Must provide an argument for lambda", call.=FALSE)
-  }    
 
   ## Check bioact
 
