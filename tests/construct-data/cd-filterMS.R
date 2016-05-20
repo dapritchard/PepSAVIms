@@ -317,6 +317,19 @@ class(true_nosatisfy) <- c("filterMS", "msDat")
 
 
 
+# ````````````````````````````````````````````````` #
+#  Object for testing region and border assignment  #
+#.................................................. #
+
+# Create a (3 x 12) msDat object
+ms2 <- matrix(1:36, ncol=12)
+ms2[, 5:6] <- 1500
+colnames(ms2) <- paste0("ms", 1:12)
+msDatObj_alt <- msDat(ms2, 1:3, rep(3L, 3))
+
+
+
+
 # ````````````````````` #
 #  Create binMS object  #
 # ..................... #
@@ -325,30 +338,6 @@ class(true_nosatisfy) <- c("filterMS", "msDat")
 binMS_obj <- list(msDatObj  = msDatObj,
                   summ_info = NULL)
 class(binMS_obj) <- c("binMS", "msDat")
-
-
-
-
-# `````````````````````````````````````````````````` #
-#  Objects for testing region and border assignment  #
-#................................................... #
-
-# Create a (3 x 12) msDat object
-ms2 <- matrix(1:36, ncol=12)
-ms2[, 5:6] <- 1500
-colnames(ms2) <- paste0("ms", 1:12)
-msDatObj2 <- msDat(ms2, 1:3, rep(3L, 3))
-
-# Create test objects by calling filterMS with various choices of region and
-# border.  Testing is done by checking the region names and border names
-# provided by summ_info.
-fobj_region_char <- filterMS(msDatObj2, paste0("ms", 5:6))
-fobj_region_nume <- filterMS(msDatObj2, 5:6)
-fobj_border_all  <- filterMS(msDatObj2, 5:6, "all")
-fobj_border_none <- filterMS(msDatObj2, 5:6, "none")
-fobj_border_num1 <- filterMS(msDatObj2, 5:6, 3)
-fobj_border_num2 <- filterMS(msDatObj2, 5:6, c(3, 43))
-fobj_border_0    <- filterMS(msDatObj2, 5:6, 0)
 
 
 
@@ -364,12 +353,6 @@ save(true_filterMS,
      true_border_num_all,
      true_nosatisfy,
      msDatObj,
+     msDatObj_alt,
      binMS_obj,
-     fobj_region_char,
-     fobj_region_nume,
-     fobj_border_all,
-     fobj_border_none,
-     fobj_border_num1,
-     fobj_border_num2,
-     fobj_border_0,
      file="tests/data/data-filterMS.RData")

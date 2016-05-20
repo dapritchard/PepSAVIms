@@ -126,12 +126,13 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
   if (is.null(msDatObj)) {
     stop("mass spec object encapsulated by msObj cannot be NULL", call.=FALSE)
   }
+  ms <- msDatObj$ms
   
   # If we have a vector convert to a 1-row matrix.  Leave unchanged otherwise.
   bioact <- rankEN_vector_to_matrix(bioact)
   
   # Extract the region of interest for the ms data
-  ms <- extract_var(msDatObj$ms, region_ms, TRUE)
+  ms <- extract_var(ms, region_ms, TRUE)
   bio <- extract_var(bioact, region_bio, TRUE)
   
   # Check for missing and that dimensions match
@@ -252,7 +253,7 @@ extract_candidates <- function(rankEN_obj, include_cor=TRUE) {
 #'
 #' Displays the data dimensions used to fit the elastic net model
 #'
-#' @param x An object of class \code{\link{rankEN}}
+#' @param x An object of class \code{rankEN}
 #'
 #' @param ... Arguments passed to dot-dot-dot are ignored
 #'

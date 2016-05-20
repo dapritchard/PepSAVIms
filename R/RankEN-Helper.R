@@ -173,11 +173,17 @@ rankEN_check_valid_input <- function(msObj, bioact, region_ms, region_bio,
   if (!is.numeric(bioact) && !is.data.frame(bioact)) {
     stop("bioact must be either a data.frame or of mode numeric", call.=FALSE)
   }
-  # Check that bioact is a vector or matrix
+  # Check that bioact is a vector or matrix.  Note that we don't check for NAs
+  # or non-numeric yet b/c we only care about problems in the region of interest.
   else if (is.numeric(bioact)) {
     bio_dim <- attr(bioact, "dim")
     if (!identical(bio_dim, NULL) && !identical(length(bio_dim), 2L)) {
       stop("If of mode numeric, then bioact must be a vector or a matrix", call.=FALSE)
+    }
+    # We require matrices to have number of cols >= 2 for extract_var(), and
+    # when bioact is a vector then it is turned into a (1 x p) matrix later
+    else if (identical(bio_dim, NULL) && (length(bioact) < 2L)) {
+      stop("If a numeric vector, then bioact must have length >= 2", call.=FALSE)
     }
   }
   # Note: don't check for NAs or non-numeric yet b/c we only care about problems

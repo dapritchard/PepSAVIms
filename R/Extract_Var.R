@@ -1,22 +1,23 @@
 
-# Extraction functionality overview --------------------------------------------
-
-
-# There are two functions in this file which are designed to be directly invoked
-# by calling routines - the remaining functions are subroutines for these main
-# routines.  The routines designed for direct access by calling routines are the
-# following:
+#                 ** Extraction functionality overview **
 #
-#   extract_var - returns a subset of the data
+# There are two functions in this file which are designed to be directly invoked
+# by calling routines.  These top-level (relative to this file) functions are:
+#
+#   extract_var - returns data as specified / provided by arg var_specify,
+#                 possibly obtained by subsetting data from arg data_obs.
 #
 #   extract_idx - returns indices corresponding to the data which is to be
 #                 subsetted
+#
+# See the comments describing the functions for a fuller description.  The
+# remaining functions in the file are subroutines for these main routines.
 #
 # Note that the main routines are the ones that perform the error
 # checking, and it is assumed that the arguments are valid when calling the
 # subroutines.
 #
-# The routines in this section have a desired type of a matrix or data.frame for
+# The routines in this file have a desired type of a matrix or data.frame for
 # data_obs, a numeric or character vector for var_specify, and logical for
 # expect_matr
 
@@ -26,7 +27,15 @@
 # Extracting data section ------------------------------------------------------
 
 
-# extract the data in data_obs that is specified by var_specify.
+# Extract the data as specified / provided by arg var_specify, possibly obtained
+# by subsetting data from arg data_obs.  In more detail, the argument for
+# var_specify may itself be the data, in which case the data itself is just
+# returned (is essentially the identity function).  If this is not the case,
+# then the argument to var_specify should be either NULL, or a numeric or
+# character vector providing the names or indices of the columns in data_obs
+# that should be extracted and returned to the caller.  If var_specify is NULL,
+# then the function returns all columns in data_obs, after removing any columns
+# specified by name or index in arguments passed to dot-dot-dot.
 #
 # PRE: when we have a 1-row data_obs, and an index argument to var_specify then
 # this will erroneously treat the index as data.  Thus a potential calling
@@ -52,9 +61,10 @@ extract_var <- function(data_obs, var_specify, expect_matr=FALSE, ...) {
   # Note: the second condition in the following case is to handle the case where
   # the length of the region is the same as the length of the data (e.g. if
   # there are 3 replicates in bioactivity data and region is length 3).  This
-  # condition is usually able to disambiguate the cases b/c we only expect
-  # var_specify to be data (as opposed to column names or indices) in the case
-  # of vector arguments (see precondition regarding 1-row data).
+  # condition is usually able to (except in the 1-row data case) disambiguate
+  # the cases b/c we only expect var_specify to be data (as opposed to column
+  # names or indices) in the case of vector arguments.  See the precondition
+  # regarding 1-row data.
   else if ((identical(length(var_specify), NROW(data_obs)))
            && identical(expect_matr, FALSE)) {
     argstr <- "data"
@@ -99,7 +109,7 @@ extract_null <- function(data_obs, dat_nm, spec_nm, ...) {
          " after removing data for other variables", call.=FALSE)
   }
 
-  # Return data_obs after removing non-ms columns and converting to a matrix
+  # Return data_obs after removing non-used columns and converting to a matrix
   extract_idx_to_data(data_obs, var_idx, TRUE, dat_nm, spec_nm)
 }
 
@@ -288,7 +298,7 @@ extract_num_to_idx <- function(data_obs, var_specify, dat_nm, spec_nm) {
   }  
   # Check that there are no duplicates in var_specify (note: integer(0) fails
   # the conditional as desired)
-  if ( !identical(length(unique(var_specify)), length(var_specify)) ) {
+  if (! identical(length(unique(var_specify)), length(var_specify)) ) {
     stop(spec_nm, " cannot have any duplicate values", call.=FALSE)
   }
 
@@ -360,6 +370,12 @@ extract_check_valid <- function(data_obs, var_specify, expect_matr, dat_nm, spec
     stop(dat_nm, " must have number of columns no less than 2", call.=FALSE)
   }
 
+  # Check that expect_matr is of the right form.  Do this before checking
+  # var_specify b/c we need to use the value of expect_matr in the checks.
+  if (!identical(expect_matr, TRUE) && !identical(expect_matr, FALSE)) {
+    stop("expect_matr must be either TRUE or FALSE", call.=FALSE)
+  }
+
   # Check that var_specify is of the right form
   if (!is.null(var_specify) && !is.numeric(var_specify) && !is.character(var_specify)) {
     stop(spec_nm, " must either be NULL or either of mode numeric or mode character", call.=FALSE)
@@ -383,11 +399,6 @@ extract_check_valid <- function(data_obs, var_specify, expect_matr, dat_nm, spec
     if (!expect_matr && !(identical(spec_len, 1L) || identical(spec_len, nrow(data_obs)))) {
       stop(spec_nm, " must have length 1 or length equal to the number of observations", call.=FALSE)
     }
-  }
-
-  # Check that expect_matr is of the right form
-  if (!identical(expect_matr, TRUE) && !identical(expect_matr, FALSE)) {
-    stop("expect_matr must be either TRUE or FALSE", call.=FALSE)
   }
 }
 

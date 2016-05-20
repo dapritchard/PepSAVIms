@@ -76,8 +76,8 @@ cmpidx <- list(all    = enter_idx,
 #  Create 'true' rankEN objects  #
 # .............................. #
 
-# Computes four 'true' objects; each is a particular combination of pos_only and
-# ncomp specifications
+# Hand-computes four 'true' objects; each is a particular combination of
+# pos_only and ncomp specifications
 
 # Dimensions of the data used for analysis
 data_dim  = list(reg  = nrow(ms_regr),
@@ -107,8 +107,6 @@ summ_info <- list(
 
 # Construct rankEN objects for each combination of pos_only and ncomp
 true_rankEN <- mapply(cmpidx, summ_info, SIMPLIFY=FALSE, FUN=function(idx, info) {
-  print(idx)
-  print(info$pos_only)
   list(mtoz      = msDatObj$mtoz[idx],
        charge    = msDatObj$chg[idx],
        comp_cor  = comp_cor[idx],
@@ -123,114 +121,69 @@ true_rankEN <- lapply(true_rankEN, structure, class="rankEN")
 
 
 
-# # Create rankLasso object using function ---------------------------------------
+# `````````````````````````````````````` #
+#  Create related objects for testing    #
+# ...................................... #
 
-# # A few variations of pos_only and ncomp; matrix for bioact and indices for
-# # region specifiers
-# rankEN_default <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda)
-# rankEN_keep_10 <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, , 10L)
-# rankEN_allcomp <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, FALSE)
-# rankEN_keep_10_allcomp <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, FALSE, 10L)
-
-# # bioact as a data.frame or vector
-# rankEN_biodf_default <- rankEN(msDatObj, data.frame(bioact), reg_idx, reg_idx, lambda)
-# rankEN_biovec_default <- rankEN(msDatObj, colMeans(bioact), reg_idx, reg_idx, lambda)
-
-# # region specifiers as character vectors
-# rankEN_ms_reg_char_default <-
-#   rankEN(msDatObj, bioact, paste0("ms", 21:30), reg_idx, lambda)
-# rankEN_bio_reg_char_default <-
-#   rankEN(msDatObj, bioact, reg_idx, paste0("bio", 21:30), lambda)
-# rankEN_biovec_reg_char_default <-
-#   rankEN(msDatObj, colMeans(bioact), reg_idx, paste0("bio", 21:30), lambda)
-
-# # region specifiers as NULL
-# rankEN_ms_region_null_allcomp <-
-#   rankEN(msDat_region_only, bioact, NULL, reg_idx, lambda, FALSE)
-# rankEN_bio_region_null_keep10 <-
-#   rankEN(msDatObj, bioact_region_only, reg_idx, NULL, lambda, , 10L)
-# rankEN_biodf_region_null_default <-
-#   rankEN(msDatObj, data.frame(bioact_region_only), reg_idx, NULL, lambda)
-# rankEN_biovec_region_null_default <-
-#   rankEN(msDatObj, colMeans(bioact_region_only), reg_idx, NULL, lambda)
-
-# # bioact as data.frame / vector + character region specifier
-# rankEN_biodf_region_char_default <-
-#   rankEN(msDatObj, data.frame(bioact), reg_idx, paste0("bio", 21:30), lambda)
-# rankEN_biovec_region_char_default <-
-#   rankEN(msDatObj, colMeans(bioact), reg_idx, paste0("bio", 21:30), lambda)
-
-# # bioact with missing or character outside region of interest
-# rankEN_NA_outside_default <-
-#   rankEN(msDatObj, biodf_NA_out_region, reg_idx, reg_idx, lambda)
-# rankEN_char_outside_default <-
-#   rankEN(msDatObj, biodf_char_out_region, reg_idx, reg_idx, lambda)
-
-# # region as a matrix
-# # rankEN_ms_region_matr_default <-
-# #   rankEN(msDatObj, bioact, reg_idx_matr, reg_idx, lambda)
-# # rankEN_biovec_region_matr_default <-
-# #   rankEN(msDatObj, colMeans(bioact), reg_idx, reg_idx_matr, lambda)
-
-
-
-
-# ``````````````````` #
-#  Create related object for testing    #
-# ................... #
-
+# Create a filterMS object from the available msDatObj.  We don't need realistic
+# values for cmp_by_crit and summ_info since rankEN extracts the msDat object
+# from a filterMS object anyway.
 filterMS_obj <- list(msDatObj    = msDatObj,
                      cmp_by_crit = NULL,
                      summ_info   = NULL)
 class(filterMS_obj) <- c("filterMS", "msDat")
 
-
+# Bioactivity data as a data.frame.  Note that we have created of column of type
+# character.  This should be okay as the column is not part of the region of
+# interest.
 bio_df <- data.frame(bioact)
 bio_df[, "bio1"] <- "asdf"
 
+# Bioactivity data with missing in region of interest
+bio_NA <- bioact
+bio_NA[1L, reg_idx[1L]] <- NA_real_
+
+# Bioactivity as a vector
 bio_vec <- colMeans(bioact)
+# Bioactivity as a 1-row matrix
 bio_matr_ave <- matrix(bio_vec,
                        nrow=1L,
                        dimnames=list(NULL, colnames(bioact)))
 
-
+# Mass spec and bioactivity data after reducing data to only the columns
+# corresponding to the region of interest
 ms_reg_only <- msDatObj[, reg_idx]
 bio_reg_only <- bioact[, reg_idx]
 bio_vec_reg_only <- bio_vec[reg_idx]
 
-
+# Create a 'true' value for the case when bioactivity data is provided as
+# 1-replicate or averaged data.  This just requires modifying the summ_info from
+# the previous case.
 true_rankEN_bio_ave <- true_rankEN$pos
 true_rankEN_bio_ave$summ_info$data_dim$repl <- 1L
 
 
 
 
+# ````````````````````````````````````` #
+#  Save data for use by testing script  #
+# ..................................... #
 
-
-
-
-
-# reg_idx_NA <- replace(reg_idx, 1, NA)
-
-
-
-# biodf_NA_out_region <- biodf_NA_in_region <-
-#   biodf_char_out_region <- biodf_char_in_region <- data.frame(bioact)
-# biodf_NA_out_region[1, 1] <- NA
-# biodf_char_out_region$char_col <- rep("a", nrow(bioact))
-# biodf_NA_in_region[1, reg_idx[1]] <- NA
-# biodf_char_in_region[, reg_idx[1]] <- rep("a", nrow(bioact))
-
-# # Create a single numeric value with missing
-# na_num <- numeric(1)
-# na_num[1] <- NA
-
-# na_log <- logical(1)
-# na_log[1] <- NA
-
-# # Create data restriced to region of interest
-# msDat_region_only <- msDatObj[, reg_idx]
-# bioact_region_only <- bioact[, reg_idx]
-
-# colnamesMS(testDat$msDat) <- paste0("mass_spec", 1:50)
-# colnames(testDat$bioact) <- paste0("bioact", 1:50)
+save(# Objects used in rankEN calls
+     msDatObj,
+     bioact,
+     reg_idx,
+     lambda,
+     # 'True' objects to test against
+     true_rankEN,
+     true_rankEN_bio_ave,
+     # Derived objects for further testing
+     filterMS_obj,
+     bio_df,
+     bio_NA,
+     bio_vec,
+     bio_matr_ave,
+     ms_reg_only,
+     bio_reg_only,
+     bio_vec_reg_only,
+     file="tests/data/data-rankEN_test.RData")

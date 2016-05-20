@@ -58,31 +58,38 @@ test_that("filterMS: test with valid input", {
 #  Test region and borders assignment  #
 # .................................... #
 
-# Tests by checking that the region of border names supplied to the summ_info
-# object are as they should be
+# Tests in this section are done by checking that the region of border names
+# supplied to the summ_info object are as they should be
 
 test_that("filterMS: region and border assignment", {
   
   # region: specify with char
-  expect_identical( fobj_region_char$summ_info$reg_nm,  paste0("ms", 5:6) )
+  out <- filterMS(msDatObj_alt, paste0("ms", 5:6))
+  expect_identical( out$summ_info$reg_nm, paste0("ms", 5:6) )
   
   # region: specify with indices
-  expect_identical( fobj_region_nume$summ_info$reg_nm,  paste0("ms", 5:6) )
+  out <- filterMS(msDatObj_alt, 5:6)
+  expect_identical( out$summ_info$reg_nm, paste0("ms", 5:6) )
   
   # border: specify "all"
-  expect_identical( fobj_border_all$summ_info$bor_nm,   paste0("ms", c(1:4, 7:12)) )
+  out <- filterMS(msDatObj_alt, 5:6, "all")
+  expect_identical( out$summ_info$bor_nm, paste0("ms", c(1:4, 7:12)) )
   
   # border: specify "none"
-  expect_identical( fobj_border_none$summ_info$bor_nm,  character(0) )
+  out <- filterMS(msDatObj_alt, 5:6, "none")
+  expect_identical( out$summ_info$bor_nm, character(0) )
   
   # border: specify 3
-  expect_identical( fobj_border_num1$summ_info$bor_nm,  paste0("ms", c(2:4, 7:9)) )
+  out <- filterMS(msDatObj_alt, 5:6, 3)
+  expect_identical( out$summ_info$bor_nm, paste0("ms", c(2:4, 7:9)) )
   
   # border: specify 3, 44
-  expect_identical( fobj_border_num2$summ_info$bor_nm,  paste0("ms", c(2:4, 7:12)) )
+  out <- filterMS(msDatObj_alt, 5:6, c(3, 43))
+  expect_identical( out$summ_info$bor_nm, paste0("ms", c(2:4, 7:12)) )
   
   # border: specify 0
-  expect_identical( fobj_border_0$summ_info$bor_nm,     character(0) )
+  out <- filterMS(msDatObj_alt, 5:6, 0)
+  expect_identical( out$summ_info$bor_nm, character(0) )
 })
 
 
@@ -147,7 +154,7 @@ test_that("filterMS: nonexistent object", {
 
 test_that("filterMS: NAs in argument", {
 
-  # Note: we assume that the MsDat object is valid
+  # Note: we assume that the msDat object is valid
 
   # region has NA
   expect_error(filterMS(msDatObj, c(2, NA), "all", 0.05, 1000, 7L),
@@ -339,6 +346,3 @@ test_that("filterMS: max_chg", {
   # vector length 2
   expect_error( filterMS(msDatObj, 3:4, max_chg=1:2), "max_chg must be of length 1" )
 })
-
-
-

@@ -42,7 +42,7 @@ test_that("filterMS: msObj with valid input", {
   out <- rankEN(msDatObj, bioact, paste0(reg_idx), reg_idx, lambda)
   expect_identical(true_rankEN$pos, out)
 
-  # region_ms, region_bio: character, characterr
+  # region_ms, region_bio: character, character
   out <- rankEN(msDatObj, bioact, paste0(reg_idx), paste0(reg_idx), lambda)
   expect_identical(true_rankEN$pos, out)
 
@@ -54,76 +54,22 @@ test_that("filterMS: msObj with valid input", {
   out <- rankEN(msDatObj, bio_reg_only, reg_idx, NULL, lambda)
   expect_identical(true_rankEN$pos, out)
 
-  # region_ms, region_bio: numeric, numeric (with bioact a vector)
+  # region_ms, region_bio: numeric, NULL (with bioact a vector)
   out <- rankEN(msDatObj, bio_vec_reg_only, reg_idx, NULL, lambda)
   expect_identical(true_rankEN_bio_ave, out)
 
-  # pos_only, ncomp: TRUE, 10
+  # pos_only, ncomp: TRUE, 10 (i.e. keep only positive, limit to 10)
   out <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, TRUE, 10L)
   expect_identical(true_rankEN$pos_10, out)
 
-  # pos_only, ncomp: FALSE, NULL
+  # pos_only, ncomp: FALSE, NULL (i.e. keep all)
   out <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, FALSE, NULL)
   expect_identical(true_rankEN$all, out)
 
-  # pos_only, ncomp: FALSE, 10
+  # pos_only, ncomp: FALSE, 10 (i.e. limit to 10, may be either pos or neg)
   out <- rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, FALSE, 10L)
   expect_identical(true_rankEN$all_10, out)
 })
-
-
-
-                 
-
-# # A few variations of pos_only and ncomp; matrix for bioact and indices for
-# # region specifiers
-# test_that("rankEN: various choices of ncomp, pos_only", {
-#   expect_identical( rankEN_default,         true_default )
-#   expect_identical( rankEN_keep_10,         true_keep_10 )
-#   expect_identical( rankEN_allcomp,         true_allcomp )
-#   expect_identical( rankEN_keep_10_allcomp, true_keep_10_allcomp )
-# })
-
-# # bioact as a data.frame or vector
-# # TODO: NA outside region
-
-# test_that("rankEN: bioact as a data.frame or vector", {
-#   expect_identical( rankEN_biodf_default,  true_default )
-#   expect_identical( rankEN_biovec_default, true_biovec_default )
-# })
-
-# # region specifiers as character vectors
-# test_that("rankEN: region specifiers as character vectors", {
-#   expect_identical( rankEN_ms_reg_char_default,     true_default )
-#   expect_identical( rankEN_bio_reg_char_default,    true_default )
-#   expect_identical( rankEN_biovec_reg_char_default, true_biovec_default )
-# })
-
-# # region specifiers as NULL
-# test_that("rankEN: region specifiers as NULL", {
-#   expect_identical( rankEN_ms_region_null_allcomp,     true_allcomp )
-#   expect_identical( rankEN_bio_region_null_keep10,     true_keep_10 )
-#   expect_identical( rankEN_biodf_region_null_default,  true_default )
-#   expect_identical( rankEN_biovec_region_null_default, true_biovec_default )
-# })
-
-# # bioact as data.frame / vector + character region specifier
-# test_that("rankEN: bioact as data.frame / vector + character region specifier", {
-#   expect_identical( rankEN_biodf_region_char_default,  true_default )
-#   expect_identical( rankEN_biovec_region_char_default, true_biovec_default )
-# })
-
-# # bioact with NA or character data outside of region of interest
-# test_that("rankEN: bioact as data.frame / vector + character region specifier", {
-#   expect_identical( rankEN_char_outside_default,  true_default )
-#   expect_identical( rankEN_char_outside_default, true_default )
-# })
-
-# # region as a matrix
-# test_that("rankEN: region as a matrix", {
-#   expect_identical( rankEN_ms_region_matr_default,     true_default )
-#   expect_identical( rankEN_biovec_region_matr_default, true_biovec_default )
-# })
 
 
 
@@ -194,64 +140,165 @@ test_that("rankEN: nonexistent object", {
 #  Argument is of the wrong type  #
 # ............................... #
 
-
-
-
-## Invalid input
-
-# rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
-#                    pos_only=TRUE, ncomp=NULL)
-
-# Check for missing arguments
-expect_error( rankEN(, bioact, reg_idx, reg_idx, lambda),
-              "Must provide an argument for msObj")
-expect_error( rankEN(msDatObj, , reg_idx, reg_idx, lambda),
-              "Must provide an argument for bioact")
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, ),
-              "Must provide an argument for lambda")
-
-expect_error( rankEN(list(), bioact, reg_idx, reg_idx, lambda),
-              "msObj must be an object of class \"msDat\"")
-expect_error( rankEN(msDatObj, list(), reg_idx, reg_idx, lambda),
-              "bioact must be either a data.frame or of mode numeric")
-expect_error( rankEN(msDatObj, bioact, list(), reg_idx, lambda),
-              "region_ms must be either NULL or either of mode numeric or character")
-expect_error( rankEN(msDatObj, bioact, reg_idx, logical(10), lambda),
-              "region_bio must be either NULL or either of mode numeric or character")
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, list()),
-              "lambda must be a numeric value")
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, -11),
-              "lambda cannot be smaller than 0")
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, 1:3),
-              "lambda must be an atomic vector of length 1")
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, 1, "asdf"),
-              "pos_only must be either TRUE or FALSE")
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, 1, , list()),
-              "ncomp must be either NULL or a numeric value")
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, 1, , 0.5),
-              "If non-NULL then ncomp must be >= 1")
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, 1, , 2:4),
-              "If non-NULL then ncomp must be an atomic vector of length 1")
-
-expect_error( rankEN(msDatObj, biodf_char_in_region, reg_idx, reg_idx, lambda),
-              "bioact cannot have any non-numeric in the region provided by region_bio" )
-expect_error( rankEN(msDatObj, biodf_NA_in_region, reg_idx, reg_idx, lambda),
-              "bioact cannot have any missing in the region provided by region_bio" )
-expect_error( rankEN(msDatObj, bioact, reg_idx_NA, reg_idx, lambda),
-              "region_ms cannot contain any missing" )
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx_NA, lambda),
-              "region_bio cannot contain any missing" )
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, na_num),
-              "lambda cannot contain any missing" )
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, na_log),
-              "pos_only must be either TRUE or FALSE" )
-expect_error( rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, , na_num),
-              "If non-NULL then ncomp cannot contain any missing" )
-expect_error( rankEN(msDatObj, bioact, reg_idx, region_idx[-1L], lambda),
-              paste0("Number of fractions for mass spectrometry (10) does not ",
-                     "match the number of fractions for bioactivity (9)"), fixed=TRUE )
+test_that("rankEN: argument of wrong type", {
+  
+  # msObj of wrong type: a matrix
+  expect_error(rankEN(matrix(nrow=200, ncol=50), bioact, reg_idx, reg_idx, lambda),
+               "msObj must be an object of class \"msDat\"")
+  
+  # msObj of wrong type: an msDat object with class attribute renamed
+  expect_error(rankEN(structure(msDatObj, class="asdf"), bioact, reg_idx, reg_idx, lambda),
+               "msObj must be an object of class \"msDat\"")
+  
+  # bioact of wrong type: 3-d array
+  expect_error(rankEN(msDatObj, array(1, dim=1:3), reg_idx, reg_idx, lambda),
+               "If of mode numeric, then bioact must be a vector or a matrix")
+  
+  # region_ms of wrong type: logical vector
+  expect_error(rankEN(msDatObj, bioact, (rnorm(10) > 0), reg_idx, lambda),
+               "region_ms must be either NULL or either of mode numeric or character")
+  
+  # region_bio of wrong type: list
+  expect_error(rankEN(msDatObj, bioact, reg_idx, list(1, 2), lambda),
+               "region_bio must be either NULL or either of mode numeric or character")
+  
+  # lambda of wrong type: logical
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, TRUE),
+               "lambda must be a numeric value")
+  
+  # pos_only of wrong type: list
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, list()),
+               "pos_only must be either TRUE or FALSE")
+  
+  # ncomp of wrong type: closure
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, TRUE, sum),
+               "ncomp must be either NULL or a numeric value")
+})
 
 
 
 
+# ````````````````````````````````````````` #
+#  Argument of the right type but with NAs  #
+# ......................................... #
 
+test_that("rankEN: right type but with NAs", {
+
+  # bioact NA (in region of interest)
+  expect_error(rankEN(msDatObj, bio_NA, reg_idx, reg_idx, lambda),
+               "bioact cannot have any missing in the region provided by region_bio")
+
+  # region_ms NA
+  expect_error(rankEN(msDatObj, bioact, replace(reg_idx, 1L, NA), reg_idx, lambda),
+               "region_ms cannot contain any missing")
+
+  # region_bio NA
+  expect_error(rankEN(msDatObj, bioact, reg_idx, replace(reg_idx, 1L, NA), lambda),
+               "region_bio cannot contain any missing")
+  
+  # lambda NA
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, NA_real_),
+               "lambda cannot contain any missing")
+  
+  # pos_only NA
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, NA),
+               "pos_only must be either TRUE or FALSE")
+  
+  # ncomp NA
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, lambda, TRUE, NA_real_),
+               "If non-NULL then ncomp cannot contain any missing")
+})
+
+
+
+
+# ``````````````````````````````` #
+#  Right type but illegal values  #
+# ............................... #
+
+test_that("rankEN: right type but illegal values", {
+
+  # Note: assume that if msObj inherits from msDat then the data contained
+  # within is valid
+
+  # bioact: 0 column matrix
+  expect_error(rankEN(msDatObj, bioact[, integer(0L)], reg_idx, reg_idx, lambda),
+               "bioact must have number of columns no less than 2")
+  
+  # bioact: 1 column data.frame
+  expect_error(rankEN(msDatObj, bio_df[, reg_idx[1L], drop=FALSE], reg_idx, reg_idx, lambda),
+               "bioact must have number of columns no less than 2")
+  
+  # bioact: give a vector with length < 2
+  expect_error(rankEN(msDatObj, 99, reg_idx, reg_idx, lambda),
+               "If a numeric vector, then bioact must have length >= 2")
+  
+  # region_ms: length 0
+  expect_error(rankEN(msDatObj, bioact, integer(0L), reg_idx, lambda),
+               "If non-NULL, then region_ms must have length no less than 1")
+  
+  # region_ms: names not in msObj names
+  expect_error(rankEN(msDatObj, bioact, c("ms21", "qwer"), reg_idx, lambda),
+               "column names in ms do not contain qwer element in region_ms")
+  
+  # region_ms: duplicate names
+  expect_error(rankEN(msDatObj, bioact, c("ms21", "ms21", "ms22"), reg_idx, lambda),
+               "region_ms cannot have any duplicate values")
+
+  # region_ms: ambiguous names
+  expect_error(rankEN(msDatObj, bioact, c("ms21", "ms22", "ms"), reg_idx, lambda),
+               "name provided had multiple matches in data - ms element in region_ms")
+  
+  # region_bio: length 0
+  expect_error(rankEN(msDatObj, bioact, reg_idx, integer(0L), lambda),
+               "If non-NULL, then region_bio must have length no less than 1")
+  
+  # region_bio: index too small
+  expect_error(rankEN(msDatObj, bioact, reg_idx, c(reg_idx, 0L), lambda),
+               "out of bounds index 0 provided for region_bio relative to bioact")
+  
+  # region_bio: index too large
+  expect_error(rankEN(msDatObj, bioact, reg_idx, c(reg_idx, 999L), lambda),
+               "out of bounds index 999 provided for region_bio relative to bioact")
+
+  # lambda: negative value
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, -1),
+               "lambda cannot be smaller than 0")
+
+  # lambda: length 0
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, numeric(0L)),
+               "lambda must be an atomic vector of length 1")
+
+  # lambda: length 2
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, c(1, 2)),
+               "lambda must be an atomic vector of length 1")
+
+  # Note: pos_only can only be TRUE or FALSE so there is nothing to check in
+  # this category
+  
+  # lambda: negative value
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, 0.1, TRUE, 0.4),
+               "If non-NULL then ncomp must be >= 1")
+
+  # lambda: length 0
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, 0.1, TRUE, integer(0L)),
+               "If non-NULL then ncomp must be an atomic vector of length 1")
+
+  # lambda: length 2
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx, 0.1, TRUE, c(1, 2)),
+               "If non-NULL then ncomp must be an atomic vector of length 1")
+
+  # region_ms, region_bio: lengths don't match
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx[-1L], lambda),
+               paste0("Number of fractions for mass spectrometry (10) does not ",
+                      "match the number of fractions for bioactivity (9)"), fixed=TRUE )
+
+  # region_ms, region_bio: lengths don't match
+  expect_error(rankEN(msDatObj, bioact, reg_idx, reg_idx[-1L], lambda),
+               paste0("Number of fractions for mass spectrometry (10) does not ",
+                      "match the number of fractions for bioactivity (9)"), fixed=TRUE )
+
+  # bioact, region_bio: char in selected data
+  expect_error(rankEN(msDatObj, bio_NA, reg_idx, reg_idx, lambda),
+               "bioact cannot have any missing in the region provided by region_bio")
+})

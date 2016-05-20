@@ -24,7 +24,7 @@
 #'   combined into a single matrix using \code{cbind} and returned.
 #'
 #' @return Returns either a matrix containing the mass spectrometry data if
-#'   \code{"matrix"} is specified as the argument to \code{type}, a an object
+#'   \code{"matrix"} is specified as the argument to \code{type}, or an object
 #'   with class \code{msDat} if \code{"msDat"} is specified as the argument to
 #'   \code{type}.  See \code{Details} for more detail regarding the return
 #'   objects.
@@ -235,8 +235,6 @@ dimnames.msDat <- function(msObj) {
 
 
 
-# `[.data.frame`
-
 `[.msDat` <- function(msObj, i, j) {
 
   # case: one of the classes that decorates msDat object.  Recursively call
@@ -263,5 +261,7 @@ dimnames.msDat <- function(msObj) {
 
 
 
-
-# TODO: dim, nrow, ncol
+dim.msDat <- function(x) { 
+  msDatObj <- extractMS(x, type="msDat")
+  dim(msDatObj$ms)
+}

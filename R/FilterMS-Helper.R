@@ -1,22 +1,4 @@
 
-# filterMS_getRegionIdx <- function(region, ms) {
-  
-#   extract_check_valid(region, ms, "region", TRUE)
-  
-#   if (is.character(region)) {
-#     regIdx <- extract_char_to_idx(region, ms, "region", TRUE)
-#   } else if (is.numeric(region)) {
-#     regIdx <- extract_num_to_idx(region, ms, "region", TRUE)
-#   } else {
-#     stop("Shouldn't reach here!  Please send a bug report")
-#   }
-  
-#   return (regIdx)
-# }
-
-
-
-
 filterMS_border_idx <- function(border, regIdx, ms_nc) {
 
   if ( is.character(border) ) {
