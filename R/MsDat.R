@@ -102,9 +102,9 @@ msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
   ms_inten <- extract_var(mass_spec, ms_inten, TRUE, mtoz, charge)
 
   # Construct msDat object
-  outDat <- list( ms   = ms_inten,
-                  mtoz = dmtoz,
-                  chg  = dcharge )
+  outDat <- list(ms   = ms_inten,
+                 mtoz = dmtoz,
+                 chg  = dcharge)
   
   structure(outDat, class="msDat")
 }
@@ -127,8 +127,8 @@ msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
 
 print.msDat <- function(x, ...) {
   
-  cat("An object of class \"msDat\" with ", format(NROW(msDat$ms), big.mark=","),
-      " compounds and ", NCOL(msDat$ms), " fractions.\n", sep="")
+  cat("An object of class \"msDat\" with ", format(NROW(x$ms), big.mark=","),
+      " compounds and ", NCOL(x$ms), " fractions.\n", sep="")
   cat("Use extractMS to extract the mass spectrometry data.\n\n")
 
 }
@@ -148,6 +148,12 @@ msDat_check_valid_input <- function(mass_spec, mtoz, charge, ms_inten) {
     if (!eval(substitute(hasArg(var_nm)))) {
       stop("Must provide an argument for ", var_nm, call.=FALSE)
     }
+    # Check that an object exists for provided argument 
+    tryCatch(get(var_nm), error = function(err) {
+      err <- as.character(err)
+      obj_nm <- regmatches(err, gregexpr("(?<=\')(.*?)(?=\')", err, perl=TRUE))[[1L]]
+      stop("object \'", obj_nm, "\' not found for ", var_nm, call.=FALSE)
+    })
   }
 
   ## Check mass_spec
@@ -161,7 +167,7 @@ msDat_check_valid_input <- function(mass_spec, mtoz, charge, ms_inten) {
   else if (NROW(mass_spec) <= 1L) {
     stop("mass_spec must have 2 or more rows", call.=FALSE)
   }
-  # Decide not to allow 0 columns in data
+  # Don't allow 0 columns in data as a design decision
   else if (identical(NCOL(mass_spec), 0L)) {
     stop("mass_spec cannot have 0 columns", call.=FALSE)
   }
@@ -181,84 +187,6 @@ msDat_check_valid_input <- function(mass_spec, mtoz, charge, ms_inten) {
     stop("ms_inten must be either NULL or of mode numeric or character", call.=FALSE)
   }
 }
-
-
-
-
-# TODO: need documentation for this
-
-# getCmpInfo <- function(mass_spec, mtoz, charge) {
-
-#   # Calculate number of compounds
-#   nCmp <- nrow(mass_spec)
-
-#   # Check if mtoz is numeric or character.  Pre: mtoz is a non-list vector
-#   if ( !(is.numeric(mtoz) || is.character(mtoz)) ) {
-#     stop("mtoz must be numeric or character\n")
-#   }
-#   else if ( !( identical(length(mtoz), 1L) || identical(length(mtoz), nCmp) ) ) {
-#     stop("mtoz must have either have a length of 1 or length equal to the ",
-#          "number of compounds", call.=FALSE)
-#   }
-
-#   # Check if charge is numeric or character.  Pre: charge is a non-list vector
-#   if ( !(is.numeric(charge) || is.character(charge)) ) {
-#     stop("charge must be numeric or character\n")
-#   }
-#   else if ( !( identical(length(mtoz), 1L) || identical(length(mtoz), nCmp) ) ) {
-#     stop("charge must have either have a length of 1 or length equal to the ",
-#          "number of compounds", call.=FALSE)
-#   }
-
-#   # Initialize a list to save mass spectrometry identifying information (and
-#   # possibly location of this information is mass_spec) into
-#   outDat <- list()
-#   # Create iterable object for for loop
-#   varList <- list(mtoz=mtoz, chg=charge)
-
-
-#   # Each iteration in loop creates an entry in outDat where the entry is a list
-#   # containing elements loc and val.  loc is an index for the column in mass_spec
-#   # containing the mass-to-charge or charge information (which may be numeric(0) if
-#   # not in mass_spec).  val a vector with the actual information.
-
-#   for (i in 1:length(varList)) {
-#     outDat[[i]] <- list()
-#     thisVar <- varList[[i]]
-
-#     # nCmp length atomic vector
-#     if ( identical(length(thisVar), nCmp) ) {
-#       outDat[[i]]$loc <- numeric(0)
-#       outDat[[i]]$val <- thisVar
-#     }
-#     # length 1 numeric
-#     else if (is.numeric(thisVar)) {
-#       if ((thisVar < 1) || (thisVar > ncol(mass_spec))) {
-#         stop(paste("not a valid column number for", names(varList)[i], "\n"))
-#       }
-#       outDat[[i]]$loc <- as.integer(thisVar)
-#       outDat[[i]]$val <- mass_spec[, thisVar]
-#     }
-#     # length 1 character
-#     else if (is.character(thisVar)) {
-#       if ( !(thisVar %in% colnames(mass_spec)) ) {
-#         stop(paste("invalid column name given for", names(varList)[i], "\n"))
-#       }
-#       outDat[[i]]$loc <- which(thisVar == colnames(mass_spec))
-#       outDat[[i]]$val <- mass_spec[, thisVar]
-#     }
-#     else {
-#       # Should not reach here.  All cases should be covered either in the error
-#       # checking or conditionals.
-#     }
-#   } # End loop entering data into outDat
-
-#   names(outDat) <- names(varList)
-
-#   return (outDat)
-# }
-
-
 
 
 

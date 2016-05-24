@@ -198,7 +198,12 @@ extract_idx_to_data <- function(data_obs, var_idx, expect_matr, dat_nm, spec_nm)
 
 
 # Returns a vector of indices corresponding to columns (i.e. variables) in
-# data_obs as specified by var_specify
+# data_obs as specified by var_specify.  In more detail, the argument for
+# var_specify should either be (i) numeric, in which case it is just returned,
+# or (ii) a character vector providing the names of column in data_obs which are
+# converted to indices, or (iii) NULL, then the function returns all indices in
+# data_obs, after removing any indices specified by name or index in arguments
+# passed to dot-dot-dot.
 #
 # PRE: assumes that var_specify is not a data vector (i.e. is of type NULL,
 # numeric, or character).  This is in contrast to extract_var() where a data

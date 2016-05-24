@@ -1,39 +1,4 @@
 
-# rankEN_bioact_to_matrix <- function(bioact, region_bio) {
-
-#   region_idx <- extract_idx(region_bio,
-
-#   # case: bioact a data.frame
-#   if (is.data.frame(bioact)) {
-#     bioact <- as.matrix(bioact)
-#   }
-#   # case: bioact a vector; turn into a 1 x n matrix
-#   else if (identical(attr(bioact, "dim"), NULL)) {
-#     attr(bioact, "dim") <- c(1, length(bioact))
-#     attr(bioact, "dimnames") <- list(NULL, attr(bioact, "names"))
-#     attr(bioact, "names") <- NULL
-#   }
-#   # else: bioact already a matrix
-
-#   # Ensure that number of rows > 0, number of cols > 0
-#   if ( !(nrow(bioact) >= 1L) ) {
-#     stop("bioact must have 1 or more rows", call.=FALSE)
-#   }
-#   else if ( !(ncol(bioact) >= 1L) ) {
-#     stop("bioact must have 1 or more columns", call.=FALSE)
-#   }
-
-#   # Ensure that there are no missing in bioact
-#   if (anyNA(bioact)) {
-#     stop("bioact cannot contain any missing", call.=FALSE)
-#   }
-
-#   return (bioact)
-# }
-
-
-
-
 rankEN_vector_to_matrix <- function(vec) {
   
   # case: not a vector
@@ -50,14 +15,6 @@ rankEN_vector_to_matrix <- function(vec) {
 
 
 rankEN_check_regr_args <- function(ms, bio) {
-
-  # Ensure no missing in region of interest
-  # if (anyNA(ms)) {
-  #   stop("mass spec data in region of interest cannot contain any missing", call.=FALSE)
-  # }
-  # else if (anyNA(bioact)) {
-  #   stop("bioact cannot contain any missing", call.=FALSE)
-  # }
 
   # Ensure that the dimensions match
   if ( !identical(ncol(ms), ncol(bio)) ) {
@@ -121,31 +78,6 @@ rankEN_filter_compIdx <- function(comp_idx, comp_cor, ncomp, pos_only) {
 
   comp_idx  
 }
-
-
-
-
-# rankEN_data_desc <- function(ms, bioMat, regionIdx, cmpIdx) {
-
-#   #   # Extract mass spec fraction names
-#   # ms_nm <- colnames(ms)
-#   # if (is.null(ms_nm)) {
-#   #   ms_nm <- as.character(seq_len(ms_nc))
-#   # }
-
-#   msDim <- dim(ms)
-#   bioDim <- dim(bioMat)
-
-#   regionNm <- list( ms  = colnames(ms)[regionIdx$ms],
-#                     bio = colnames(bioMat)[regionIdx$bio] )
-
-#   data_desc <- list( msDim     = msDim,
-#                      bioDim    = bioDim,
-#                      regionNm  = regionNm,
-#                      regionIdx = regionIdx,
-#                      cmpIdx    = cmpIdx )
-#   return (data_desc)
-# }
 
 
 

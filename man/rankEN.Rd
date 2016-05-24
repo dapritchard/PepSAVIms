@@ -8,10 +8,10 @@ rankEN(msObj, bioact, region_ms = NULL, region_bio = NULL, lambda,
   pos_only = TRUE, ncomp = NULL)
 }
 \arguments{
-\item{msObj}{An object of class \code{\link{msDat}} containing mass
-  spectrometry abundances data and identifying information.  Note that this
-  includes objects created by the functions \code{binMS}, \code{filterMS},
-  and \code{msDat}.}
+\item{msObj}{An object of class \code{msDat} containing mass spectrometry
+  abundances data and identifying information.  Note that this includes
+  objects created by the functions \code{binMS}, \code{filterMS}, and
+  \code{msDat}.}
 
 \item{bioact}{Either a numeric vector or matrix, or a data frame providing
   bioactivity data.  If a numeric vector, then it is assumed that each entry

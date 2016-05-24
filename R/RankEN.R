@@ -4,7 +4,7 @@
 #' Returns identifying information for the compounds in the order in which they
 #' first enter the Elastic Net model
 #'
-#' @param msObj An object of class \code{{msDat} containing mass spectrometry
+#' @param msObj An object of class \code{msDat} containing mass spectrometry
 #'   abundances data and identifying information.  Note that this includes
 #'   objects created by the functions \code{binMS}, \code{filterMS}, and
 #'   \code{msDat}.

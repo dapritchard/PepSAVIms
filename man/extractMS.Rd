@@ -18,7 +18,7 @@ extractMS(msObj, type = "matrix")
 }
 \value{
 Returns either a matrix containing the mass spectrometry data if
-  \code{"matrix"} is specified as the argument to \code{type}, a an object
+  \code{"matrix"} is specified as the argument to \code{type}, or an object
   with class \code{msDat} if \code{"msDat"} is specified as the argument to
   \code{type}.  See \code{Details} for more detail regarding the return
   objects.

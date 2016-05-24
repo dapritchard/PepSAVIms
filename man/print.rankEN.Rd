@@ -7,7 +7,7 @@
 \method{print}{rankEN}(x, ...)
 }
 \arguments{
-\item{x}{An object of class \code{\link{rankEN}}}
+\item{x}{An object of class \code{rankEN}}
 
 \item{...}{Arguments passed to dot-dot-dot are ignored}
 }

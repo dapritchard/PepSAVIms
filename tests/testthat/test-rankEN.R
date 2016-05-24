@@ -4,7 +4,7 @@
 #  Load testing data  #
 # ................... #
 
-# See construct-data/cd-filterMS.R for the file used to create the data
+# See tests/construct-data/cd-filterMS.R for the file used to create the data
 load("../data/data-rankEN_test.RData")
 
 
