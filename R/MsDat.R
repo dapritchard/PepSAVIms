@@ -126,10 +126,12 @@ msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
 #' @export
 
 print.msDat <- function(x, ...) {
+
+  print.default(x)
   
-  cat("An object of class \"msDat\" with ", format(NROW(x$ms), big.mark=","),
+  cat("\nAn object of class \"msDat\" with ", format(NROW(x$ms), big.mark=","),
       " compounds and ", NCOL(x$ms), " fractions.\n", sep="")
-  cat("Use extractMS to extract the mass spectrometry data.\n\n")
+  cat("Use extractMS to column-bind the data together into a single matrix.\n\n")
 
 }
 

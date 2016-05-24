@@ -36,119 +36,27 @@ extractMS <- function(msObj, type="matrix") {
 
   # Check args are of the right type
   if (missing(msObj)) {
-    stop("Must provide an argument for msObj")
+    stop("Must provide an argument for msObj", call.=FALSE)
   }
-  else if (!is.character(type)) {
-    stop("type must have mode character")
+  else if (!inherits(msObj, "msDat")) {
+    stop("msObj must be of class \"msDat\"", call.=FALSE)
+  }
+  else if (!identical(type, "matrix") && !identical(type, "msDat")) {
+    stop("type must have a value of \"matrix\" or \"msDat\"", call.=FALSE)
   }
 
-  # Note: class() returns a character vector regardless of input, so the
-  # following is always valid
-  class_nm <- class(msObj)[1]
-  msDatObj <- switch(class_nm,
-                     binMS    = msObj$msDatObj,
-                     filterMS = msObj$msDatObj,
-                     msDat    = msObj,
-                     stop("msObj must be an object of class \"msDat\"", call.=FALSE))
+  # Point msObj to the location of the msDat object
+  if (! identical(class(msObj), "msDat")) {
+    msObj <- msObj$msDatObj
+  }
 
   # Return data in the desired form
   switch(type,
-         matrix = with(msDatObj, cbind(mtoz, chg, ms)),
-         msDat  = msDatObj,
-         stop("type must have a value of \"matrix\" or \"msDat\"", call.=FALSE))
+         msDat  = msObj,
+         matrix = cbind(mtoz   = msObj$mtoz,
+                        charge = msObj$chg,
+                        inten  = msObj$ms))
 }
-
-
-
-
-#' Mass spectrometry abundances fraction names
-#'
-#' Retrieve or set the mass spectrometry abundances fraction names for objects
-#' of class \code{binMS}, \code{filterMS}, or \code{msDat}.
-#'
-#' @param msObj An object of class \code{binMS}, \code{filterMS}, or
-#'   \code{msDat}
-#'
-#' @param value Either \code{NULL} or a character vector or an object that can
-#'   be coerced to a character vector.  If non-\code{NULL}, then must be of the same
-#'   length as the number of fractions in the mass spectrometry data.
-#'
-#' @export
-
-colnamesMS <- function(msObj) {
-  # Error-checking performed in extractMS
-  msDatObj <- extractMS(msObj, "msDat")
-  # returns NULL when msDatObj is NULL
-  colnames(msDatObj$ms)
-}
-
-
-#' @rdname colnamesMS
-#'
-#' @export
-
-`colnamesMS<-` <- function(msObj, value) {
-  
-  # Note: don't need to check if msObj, value are missing.  R won't invoke this
-  # function unless both args are present
-
-  # If non-NULL, ensure that value is a character vector
-  if (!is.null(value) && !is.character(value)) {
-    # Will throw an error if cannot coerce; use default error message
-    value <- as.character(value)
-  }
-  
-  # Ensure that msObj of a valid class.  note: class() returns a character
-  # vector regardless of input
-  class_nm <- class(msObj)
-  if (!identical(class_nm, "binMS")
-      && !identical(class_nm, "filterMS")
-      && !identical(class_nm, "msDat")) {
-    stop("msObj must be an object of class \"binMS\", \"filterMS\", or \"msDat\"", call.=FALSE)
-  }
-
-  # Extract dimnames from mass spectrometry abundances matrix
-  if (identical(class_nm, "msDat")) {
-    dn <- dimnames(msObj$ms)
-    nfrac <- NCOL(msObj$ms)
-  }
-  else {
-    dn <- dimnames(msObj$msObj$ms)
-    nfrac <- NCOL(msObj$msObj$ms)
-  }
-
-  # Ensure that length of replacement is correct
-  if (!is.null(value) && !identical(length(value), nfrac)) {
-    stop("Length of replacement vector (", length(value), ") ",
-         "not equal to the number of fractions in mass spectrometry data (", nfrac, ")")
-  }
-  
-  # case: dimnames from ms matrix are null; if value is null then just return,
-  # otherwise create container to store new values
-  if (is.null(dn)) {
-    if (is.null(value)) {
-      return(msObj)
-    }
-    dn <- vector("list", 2)
-  }
-  
-  # Store value in dn
-  if (is.null(value)) {
-    dn[2L] <- list(NULL)
-  } else {
-    dn[[2L]] <- value
-  }
-
-  # Write updated dimnames to ms matrix
-  if (identical(class_nm, "msDat")) {
-    dimnames(msObj$ms) <- dn
-  } else {
-    dimnames(msObj$msObj$ms) <- dn
-  }
-  
-  return (msObj)
-}
-
 
 
 
@@ -162,74 +70,17 @@ dimnames.msDat <- function(msObj) {
 `dimnames<-.msDat` <- function(msObj, value) {
   
   # case: one of the classes that decorates msDat object.  Recursively call
-  # with inner msDat object
+  # with inner msDat object.
   if (!identical(class(msObj), "msDat")) {
     dimnames(msObj$msDatObj) <- value
     return (msObj)
   }
 
-  ## else: msObj is strictly of class msDat
   dimnames(msObj$ms) <- value
   names(msObj$mtoz) <- value[[1]]
   names(msObj$chg) <- value[[1]]
 
   return (msObj)
-
-  # # Get matrix dimensions
-  # nr <- nrow(ms)
-  # nc <- ncol(ms)
-
-  # # case: dimnames from ms matrix are null; if value is null then just return,
-  # # otherwise create container to store new values
-  # if (is.null(dn)) {
-  #   if (is.null(value)) {
-  #     return(msObj)
-  #   }
-  #   dn <- vector("list", 2)
-  # }
-
-  
-  # if (!is.null(value)) {
-
-  #   # Since value is non-NULL, it must be a list with exactly 2 elements
-  #   if (!is.list(value)) {
-  #     stop("replacement value must either be NULL or a list")
-  #   }
-  #   else if (!identical(length(value), 2L)) {
-  #     stop("if a list then replacement value must have exactly 2 elements")
-  #   }
-
-  #   x <- value[[1L]]
-  #   else if (!is.null(x)) {
-  #     # case: x is not a character vector; try to coerce
-  #     if (!is.character(x)) {
-  #       nm <- tryCatch({
-  #         as.character(x)
-  #       }, error = function() {
-  #         stop("element 1 of replacement value unable to be coerced to character")
-  #       })
-  #     }
-  #     # case: x is a character vector
-  #     else {
-  #       nm <- x
-  #     }
-
-  #     msDatObj <- switch(class_nm,
-  #                    binMS    = msObj$msObj,
-  #                    filterMS = msObj$msObj,
-  #                    msDat    = msObj,
-  #                    stop("msObj must be an object of class \"msDat\""))
-
-  #   }
-        
-      
-  # }
-
-  # Ch
-
-  # Check that list elements are character or can be coerced to character
-  
-
 }
 
 
@@ -238,11 +89,11 @@ dimnames.msDat <- function(msObj) {
 `[.msDat` <- function(msObj, i, j) {
 
   # case: one of the classes that decorates msDat object.  Recursively call
-  # with inner msDat object
-  # if (!identical(class(msObj), "msDat")) {
-  #   msObj$msDatObj[i, j] <- value
-  #   return (msObj)
-  # }
+  # with inner msDat object.
+  if (!identical(class(msObj), "msDat")) {
+    msObj$msDatObj <- msObj$msDatObj[i, j]
+    return (msObj)
+  }
 
   msObj$ms <- msObj$ms[i, j, drop=FALSE]
   msObj$mtoz <- msObj$mtoz[i]
@@ -254,6 +105,13 @@ dimnames.msDat <- function(msObj) {
 
 `[<-.msDat` <- function(msObj, i, j, value) {
 
+  # case: one of the classes that decorates msDat object.  Recursively call
+  # with inner msDat object.
+  if (!identical(class(msObj), "msDat")) {
+    msObj$msDatObj[i, j] <- value
+    return (msObj)
+  }
+  
   msObj$ms[i, j] <- value
 
   msObj
