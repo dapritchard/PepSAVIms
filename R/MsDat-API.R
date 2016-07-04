@@ -59,7 +59,6 @@ extractMS <- function(msObj, type="matrix") {
 }
 
 
-
 dimnames.msDat <- function(msObj) {
   
   x <- extractMS(msObj, "msDat")

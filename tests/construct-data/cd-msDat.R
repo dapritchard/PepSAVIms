@@ -16,7 +16,7 @@ ms_mat <- matrix(1:40,
                                 paste0("ms", 1:3),
                                 paste0("junk", 1:3))))
 # Data indices
-mtoz_idx <- 1
+mtoz_idx <- 1L
 chg_idx <- 2L
 inten_idx <- 3:5
 
@@ -45,9 +45,11 @@ ms_red_df <- data.frame(ms_red)
 
 # Manually construct 'true' msDat object ---------------------------------------
 
+ms_nm <- list(paste0(format(round(mtoz_data, 4), nsmall=4), "/", chg_data),
+              c("ms1", "ms2", "ms3"))
 ms_true <- matrix(11:25,
                   nrow=5,
-                  dimnames=list(paste0(1:5), c("ms1", "ms2", "ms3")))
+                  dimnames=ms_nm)
 
 trueDat <- structure(list(ms   = ms_true,
                           mtoz = setNames(1:5, paste(1:5)),

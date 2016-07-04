@@ -96,15 +96,22 @@ msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
   # Check that input is of the right form
   msDat_check_valid_input(mass_spec, mtoz, charge, ms_inten)
 
-  # Obtain mass-to-charge, charge, and mass spectrometry abundances variables
-  dmtoz <- extract_var(mass_spec, mtoz)
-  dcharge <- extract_var(mass_spec, charge)
+  # Obtain mass-to-charge, charge, and mass spectrometry abundances variables.
+  # Note that we use the original version of the variables in each of the
+  # extract_* calls.
+  mtoz_ <- extract_var(mass_spec, mtoz)
+  charge_ <- extract_var(mass_spec, charge)
   ms_inten <- extract_var(mass_spec, ms_inten, TRUE, mtoz, charge)
+
+  # Row names for mass spectrometry data are their mtoz and charge states
+  row.names(ms_inten) <- paste0(format(round(mtoz_, 4), nsmall=4),
+                                "/",
+                                charge_)
 
   # Construct msDat object
   outDat <- list(ms   = ms_inten,
-                 mtoz = dmtoz,
-                 chg  = dcharge)
+                 mtoz = mtoz_,
+                 chg  = charge_)
   
   structure(outDat, class="msDat")
 }
@@ -127,11 +134,11 @@ msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
 
 print.msDat <- function(x, ...) {
 
-  print.default(x)
+  print(x$ms)
   
-  cat("\nAn object of class \"msDat\" with ", format(NROW(x$ms), big.mark=","),
-      " compounds and ", NCOL(x$ms), " fractions.\n", sep="")
-  cat("Use extractMS to column-bind the data together into a single matrix.\n\n")
+  # cat("\nAn object of class \"msDat\" with ", format(NROW(x$ms), big.mark=","),
+  #     " compounds and ", NCOL(x$ms), " fractions.\n", sep="")
+  # cat("Use extractMS to column-bind the data together into a single matrix.\n\n")
 
 }
 

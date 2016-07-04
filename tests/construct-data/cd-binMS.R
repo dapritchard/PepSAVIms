@@ -170,7 +170,7 @@ binDat <- sapply(idx, function(j) {
   # Return consolidated group values
   this_bin
 })
-# Put data into observations x variables format
+# Put data into observations by variables format
 binDat <- t(binDat)
 # Reorder the binned data so that bins go from smallest m/z to largest
 binDat <- binDat[order(binDat[, "mtoz"], binDat[, "time"], binDat[, "chg"]), ]

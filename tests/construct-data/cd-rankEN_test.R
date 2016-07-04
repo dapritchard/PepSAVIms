@@ -5,7 +5,7 @@
 
 # Load saved simulated data.  See object sim_args in the RData file for the
 # arguments used to generate the data.
-load("../data/data-rankEN_sim.RData")
+load("tests/data/data-rankEN_sim.RData")
 
 # msDatObj: a (200 x 50) mass spec data object
 msDatObj <- testDat$msDat

@@ -144,11 +144,11 @@ test_that("rankEN: argument of wrong type", {
   
   # msObj of wrong type: a matrix
   expect_error(rankEN(matrix(nrow=200, ncol=50), bioact, reg_idx, reg_idx, lambda),
-               "msObj must be an object of class \"msDat\"")
+               "msObj must be of class \"msDat\"")
   
   # msObj of wrong type: an msDat object with class attribute renamed
   expect_error(rankEN(structure(msDatObj, class="asdf"), bioact, reg_idx, reg_idx, lambda),
-               "msObj must be an object of class \"msDat\"")
+               "msObj must be of class \"msDat\"")
   
   # bioact of wrong type: 3-d array
   expect_error(rankEN(msDatObj, array(1, dim=1:3), reg_idx, reg_idx, lambda),
