@@ -71,8 +71,8 @@ This document describes all of the steps and shows the results of the data
 analysis performed in \papername/.  Providing the analysis will hopefully make
 the research more reproducible, give the interested reader a greater
 understanding of the methodology developed in the paper, and to provide a
-working template for researchers who may wish to use the methodology developed
-in the paper and the tools developed in this package for their own research.
+working template for researchers who may wish to apply the methodology developed
+in the paper to their own research problems.
 
 
 \section{Data collection}
@@ -81,7 +81,9 @@ This section describes in brief the data collection procedures that are
 performed upstream of the data analysis.  Please refer to \papername/ for more
 detail regarding this process. \vspace{-2mm}
 
-\subsection{\textit{Viola odorata}  liquid chrometography mass spectrometry} \label{sec: lcms}
+
+\subsection{\textit{Viola odorata} liquid chrometography mass
+  spectrometry} \label{sec: lcms}
 
 Aqueous extraction was performed on \textit{Viola odorata} botanical samples.
 The resulting extracts were crudely fractionated using strong cation exchange
@@ -96,7 +98,7 @@ analysis obtained 6,430 MS features for \textit{Viola odorata} across 34
 fractions.
 
 
-\subsection{Bioactivity screening}
+\subsection{Bioactivity screening} \label{sec: bioact}
 
 Peptide libraries were assayed for growth inhibition against the following
 pathogens: E. coli, S. aureus, K. pneumoniae, A. baumannii, P. aeruginosa, and
@@ -109,22 +111,27 @@ or water, respectively, to determine a percent activity of each library
 fraction.  Percent activity of each well was calculated using the formula:
 \[ \text{percent activity} = 100 \times \frac{ \text{RFU of fraction} - \text{RFU of positive control} }{ \text{RFU of negative control} - \text{RFU of positive control} } \]
 
+
+
+
+% Flowchart and fcn descriptions -----------------------------------------------
+
 \section{Package Overview}
 
 A flowchart for a data analysis performed using \pkg{PRISMS} is show in figure
-\ref{fig: flow chart}.  The blue nodes are functions in the \pkg{PRISMS}
-ecosystem; the pink nodes denotes mass spectrometry data to be used as data
-inputs; the green node denotes bioactivity data to be used as a data input; and
-the yellow node denotes the analysis results of using the \pkg{PRISMS}
-methodology and software.
+\ref{fig: flow chart}.  The blue rectangles and diamond are functions in the
+\pkg{PRISMS} ecosystem; the pink oval denotes mass spectrometry data to be used
+as data inputs; the green oval denotes bioactivity data to be used as a data
+input; and the yellow oval denotes the analysis results of using the
+\pkg{PRISMS} methodology and software.
 
 The prototypical data analysis workflow is the path described by the solid
 lines; this is the procedure performed in \papername/, and described in more
 detail in Section \ref{sec: prototypical}.  The dashed lines show alternative
 workflows which may be performed in situations where some of the data processing
-steps have already been performed using other tools, or in situations where some
-of the data processing steps may not be appropriate for the particular data
-analysis in hand.
+steps have already been performed using other tools, or where some of the data
+processing steps may not be appropriate for the particular data analysis in
+hand.
 
 
 \begin{figure}[H]
@@ -162,23 +169,22 @@ analysis in hand.
 represent alternative workflows}
 \end{figure}
 
-A conception view of the functions in the \pkg{PRISMS} package is provided in
-the following subsections.  Please refer to the function documentation for more
-information regarding their application programming interface, as well as
-further technical detail.
+A conceptual presentation of the functions in the \pkg{PRISMS} package is
+provided in the following subsections.  Please refer to the function
+documentation for more information regarding the application programming
+interface, as well as for further technical detail.
 
 
 \subsection{The \binMS/ function}
 
 The mass spectrometry abundance data can optionally undergo two preprocessing
-steps.  The first step is a consolidation step.  The goal is to to consolidate
+steps.  The first step is a consolidation step - the goal is to to consolidate
 mass spectrometry observations in the data that are believed to belong to the
 same underlying compound.  In other words, the instrumentation may have obtained
 multiple reads of mass spectrometry abundances that in actuality belong to the
-same compound - in which case we wish to attribute all of the elution to this
-compound and remove the appearance of having multiple compounds.  The function
-name \binMS/ derives from the fact that we use a binning procedure to
-consolidate the data.
+same compound - in which case we wish to attribute all of the elution to a
+single compound.  The function name \binMS/ derives from the fact that we use a
+binning procedure to consolidate the data.
 
 The consolidation procedure is undergone as follows.  Firstly, all observations
 must satisfy each of the following criterions or they are removed from
@@ -188,12 +194,13 @@ data).
 \begin{enumerate}[label=(\roman*)]
 
 \item Each observation must have its peak elution time occur during the
-  specified interval
+  specified interval.
 
-\item Each observation must have a mass that falls within the specified interval
+\item Each observation must have a mass that falls within the specified
+  interval.
 
 \item Each observation must have an electrical charge state that falls within
-  the specified interval
+  the specified interval.
 
 \end{enumerate}
 
@@ -201,27 +208,28 @@ data).
 Once that a set of observations satisfying the above criteria is obtained, then
 a second step attempts to combine observations believed to belong to the same
 underlying compound.  The procedure considers two observations that satisfy each
-of the following criteria to belong to the same compound.
+of the following criterions to belong to the same compound.
 
 \begin{enumerate}[label=(\roman*)]
 
 \item The absolute difference in Daltons of the mass-to-charge value between the
-  two observations is less the the specified value
+  two observations is less the the specified value.
 
 \item The absolute difference of the peak elution time between the two
-  observations is less than the specified value
+  observations is less than the specified value.
 
-\item The electrical charge state must be the same for the two observations
+\item The electrical charge state must be the same for the two observations.
 
 \end{enumerate}
 
 
 \subsection{The \code{filterMS} function}
 
-The next optional preprocessing step for the mass spectrometry abundance data is
-a filtering step.  The goal of the filtering step is to reduce the list of
-candidate compounds for reduction of bioactivity levels through subject-matter
-knowledge prior to using statistical methods.  By filtering the candidate set
+The second optional preprocessing step for the mass spectrometry abundance data
+is a filtering step.  The goal of the filtering step is to reduce the level of
+noise in the data by removing any potential candidate compounds with observed
+abundances for which it is not scientifically plausible that they might be a
+compound with an effect on bioactivity levels.  By filtering the candidate set
 prior to a statistical analysis, this step can greatly increase the ability of
 the analysis to effectively differentiate such compounds.  The criteria for the
 downstream inclusion of a candidate compound is listed below.
@@ -241,7 +249,7 @@ downstream inclusion of a candidate compound is listed below.
 \item At least 1 fraction in the region of interest must have intensity greater
   than the specified value.
 
-\item Compound charge state must be less than or equal to the specified value.
+\item The compound charge state must be less than or equal to the specified value.
 
 \end{enumerate}
 
@@ -251,14 +259,14 @@ downstream inclusion of a candidate compound is listed below.
 Once the mass spectrometry abundance data has optionally undergone any
 preprocessing steps, a statistical procedure to search for candidate compounds
 for reduction of bioactivity levels is performed.  This step is performed by the
-\rankEN/ function, and takes as inputs both the preprocessed mass
-spectrometry abundance data and the bioactivity levels data.  The procedure
-works by specifying the level of the $\ell_2$ penalty parameter in the elastic
-net penalty, and tracking the inclusion of the coefficients corresponding to
+\rankEN/ function, and takes as inputs both the preprocessed mass spectrometry
+abundance data and the bioactivity levels data.  The procedure works by
+specifying the level of the $\ell_2$ penalty parameter in the elastic net
+penalty, and tracking the inclusion of the coefficients corresponding to
 compounds into the nonzero set along the elastic net path.  An ordered list of
-candidate compounds for reduction of bioactivity levels is then obtained by
-providing the order in which the coefficients corresponding to compounds entered
-the nonzero set.
+candidate compounds for reduction of bioactivity levels is obtained by providing
+the order in which the coefficients corresponding to compounds entered the
+nonzero set.
 
 
 \subsection{The \msDat/ function}
@@ -274,24 +282,29 @@ object is required.
 The reason for having an object of class \code{msDat} is to allow for a
 consistent interface to \filterMS/ and \rankEN/ whether the mass spectrometry
 data is obtained via a prior call to \binMS/, \filterMS/, or
-directly from user the without any preprocessing.
+directly from user (but then via a call to \msDat/).
 
 
 
 
-% Describing prototypical workflow -------------------------
+% Paper data analysis ----------------------------------------------------------
 
 \section{Data analysis workflow as presented in \papername/} \label{sec:
   prototypical}
 
 This section describes all of the steps and shows the results of the data
-analysis performed in \papername/, which is the workflow shown in Figure
+analyses performed in \papername/, which is the workflow shown in Figure
 \ref{fig: flow chart prototypical}.  In this scenario, mass spectrometry
 abundance data across various fractions for the biological analyte is obtained
 via a mass spectrometer as described in section \ref{sec: lcms}, and is
 represented by the pink oval.  The mass spectrometry data is consolidated via
 the \binMS/ function, and the resulting consolidated data is filtered by the
 \filterMS/ function.
+
+Bioactivity data is collected as described in section \ref{sec: bioact}, and is
+represented by the green oval. The bioactivity data is then then provided along
+with the consolidated and filtered data as inputs to the \rankEN/ function,
+which calculates and returns the data analysis results.
 
 
 \begin{figure}[H]
@@ -317,43 +330,66 @@ the \binMS/ function, and the resulting consolidated data is filtered by the
 \label{fig: flow chart prototypical}
 \end{figure}
 
-First we describe the data analysis workflow as performed in \papername/, which
-is the workflow shown in Figure \ref{fig: flow chart prototypical}.  In this
-scenario, mass spectrometry abundance data across various fractions for the
-biological analyte is obtained via a mass spectrometer, and is represented by
-the light red oval leftmost in the top line of nodes (see section *** of *** for
-the laboratory procedure used to procure this data).  Concurrently, bioactivity
-data is obtained via ****, as described in section **** of ****; this data is
-represented as the light green node alone on the second row of nodes.  The
-bioactivity data is not immediately used; first some preprocessing steps are
-performed on the mass spectrometry data.
+
+
+\subsection{Reading in the data}
+
+TODO: describe the reading in the data section
 
 <<reading-data>>=
 # Read the data
+
+# read.table
+# read_table
+# scan
 @
 
-The first step performed is to consolidate the mass spectometry abundances that
-are presumed to belong to the same chemical compound; we refer to this process
-as binning the data, where the term binning is derived from the method used to
-achieve this aim.  This task is accomplished be passing the mass spectrometry
-data as an argument to the \R/ function \binMS/.
 
-Next we wish to perform some feature screening to reduce the level of noise in
-the data by removing any potential candidate compounds with observed abundances
-for which it is not scientifically plausible that they might be a compound with
-an effect on bioactivity levels (see section **** of ****).  This task is
-performed by passing the \R/ data object created by \binMS/ and passing it
-as an argument to \filterMS/.
+\subsection{Consolidating mass spectrometry data}
 
-At this point we have mass spectrometry data for which the original chemical
-compounds that had been spread out over multiple observations recovered by the
-binning process, and implausible compounds screened out of the dataset by the
-filtering process, as well as the corresponding bioactivity data.  Now it
-remains to perform a statistical procedure by which we can obtain a list of
-candidate compounds which may have a (promotive) effect on the reduction of
-bioactivity levels in the bioactivity data.  This is accomplished by passing the
-\R/ object returned by the \filterMS/ data in addition to the bioactivity
-data to the \filterMS/ function.  The \R/ object returned by this function
-provides such a list of candidate compounds.
+TODO: describe the consolidation process
+
+<<consolidating-data>>=
+# binMS(ms_data, ...)
+@
+
+
+
+\subsection{Filtering mass spectrometry data}
+
+TODO: describe filtering process
+
+<<filtering-data>>=
+# filterMS(binned_data, ...)
+@
+
+
+\subsection{Statistical analysis}
+
+TODO: describe statistical analysis
+
+<<statistical-analysis>>=
+
+# Some statistical analyses ;)
+
+1 + 1
+
+log( exp(5) )
+
+sqrt(2)
+@
+
+
+
+
+\section{Conclusion}
+
+TODO: conclusion here
+
+
+\vspace{10mm}
+
+**** Need bibliography ****
+
 
 \end{document}
