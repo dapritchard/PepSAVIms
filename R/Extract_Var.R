@@ -1,5 +1,7 @@
 
-#                 ** Extraction functionality overview **
+#                 `````````````````````````````````````````
+#                 |  Extrac_Var.R functionality overview  |
+#                 .........................................
 #
 # There are two functions in this file which are designed to be directly invoked
 # by calling routines.  These top-level (relative to this file) functions are:
@@ -38,11 +40,11 @@
 # specified by name or index in arguments passed to dot-dot-dot.
 #
 # PRE: when we have a 1-row data_obs, and an index argument to var_specify then
-# this will erroneously treat the index as data.  Thus a potential calling
-# function should not use this routine if this is a possibility.
+# this will erroneously treat the index as data.  Thus a calling function should
+# not use this routine if this scenario is a possibility.
 
 extract_var <- function(data_obs, var_specify, expect_matr=FALSE, ...) {
-  
+
   # Extract variable name from var_specify and data_obs; used for error messages
   spec_nm <- deparse( substitute(var_specify) )
   dat_nm <- deparse( substitute(data_obs) )
@@ -120,7 +122,7 @@ extract_null <- function(data_obs, dat_nm, spec_nm, ...) {
 # function)
 
 extract_data <- function(var_specify, spec_nm) {
-  
+
   if (!is.numeric(var_specify)) {
     stop("If ", spec_nm, " is the same length of the data then it must be of ",
          "mode numeric", call.=FALSE)
@@ -154,7 +156,7 @@ extract_num <- function(data_obs, var_specify, expect_matr, dat_nm, spec_nm) {
 extract_char <- function(data_obs, var_specify, expect_matr, dat_nm, spec_nm) {
 
   var_idx <- extract_char_to_idx(data_obs, var_specify, dat_nm, spec_nm)
-  
+
   extract_idx_to_data(data_obs, var_idx, expect_matr, dat_nm, spec_nm)
 }
 
@@ -187,7 +189,7 @@ extract_idx_to_data <- function(data_obs, var_idx, expect_matr, dat_nm, spec_nm)
       row.names(out_dat) <- row.names(data_obs)
     }
   }
-  
+
   return (out_dat)
 }
 
@@ -219,7 +221,7 @@ extract_idx <- function(data_obs, var_specify, expect_matr=FALSE, ...) {
   extract_check_valid(data_obs, var_specify, expect_matr, dat_nm, spec_nm)
 
   # Figure out in which way the data is presented to us
-  
+
   if (is.null(var_specify)) {
     if (!identical(expect_matr, TRUE)) {
       stop("is var_specify is NULL, then expect_matr must be TRUE", call.=FALSE)
@@ -300,7 +302,7 @@ extract_num_to_idx <- function(data_obs, var_specify, dat_nm, spec_nm) {
       stop("out of bounds index ", k, " provided for ", spec_nm,
            " relative to ", dat_nm, call.=FALSE)
     }
-  }  
+  }
   # Check that there are no duplicates in var_specify (note: integer(0) fails
   # the conditional as desired)
   if (! identical(length(unique(var_specify)), length(var_specify)) ) {
@@ -323,7 +325,7 @@ extract_char_to_idx <- function(data_obs, var_specify, dat_nm, spec_nm) {
   if (is.null(var_nm)) {
     stop("Variable specified by name but data columns not equipped with names", call.=FALSE)
   }
-  
+
   # Check that there are no duplicates in var_specify (note: integer(0) fails
   # the conditional as desired)
   if ( !identical(length(unique(var_specify)), length(var_specify)) ) {
@@ -331,7 +333,7 @@ extract_char_to_idx <- function(data_obs, var_specify, dat_nm, spec_nm) {
   }
 
   out_idx <- sapply(var_specify, function(nm) {
-    
+
     # Number of matches for current element of var_specify in fraction names
     matchIdx <- grep(nm, var_nm, fixed=TRUE)
     nMatch <- length(matchIdx)
@@ -349,7 +351,7 @@ extract_char_to_idx <- function(data_obs, var_specify, dat_nm, spec_nm) {
   })
 
   # Return indices after stripping variable names
-  setNames(out_idx, NULL)
+  stats::setNames(out_idx, NULL)
 }
 
 
@@ -385,20 +387,20 @@ extract_check_valid <- function(data_obs, var_specify, expect_matr, dat_nm, spec
   if (!is.null(var_specify) && !is.numeric(var_specify) && !is.character(var_specify)) {
     stop(spec_nm, " must either be NULL or either of mode numeric or mode character", call.=FALSE)
   }
-  
+
   if (!is.null(var_specify)) {
     spec_len <- length(var_specify)
-    
+
     # Check that there are no missing in var_specify
     if (anyNA(var_specify)) {
       stop(spec_nm, " cannot contain any missing", call.=FALSE)
     }
-    
+
     # Check that input corresponding to matrix data has at least 1 entry
     if ( identical(length(var_specify), 0L) ) {
       stop("If non-NULL, then ", spec_nm, " must have length no less than 1", call.=FALSE)
     }
-    
+
     # Check that input corresponding to vector data has either exactly 1 entry or
     # exactly the number of entries in the data (i.e. is providing a variable)
     if (!expect_matr && !(identical(spec_len, 1L) || identical(spec_len, nrow(data_obs)))) {

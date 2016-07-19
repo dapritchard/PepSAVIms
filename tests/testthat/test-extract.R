@@ -121,7 +121,7 @@ test_that("extract_idx: right type but illegal values", {
 
   # data_obs: 1 col matrix
   expect_error(extract_idx(obs_one_col, col_idx, TRUE),
-               "obs_one_col must have number of columns no less than 2")         
+               "obs_one_col must have number of columns no less than 2")
 
   # note: we don't check data_obs for valid values (i.e. no NAs or non-numeric
   # entries) with extract_idx because we never subset the data.  In other words,
@@ -151,7 +151,7 @@ test_that("extract_idx: right type but illegal values", {
   # var_specify: duplicates (numeric)
   expect_error(extract_idx(obs, var_idx_dups, TRUE),
                "var_idx_dups cannot have any duplicate values")
-  
+
   # var_specify: duplicates (character)
   expect_error(extract_idx(obs, var_nm_dups, TRUE),
                "var_nm_dups cannot have any duplicate values")
@@ -175,7 +175,7 @@ test_that("extract_idx: right type but illegal values", {
 context("extract_var method")
 
 test_that("extract_var: valid input with various forms", {
-  
+
   # numeric length 1
   expect_identical( extract_var(obs, 1L), obs[, 1L] )
   # numeric length 1: return matrix

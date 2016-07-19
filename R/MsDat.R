@@ -135,11 +135,6 @@ msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
 print.msDat <- function(x, ...) {
 
   print(x$ms)
-  
-  # cat("\nAn object of class \"msDat\" with ", format(NROW(x$ms), big.mark=","),
-  #     " compounds and ", NCOL(x$ms), " fractions.\n", sep="")
-  # cat("Use extractMS to column-bind the data together into a single matrix.\n\n")
-
 }
 
 

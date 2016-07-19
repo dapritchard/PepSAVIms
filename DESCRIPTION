@@ -6,10 +6,14 @@ Date: 2015-12-14
 Authors@R: c(
     person("Pritchard", "David", email="dpritch@live.unc.edu", role=c("aut", "cre")),
     person("Kirkpatrick", "Christine", email="ckirkpat@live.unc.edu", role="aut"))
-Description: Suite of software to search for candidate compounds with an effect on bioactivity.
+Description: Suite of software to search for candidate compounds with an effect
+    on bioactivity.
 License: GPL-3
 LazyData: TRUE
-Suggests: testthat,
+Suggests:
+    testthat,
     knitr
-Imports: elasticnet
+Imports:
+    elasticnet
 VignetteBuilder: knitr
+RoxygenNote: 5.0.1

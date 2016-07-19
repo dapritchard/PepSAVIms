@@ -27,7 +27,7 @@ test_that("filterMS: test with valid input", {
 
   # region speciy by indices
   out <- filterMS(msDatObj, 3:4, "all", 0.05, 1000, 7L)
-  expect_identical(out, true_filterMS)  
+  expect_identical(out, true_filterMS)
 
   # border size 1L
   out <- filterMS(msDatObj, paste0("frac", 3:4), 1L, 0.05, 1000, 7L)
@@ -44,7 +44,7 @@ test_that("filterMS: test with valid input", {
   # msObj specify a binMS object
   out <- filterMS(binMS_obj, paste0("frac", 3:4), "all", 0.05, 1000, 7L)
   expect_identical(out, true_filterMS)
-  
+
   # No observations satisfy criteria (maximum charge set to 0)
   expect_warning(out <- filterMS(msDatObj, paste0("frac", 3:4), "all", 0.05, 1000, 0L),
                  "There are no compounds that met all of the criteria")
@@ -62,31 +62,31 @@ test_that("filterMS: test with valid input", {
 # supplied to the summ_info object are as they should be
 
 test_that("filterMS: region and border assignment", {
-  
+
   # region: specify with char
   out <- filterMS(msDatObj_alt, paste0("ms", 5:6))
   expect_identical( out$summ_info$reg_nm, paste0("ms", 5:6) )
-  
+
   # region: specify with indices
   out <- filterMS(msDatObj_alt, 5:6)
   expect_identical( out$summ_info$reg_nm, paste0("ms", 5:6) )
-  
+
   # border: specify "all"
   out <- filterMS(msDatObj_alt, 5:6, "all")
   expect_identical( out$summ_info$bor_nm, paste0("ms", c(1:4, 7:12)) )
-  
+
   # border: specify "none"
   out <- filterMS(msDatObj_alt, 5:6, "none")
   expect_identical( out$summ_info$bor_nm, character(0) )
-  
+
   # border: specify 3
   out <- filterMS(msDatObj_alt, 5:6, 3)
   expect_identical( out$summ_info$bor_nm, paste0("ms", c(2:4, 7:9)) )
-  
+
   # border: specify 3, 44
   out <- filterMS(msDatObj_alt, 5:6, c(3, 43))
   expect_identical( out$summ_info$bor_nm, paste0("ms", c(2:4, 7:12)) )
-  
+
   # border: specify 0
   out <- filterMS(msDatObj_alt, 5:6, 0)
   expect_identical( out$summ_info$bor_nm, character(0) )
@@ -100,12 +100,12 @@ test_that("filterMS: region and border assignment", {
 # ........................... #
 
 test_that("filterMS: missing input", {
-  
+
   # Note that the remaining formal args have defaults
-  
+
   # msObj missing
   expect_error( filterMS( , region=region), "Must provide an argument for msObj" )
-  
+
   # region missing
   expect_error( filterMS(msDatObj), "Must provide an argument for region" )
 })
@@ -128,19 +128,19 @@ test_that("filterMS: nonexistent object", {
   expect_error(filterMS(msDatObj, asdf, "all", 0.05, 1000, 7L),
                "object 'asdf' not found for region")
 
-  # border arg a nonexistent object  
+  # border arg a nonexistent object
   expect_error(filterMS(msDatObj, 3:4, asdf, 0.05, 1000, 7L),
                "object 'asdf' not found for border")
 
-  # bord_ratio arg a nonexistent object  
+  # bord_ratio arg a nonexistent object
   expect_error(filterMS(msDatObj, 3:4, "all", asdf, 1000, 7L),
                "object 'asdf' not found for bord_ratio")
 
-  # min_inten arg a nonexistent object  
+  # min_inten arg a nonexistent object
   expect_error(filterMS(msDatObj, 3:4, "all", 0.05, asdf, 7L),
                "object 'asdf' not found for min_inten")
 
-  # max_chg arg a nonexistent object  
+  # max_chg arg a nonexistent object
   expect_error(filterMS(msDatObj, 3:4, "all", 0.05, 1000, asdf),
                "object 'asdf' not found for max_chg")
 })
@@ -202,7 +202,7 @@ test_that("filterMS: invalid msObj", {
 # ................................... #
 
 test_that("filterMS: invalid region", {
-  
+
   # invalid type
   expect_error( filterMS(msDatObj, list()),
                 "region must be either of mode character or numeric" )
@@ -264,7 +264,7 @@ test_that("filterMS: invalid border", {
   # numeric vector length 0
   expect_error( filterMS(msDatObj, 3:4, integer(0)),
                 "border must have length 1 or 2" )
-  
+
   # numeric vector length > 2
   expect_error( filterMS(msDatObj, 3:4, 1:3),
                 "border must have length 1 or 2" )
@@ -298,7 +298,7 @@ test_that("filterMS: invalid bord_ratio", {
 
   # vector length 0
   expect_error( filterMS(msDatObj, 3:4, bord_ratio=numeric(0)), "bord_ratio must be of length 1" )
-  
+
   # vector length 2
   expect_error( filterMS(msDatObj, 3:4, bord_ratio=numeric(0)), "bord_ratio must be of length 1" )
 })

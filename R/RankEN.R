@@ -120,31 +120,31 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
 
 
   # Mung data into the right form ----------------------------------------------
-  
+
   # Obtain msDat obj
   msDatObj <- extractMS(msObj, type="msDat")
   if (is.null(msDatObj)) {
     stop("mass spec object encapsulated by msObj cannot be NULL", call.=FALSE)
   }
   ms <- msDatObj$ms
-  
+
   # If we have a vector convert to a 1-row matrix.  Leave unchanged otherwise.
   bioact <- rankEN_vector_to_matrix(bioact)
-  
+
   # Extract the region of interest for the ms data
   ms <- extract_var(ms, region_ms, TRUE)
   bio <- extract_var(bioact, region_bio, TRUE)
-  
+
   # Check for missing and that dimensions match
   rankEN_check_regr_args(ms, bio)
 
   # Convert ms to form where rows are an observation (i.e. fraction) and cols
   # arms_te a variable (i.e. a compound)
   ms_regr <- t(ms)
-  
+
   # Obtain the mean of the bioactivity replicates and convert to a vector
   bio_regr <- colMeans(bio)
-  
+
 
   # Fit model ------------------------------------------------------------------
 
@@ -156,7 +156,7 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
   }, error = function(err) {
     stop("message produced by call to enet from package elasticnet ==>\n", err, call.=FALSE)
   })
-  
+
 
   # Extract compound entrance results ------------------------------------------
 
@@ -172,7 +172,7 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
 
   # Construct return object ----------------------------------------------------
 
-  # Extract mass spec and bioactivity fraction names  
+  # Extract mass spec and bioactivity fraction names
   ms_nm <- colnames(ms)
   if (is.null(ms_nm)) {
     ms_nm <- paste0("ms", 1:ncol(ms))
@@ -180,7 +180,7 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
   bio_nm <- colnames(bio)
   if (is.null(bio_nm)) {
     bio_nm <- paste0("bio", 1:ncol(bio))
-  }  
+  }
 
   # Create info for the summary function
   summ_info <- list(
@@ -314,7 +314,7 @@ summary.rankEN <- function(object, max_comp_print=20L, ...) {
   mtoz      <- object$mtoz
   chg       <- object$charge
   ccor      <- object$comp_cor
-  
+
   # Print restricted mass spectrometry and bioactivity data dimensions
   dd_char <- format(unlist(summ_info$data_dim), big.mark=",", justify="right")
   cat(sep="",
@@ -324,12 +324,12 @@ summary.rankEN <- function(object, max_comp_print=20L, ...) {
       "    region of interest:     ", dd_char[1], "\n",
       "    candidate compounds:    ", dd_char[2], "\n",
       "    bioactivity replicates: ", dd_char[3], "\n\n")
-  
+
   # Print a table with the fraction names used for the mass spectrometry and
   # bioactivity data
   region_nm_df <- data.frame(summ_info$region_nm)
   colnames(region_nm_df) <- c("Mass spec", "Bioactivity")
-  region_table <- capture.output( print(region_nm_df, row.names=FALSE, print.gap=2)  )
+  region_table <- utils::capture.output( print(region_nm_df, row.names=FALSE, print.gap=2)  )
   lead_blanks <- rep(" ", min(getOption("width") - max(nchar(region_table)), 2L))
   cat(sep="",
       "Fractions included in region of interest:\n",
@@ -367,7 +367,7 @@ summary.rankEN <- function(object, max_comp_print=20L, ...) {
   }
   comp_df <- data.frame(mtoz, chg, format(round(ccor, 4), nsmall=4))
   colnames(comp_df) <- c("Mass spec", "Charge", "Correlation")
-  comp_table <- capture.output( print(comp_df, row.names=FALSE, print.gap=2) )
+  comp_table <- utils::capture.output( print(comp_df, row.names=FALSE, print.gap=2) )
   lead_blanks <- rep(" ", min(getOption("width") - max(nchar(comp_table)), 2L))
   for (i in 1:(min(max_comp_print, length(mtoz)) + 1)) {
     cat(lead_blanks, comp_table[i], "\n", sep="")

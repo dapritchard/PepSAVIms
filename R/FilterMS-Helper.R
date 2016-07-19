@@ -38,7 +38,7 @@ filterMS_border_idx_num <- function(bsize, regIdx, ms_nc) {
   }
 
   # Create border index variable: borIdx
-  reg_lo <- head(regIdx, 1)
+  reg_lo <- utils::head(regIdx, 1L)
   if ((reg_lo > 1L) && (bsize[1] >= 1L)) {
     bef_lo <- max(1L, reg_lo - bsize[1])
     bef_hi <- reg_lo - 1L
@@ -47,7 +47,7 @@ filterMS_border_idx_num <- function(bsize, regIdx, ms_nc) {
   else {
     bef_seq <- integer(0)
   }
-  reg_hi <- tail(regIdx, 1)
+  reg_hi <- utils::tail(regIdx, 1L)
   if ((reg_hi < ms_nc) && (bsize[2] >= 1L)) {
     aft_lo <- reg_hi + 1L
     aft_hi <- min(reg_hi + bsize[2], ms_nc)
@@ -66,13 +66,13 @@ filterMS_border_idx_num <- function(bsize, regIdx, ms_nc) {
 filterMS_check_valid <- function(msObj, region, border, bord_ratio, min_inten, max_chg) {
 
   ## Check for missing arguments
-  
+
   all_var_nm <- c("msObj", "region", "border", "bord_ratio", "min_inten", "max_chg")
   for (var_nm in all_var_nm) {
     if (!eval(substitute(hasArg(var_nm)))) {
       stop("Must provide an argument for ", var_nm, call.=FALSE)
     }
-    # Check that an object exists for provided argument 
+    # Check that an object exists for provided argument
     tryCatch(get(var_nm), error = function(err) {
       err <- as.character(err)
       obj_nm <- regmatches(err, gregexpr("(?<=\')(.*?)(?=\')", err, perl=TRUE))[[1L]]
@@ -142,7 +142,7 @@ filterMS_check_valid <- function(msObj, region, border, bord_ratio, min_inten, m
   }
   else if (anyNA(min_inten)) {
     stop("min_inten cannot contain any missing", call.=FALSE)
-  }  
+  }
 
 
   ## Check max_chg

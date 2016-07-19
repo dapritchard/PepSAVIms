@@ -1,11 +1,11 @@
 
 rankEN_vector_to_matrix <- function(vec) {
-  
+
   # case: not a vector
   if ( !(is.vector(vec) && !is.list(vec)) ) {
     return (vec)
   }
-  
+
   attr(vec, "dim") <- c(1, length(vec))
   attr(vec, "dimnames") <- list(NULL, attr(vec, "names"))
   attr(vec, "names") <- NULL
@@ -37,7 +37,7 @@ rankEN_check_regr_args <- function(ms, bio) {
 # the list.
 
 rankEN_comp_entrance <- function(enet_fit) {
-  
+
   actions <- unlist(enet_fit$actions)
   # enet (and lars) adds an entry to the end of the actions list signaling the
   # number of actions performed
@@ -50,7 +50,7 @@ rankEN_comp_entrance <- function(enet_fit) {
 
 
 rankEN_comp_cor <- function(ms_t, bio_vec) {
-  apply(ms_t, 2, function(x) cor(x, bio_vec))
+  apply(ms_t, 2, function(x) stats::cor(x, bio_vec))
 }
 
 
@@ -76,7 +76,7 @@ rankEN_filter_compIdx <- function(comp_idx, comp_cor, ncomp, pos_only) {
     comp_idx <- comp_idx[1:ncomp]
   }
 
-  comp_idx  
+  comp_idx
 }
 
 
@@ -86,13 +86,13 @@ rankEN_check_valid_input <- function(msObj, bioact, region_ms, region_bio,
                                      lambda, pos_only, ncomp) {
 
   ## Check for missing arguments
-  
+
   all_var_nm <- c("msObj", "bioact", "region_ms", "region_bio", "lambda", "pos_only", "ncomp")
   for (var_nm in all_var_nm) {
     if (!eval(substitute(hasArg(var_nm)))) {
       stop("Must provide an argument for ", var_nm, call.=FALSE)
     }
-    # Check that an object exists for provided argument 
+    # Check that an object exists for provided argument
     tryCatch(get(var_nm), error = function(err) {
       err <- as.character(err)
       obj_nm <- regmatches(err, gregexpr("(?<=\')(.*?)(?=\')", err, perl=TRUE))[[1L]]

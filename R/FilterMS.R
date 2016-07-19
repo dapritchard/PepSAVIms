@@ -113,7 +113,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
 
   # Create region index variable
   regIdx <- extract_idx(ms, region, TRUE)
-  
+
   # Create border index, i.e. the indices that surround the region of interest
   borIdx <- filterMS_border_idx(border, regIdx, ms_nc)
 
@@ -126,7 +126,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   # chosen in the case of ties.  Note that we only consider columns in either
   # the region of interest or the bordering region.
   maxIdx <- apply(ms[, allIdx, drop=FALSE], 1, function(x) {
-    last_in_allIdx <- tail(which(x == max(x)), 1L)
+    last_in_allIdx <- utils::tail(which(x == max(x)), 1L)
     allIdx[last_in_allIdx]
   })
 
@@ -160,7 +160,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
   }
 
   # Create mass-to-charge and charge datasets for each criterion
-  cmp_by_cr <- setNames(vector("list", nCrit), paste0("c", seq_len(nCrit)))
+  cmp_by_cr <- stats::setNames(vector("list", nCrit), paste0("c", seq_len(nCrit)))
   for (j in seq_len(nCrit)) {
     thisKeep <- critBool[, j]
     # note: data.frame can handle the case when thisKeep has length 0
@@ -196,7 +196,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
 #' @export
 
 print.filterMS <- function(x, ...) {
-  
+
   if (is.null(x$msDatObj)) {
     cat("An object of class \"filterMS\"; no observations ",
         "satisfied all of the inclusion criteria.\n", sep="")
@@ -308,7 +308,7 @@ summary.filterMS <- function(object, ...) {
   totcmp <- ifelse(is.null(object$msDatObj), 0, format(nrow(object$msDatObj$ms), big.mark=","))
   cat("The total number of candidate compounds was reduced to:\n",
       "-------------------------------------------------------\n",
-      rep(" ", 14 + mlen - nchar(totcmp)), totcmp,      
+      rep(" ", 14 + mlen - nchar(totcmp)), totcmp,
       "\n\n", sep="")
 }
 

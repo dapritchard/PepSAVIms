@@ -52,7 +52,7 @@ test_that("binMS: compare results with various methods of providing / specifying
   out <- binMS(testMS[, 1:n_datacols], 1, 2, "mass", "time", NULL, c(14, 45),
                c(2e3, 15e3), c(2, 10), 0.05, 1)
   expect_equal( out, true_bin )
-  
+
   # Test data as a data.frame and specify data by name
   out <- binMS(testdf, 1, 2, "mass", "time", c("ms1", "ms2"), c(14, 45),
                c(2e3, 15e3), c(2, 10), 0.05, 1)
@@ -102,17 +102,17 @@ test_that("binMS: with missing params", {
   expect_error( binMS( , "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                       c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                 "Must provide an argument for mass_spec" )
-  
+
   # Missing mtoz
   expect_error( binMS(testMS, , "chg", "mass", "time", c("ms1", "ms2"),
                       c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                 "Must provide an argument for mtoz" )
-  
+
   # Missing charge
   expect_error( binMS(testMS, "mtoz", , "mass", "time", c("ms1", "ms2"),
                       c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "Must provide an argument for charge" )
-  
+
   # Missing time_peak_reten
   expect_error( binMS(testMS, "mtoz", "chg", "mass", , c("ms1", "ms2"),
                       c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
@@ -138,7 +138,7 @@ test_that("binMS: with missing params", {
                       c(14, 45), c(2e3, 15e3), c(2, 10), , 1),
                 "Must provide an argument for mtoz_diff" )
 
-  # Missing time_diff  
+  # Missing time_diff
   expect_error( binMS(testMS, "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                       c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, ),
                 "Must provide an argument for time_diff" )
@@ -168,42 +168,42 @@ test_that("binMS: argument is nonexistent object", {
   expect_error(binMS(testMS, "mtoz", asdf, "mass", "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "object 'asdf' not found for charge")
-  
+
   # mass arg a nonexistent object
   expect_error(binMS(testMS, "mtoz", "chg", asdf, "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "object 'asdf' not found for mass")
-  
+
   # time_peak_reten arg a nonexistent object
   expect_error(binMS(testMS, "mtoz", "chg", "mass", asdf, c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "object 'asdf' not found for time_peak_reten")
-  
+
   # ms_inten arg a nonexistent object
   expect_error(binMS(testMS, "mtoz", "chg", "mass", "time", asdf,
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "object 'asdf' not found for ms_inten")
-  
+
   # time_range arg a nonexistent object
   expect_error(binMS(testMS, "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                      asdf, c(2e3, 15e3), c(2, 10), 0.05, 1),
                "object 'asdf' not found for time_range")
-  
+
   # mass_range arg a nonexistent object
   expect_error(binMS(testMS, "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                      c(14, 45), asdf, c(2, 10), 0.05, 1),
                "object 'asdf' not found for mass_range")
-  
+
   # charge_range arg a nonexistent object
   expect_error(binMS(testMS, "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), asdf, 0.05, 1),
                "object 'asdf' not found for charge_range")
-  
+
   # mtoz_diff arg a nonexistent object
   expect_error(binMS(testMS, "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), asdf, 1),
                "object 'asdf' not found for mtoz_diff")
-  
+
   # time_diff arg a nonexistent object
   expect_error(binMS(testMS, "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, asdf),
@@ -285,12 +285,12 @@ test_that("binMS: wrong types of arguments", {
 
 
 test_that("binMS: arguments of the wrong dimensions", {
-  
+
   # mass_spec with 0 rows
   expect_error(binMS(testMS[integer(0), ], "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "mass_spec must have number of rows no less than 1")
-    
+
   # mass_spec with 1 column
   expect_error(binMS(testMS[, integer(1)], "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
@@ -300,7 +300,7 @@ test_that("binMS: arguments of the wrong dimensions", {
   expect_error(binMS(testMS[, 1L, drop=FALSE], "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "mass_spec must have number of columns no less than 2")
-  
+
   # mtoz length 0 numeric vector
   expect_error(binMS(testMS, integer(0), "chg", "mass", "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
@@ -315,7 +315,7 @@ test_that("binMS: arguments of the wrong dimensions", {
   expect_error(binMS(testMS, "mtoz", "chg", c(1, 2), "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "mass must have length 1 or length equal to the number of observations")
-  
+
   # time numeric vector of wrong length
   expect_error(binMS(testMS, "mtoz", "chg", "mass", c(1, 2), c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
@@ -325,7 +325,7 @@ test_that("binMS: arguments of the wrong dimensions", {
   expect_error(binMS(testMS, "mtoz", "chg", "mass", "time", character(0),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "If non-NULL, then ms_inten must have length no less than 1")
-  
+
   # time_range with wrong length
   expect_error(binMS(testMS, "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                      c(1, 2, 3), c(2e3, 15e3), c(2, 10), 0.05, 1),
@@ -373,7 +373,7 @@ test_that("binMS: arguments of the wrong dimensions", {
 
 
 test_that("binMS: NA in arguments", {
-  
+
   # NA in region specified by ms_inten
   expect_error(binMS(test_NA, "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
@@ -388,17 +388,17 @@ test_that("binMS: NA in arguments", {
   expect_error(binMS(testMS, "mtoz", char_NA, "mass", "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "charge cannot contain any missing")
-  
+
   # mass with character NA
   expect_error(binMS(testMS, "mtoz", "chg", char_NA, "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "mass cannot contain any missing")
-  
+
   # time_peak_reten with character NA
   expect_error(binMS(testMS, "mtoz", "chg", "mass", char_NA, c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
                "time_peak_reten cannot contain any missing")
-  
+
   # time_range with numeric NA
   expect_error(binMS(testMS, "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
                      c(14, numer_NA), c(2e3, 15e3), c(2, 10), 0.05, 1),
@@ -434,7 +434,7 @@ test_that("binMS: NA in arguments", {
 
 
 test_that("binMS: errors in specifying data in mass_spec by name", {
-  
+
   # Specify a variable by name for a column name that doesn't exist
   expect_error(binMS(testMS, "asdf", "chg", "mass", "time", c("ms1", "ms2"),
                      c(14, 45), c(2e3, 15e3), c(2, 10), 0.05, 1),
