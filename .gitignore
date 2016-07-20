@@ -4,7 +4,8 @@
 !bioact.Rproj
 inst/doc
 *~
-^/vignettes/Paper_Analysis.aux
-^/vignettes/Paper_Analysis.log
-^/vignettes/Paper_Analysis.pdf
-^/vignettes/Paper_Analysis.tex
+^vignettes/Paper_Analysis.aux
+^vignettes/Paper_Analysis.log
+^vignettes/Paper_Analysis.pdf
+^vignettes/Paper_Analysis.tex
+^vignettes/auto

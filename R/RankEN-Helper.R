@@ -1,4 +1,6 @@
 
+# If vec is a vector convert to a 1-row matrix,  and leave unchanged otherwise
+
 rankEN_vector_to_matrix <- function(vec) {
 
     # case: not a vector
@@ -10,6 +12,10 @@ rankEN_vector_to_matrix <- function(vec) {
 }
 
 
+
+
+# Check that the number of fractions in the region of interest for the ms data
+# matches the number of fractions in the region of interest for bioactivity.
 
 rankEN_check_regr_args <- function(ms, bio) {
 
@@ -26,12 +32,12 @@ rankEN_check_regr_args <- function(ms, bio) {
 # Obtain an integer vector indexing (some of the) compounds by the order in
 # which they first enter the Lasso model, from first to last
 #
-# The enet slot 'actions' is a list of all the actions taken in the model path
-# in terms of either adding or removing a predictor variable from model.  If the
-# variable is added to the model, then the column index is inserted into the
-# next position in the list.  If the variable is removed from the model, then -1
-# times the column index of the variable is inserted into the next position in
-# the list.
+# The enet element 'actions' is a list of all the actions taken in the model
+# path in terms of either adding or removing a predictor variable from model.
+# If the variable is added to the model, then the column index is inserted into
+# the next position in the list.  If the variable is removed from the model,
+# then -1 times the column index of the variable is inserted into the next
+# position in the list.
 
 rankEN_comp_entrance <- function(enet_fit) {
 
@@ -46,12 +52,20 @@ rankEN_comp_entrance <- function(enet_fit) {
 
 
 
+# Return a vector with k-th element the correlation b/w the k-th column of ms_t
+# (i.e. the k-th compound) and bioactivity
+
 rankEN_comp_cor <- function(ms_t, bio_vec) {
-    apply(ms_t, 2, function(x) stats::cor(x, bio_vec))
+    apply(ms_t, 2, stats::cor, bio_vec)
 }
 
 
 
+
+# Return the indices of the compounds in the order that they entered the model
+# (i.e. comp_idx), after possibly filtering out compounds with negative
+# correlation and reducing the set to the first ncomp compounds (after
+# filtering)
 
 rankEN_filter_compIdx <- function(comp_idx, comp_cor, ncomp, pos_only) {
 
@@ -78,6 +92,8 @@ rankEN_filter_compIdx <- function(comp_idx, comp_cor, ncomp, pos_only) {
 
 
 
+
+# Ensure that user input to rankEN is valid
 
 rankEN_check_valid_input <- function(msObj, bioact, region_ms, region_bio,
                                      lambda, pos_only, ncomp) {

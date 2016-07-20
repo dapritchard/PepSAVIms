@@ -199,7 +199,7 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
     )
 
     # Construct output object
-    outDat <- list( mtoz      = msDatObj$mtoz[comp_idx_out],
+    outDat <- list( mtoz     = msDatObj$mtoz[comp_idx_out],
                    charge    = msDatObj$chg[comp_idx_out],
                    comp_cor  = comp_cor[comp_idx_out],
                    enet_fit  = enet_fit,

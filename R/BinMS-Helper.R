@@ -1,4 +1,6 @@
 
+# Ensure that user input to binMS is valid
+
 binMS_check_valid_input <- function(mass_spec, mtoz, charge, mass, time_peak_reten, ms_inten,
                                     time_range, mass_range, charge_range, mtoz_diff, time_diff) {
 

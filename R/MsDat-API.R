@@ -84,8 +84,6 @@ dimnames.msDat <- function(msObj) {
 }
 
 
-
-
 `[.msDat` <- function(msObj, i, j) {
 
     # case: one of the classes that decorates msDat object.  Recursively call
@@ -116,7 +114,6 @@ dimnames.msDat <- function(msObj) {
 
     msObj
 }
-
 
 
 dim.msDat <- function(x) {

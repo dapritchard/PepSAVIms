@@ -154,6 +154,7 @@
 #'
 #' @export
 
+
 binMS <- function(mass_spec,
                   mtoz,
                   charge,
@@ -290,30 +291,30 @@ binMS <- function(mass_spec,
         # from the original data when placing it in the bin (and taking the mean
         # occurs after the (following inner) loop) ends.
 
-        while ( (innerCtr <= n_befbin)
-               && (info_orig[rmtoz, innerCtr] - (info_bin[rmtoz, binCtr] / nbin) < mtoz_diff) ) {
+        while ( (innerCtr <= n_befbin) &&
+                (info_orig[rmtoz, innerCtr] - (info_bin[rmtoz, binCtr] / nbin) < mtoz_diff) ) {
 
-                   # case: criteria met.  Add m/z level to current bin.
-                   if ( (info_orig[rchg, innerCtr] == (info_bin[rchg, binCtr] / nbin))
-                       && (abs(info_orig[rtime, innerCtr] - (info_bin[rtime, binCtr] / nbin))
-                       < time_diff) ) {
+            # case: criteria met.  Add m/z level to current bin.
+            if ( (info_orig[rchg, innerCtr] == (info_bin[rchg, binCtr] / nbin))
+                && ( abs(info_orig[rtime, innerCtr] - (info_bin[rtime, binCtr] / nbin))
+                < time_diff ) ) {
 
-                       # add m/z level to current bin
-                       info_bin[, binCtr] <- info_bin[, binCtr] + info_orig[, innerCtr]
-                       ms_bin[, binCtr] <- ms_bin[, binCtr] + ms[, innerCtr]
+                # add m/z level to current bin
+                info_bin[, binCtr] <- info_bin[, binCtr] + info_orig[, innerCtr]
+                ms_bin[, binCtr] <- ms_bin[, binCtr] + ms[, innerCtr]
 
-                       # signal that m/z level is already part of a bin
-                       info_orig[rchg, innerCtr] <- flagv
-                       nbin <- nbin + 1L
+                # signal that m/z level is already part of a bin
+                info_orig[rchg, innerCtr] <- flagv
+                nbin <- nbin + 1L
 
-                   }
-                   # else: criteria not me; noop
+            }
+            # else: criteria not me; noop
 
-                   # Update the counter indexing the next m/z level to consider
-                   # for adding to the current bin
-                   innerCtr <- innerCtr + 1L
+            # Update the counter indexing the next m/z level to consider
+            # for adding to the current bin
+            innerCtr <- innerCtr + 1L
 
-               } # end compare current bin to next m/z level loop
+        } # end compare current bin to next m/z level loop
 
         # Take the average of the binned m/z levels (note: don't need to do this
         # for ms_bin as these values are strictly summed)
