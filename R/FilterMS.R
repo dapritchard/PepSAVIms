@@ -6,172 +6,175 @@
 #' \code{filterMS}.
 #'
 #' @param msObj An object class \code{\link{msDat}}.  Note that this includes
-#'   objects created by the functions \code{binMS} and \code{msDat}.
+#'     objects created by the functions \code{binMS} and \code{msDat}.
 #'
 #' @param region A vector either of mode character or mode numeric.  If numeric
-#'   then the entries should provide the indices for the region of interest in
-#'   the mass spectrometry data provided as the argument for \code{msObj}.  If
-#'   character then the entries should uniquely specify the region of interest
-#'   through partial string matching (see criterion 1, 4).
+#'     then the entries should provide the indices for the region of interest in
+#'     the mass spectrometry data provided as the argument for \code{msObj}.  If
+#'     character then the entries should uniquely specify the region of interest
+#'     through partial string matching (see criterion 1, 4).
 #'
 #' @param border Either a character string \code{"all"}, or a character string
-#'   \code{"none"}, or a length-1 or length-2 numeric value specifying the
-#'   number of fractions to either side of the region of interest to comprise
-#'   the bordering region.  If a single numeric value, then this is the number
-#'   of fractions to each side of the region of interest; if it is two values,
-#'   then the first value is the number of fractions to the left, and the second
-#'   value is the number of fractions to the right.  If there are not enough
-#'   fractions in either direction to completely span the number of specified
-#'   fractions, then all of the available fractions to the side in question are
-#'   considered to be part of the bordering region (see criterion 2).
+#'     \code{"none"}, or a length-1 or length-2 numeric value specifying the
+#'     number of fractions to either side of the region of interest to comprise
+#'     the bordering region.  If a single numeric value, then this is the number
+#'     of fractions to each side of the region of interest; if it is two values,
+#'     then the first value is the number of fractions to the left, and the
+#'     second value is the number of fractions to the right.  If there are not
+#'     enough fractions in either direction to completely span the number of
+#'     specified fractions, then all of the available fractions to the side in
+#'     question are considered to be part of the bordering region (see criterion
+#'     2).
 #'
 #' @param bord_ratio A single nonnegative numeric value.  A value of 0 will not
-#'   admit any compounds, while a value greater than 1 will admit
-#'   all compounds (see criterion 2).
+#'     admit any compounds, while a value greater than 1 will admit all
+#'     compounds (see criterion 2).
 #'
 #' @param min_inten A single numeric value.  A value less than the minimum mass
-#'   spectrometry value in the data will admit all compounds (see criterion 4).
+#'     spectrometry value in the data will admit all compounds (see criterion
+#'     4).
 #'
 #' @param max_chg A single numeric value specifying the maximum charge which a
-#'   compound may exhibit (see criterion 5)
+#'     compound may exhibit (see criterion 5)
 #'
 #' @details Attempts to filter out candidate compounds via subject-matter
-#'   knowledge, with the goal of removing spurious noise from downstream models.
-#'   The criteria for the downstream inclusion of a candidate compound is listed
-#'   below.
+#'     knowledge, with the goal of removing spurious noise from downstream
+#'     models.  The criteria for the downstream inclusion of a candidate
+#'     compound is listed below.
 #'
-#'   \enumerate{
+#'     \enumerate{
 #'
-#'   \item The m/z intensity maximum must fall inside the range of the
-#'   bioactivity region of interest
+#'     \item The m/z intensity maximum must fall inside the range of the
+#'         bioactivity region of interest
 #'
-#'   \item The ratio of the m/z intensity of a species in the areas bordering
-#'   the region of interest and the species maximum intensity must be less than
-#'   \code{bord_ratio}.  When there is no bordering area then it is taken to
-#'   mean that all observations satisfy this criterion.
+#'     \item The ratio of the m/z intensity of a species in the areas bordering
+#'         the region of interest and the species maximum intensity must be less
+#'         than \code{bord_ratio}.  When there is no bordering area then it is
+#'         taken to mean that all observations satisfy this criterion.
 #'
-#'   \item The immediately right adjacent fraction to its maximum intensity
-#'   fraction for a species must have a non-zero abundance.  In the case of ties
-#'   for the maximum, it is the fraction immediately to the right of the
-#'   rightmost maximum fraction which cannot have zero abundance.  When the
-#'   fraction with maximum intensity is the rightmost fraction in the data for
-#'   an observation, then it is taken to mean that the observation satisfies
-#'   this criterion.
+#'     \item The immediately right adjacent fraction to its maximum intensity
+#'         fraction for a species must have a non-zero abundance.  In the case
+#'         of ties for the maximum, it is the fraction immediately to the right
+#'         of the rightmost maximum fraction which cannot have zero abundance.
+#'         When the fraction with maximum intensity is the rightmost fraction in
+#'         the data for an observation, then it is taken to mean that the
+#'         observation satisfies this criterion.
 #'
-#'   \item At least 1 fraction in the region of interest must have intensity
-#'   greater than \code{min_inten}
+#'     \item At least 1 fraction in the region of interest must have intensity
+#'         greater than \code{min_inten}
 #'
-#'   \item Compound charge state must be less than or equal to \code{max_chg}
+#'     \item Compound charge state must be less than or equal to \code{max_chg}
 #'
-#'   }
+#'     }
 #'
 #' @return Returns an object of class \code{filterMS} which inherits from
-#'   \code{msDat}.  This object is a \code{list} with elements described below.
-#'   The class is equipped with a \code{print}, \code{summary}, and
-#'   \code{extractMS} function.
+#'     \code{msDat}.  This object is a \code{list} with elements described
+#'     below.  The class is equipped with a \code{print}, \code{summary}, and
+#'     \code{extractMS} function.
 #'
-#'   \describe{
+#'     \describe{
 #'
-#'   \item{\code{msDatObj}}{ An object of class \code{\link{msDat}} such that
-#'   the encapsulated mass spectrometry data corresponds to each of the
-#'   candidate compounds that satisfed each of the criteria.  If no criteria are
-#'   satisfied then \code{NULL} is returned. }
+#'     \item{\code{msDatObj}}{ An object of class \code{\link{msDat}} such that
+#'         the encapsulated mass spectrometry data corresponds to each of the
+#'         candidate compounds that satisfed each of the criteria.  If no
+#'         criteria are satisfied then \code{NULL} is returned. }
 #'
-#'   \item{\code{cmp_by_crit}}{ A list containing \code{data.frame}s, one for
-#'   each criterion. Each row (if any) in one of the sub-\code{data.frame}s
-#'   contains the mass-to-charge and charge information for a candidate compound
-#'   that satisfies the criterion represented by the \code{data.frame}; all of
-#'   the compounds that satisfied the criterion are included in the data.  The
-#'   \code{data.frame}s are named \code{c1}, ..., \code{c5}, etc corresponding
-#'   to criterion 1, ..., criterion 5. }
+#'     \item{\code{cmp_by_crit}}{ A list containing \code{data.frame}s, one for
+#'         each criterion. Each row (if any) in one of the
+#'         sub-\code{data.frame}s contains the mass-to-charge and charge
+#'         information for a candidate compound that satisfies the criterion
+#'         represented by the \code{data.frame}; all of the compounds that
+#'         satisfied the criterion are included in the data.  The
+#'         \code{data.frame}s are named \code{c1}, ..., \code{c5}, etc
+#'         corresponding to criterion 1, ..., criterion 5. }
 #'
-#'   \item{\code{summ_info}}{ A list containing information pertaining to the
-#'   filtering process; for use by the summary function. }
+#'     \item{\code{summ_info}}{ A list containing information pertaining to the
+#'          filtering process; for use by the summary function. }
 #'
-#'   }
+#'     }
 #'
 #' @export
 
 
 filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=1000, max_chg=7L) {
 
-  # Check validity of arguments
-  filterMS_check_valid(msObj, region, border, bord_ratio, min_inten, max_chg)
+    # Check validity of arguments
+    filterMS_check_valid(msObj, region, border, bord_ratio, min_inten, max_chg)
 
-  # Number of criterion
-  nCrit <- 5L
+    # Number of criterion
+    nCrit <- 5L
 
-  # Create pointers to mass spec variables for convenience
-  msDatObj <- extractMS(msObj, "msDat")
-  ms <- msDatObj$ms
-  mtoz <- msDatObj$mtoz
-  chg <- msDatObj$chg
+    # Create pointers to mass spec variables for convenience
+    msDatObj <- extractMS(msObj, "msDat")
+    ms <- msDatObj$ms
+    mtoz <- msDatObj$mtoz
+    chg <- msDatObj$chg
 
-  # Dimensions of mass spectrometry data
-  ms_nr <- NROW(ms)
-  ms_nc <- NCOL(ms)
+    # Dimensions of mass spectrometry data
+    ms_nr <- NROW(ms)
+    ms_nc <- NCOL(ms)
 
-  # Create region index variable
-  regIdx <- extract_idx(ms, region, TRUE)
+    # Create region index variable
+    regIdx <- extract_idx(ms, region, TRUE)
 
-  # Create border index, i.e. the indices that surround the region of interest
-  borIdx <- filterMS_border_idx(border, regIdx, ms_nc)
+    # Create border index, i.e. the indices that surround the region of interest
+    borIdx <- filterMS_border_idx(border, regIdx, ms_nc)
 
-  # All indices in either region or border
-  allIdx <- union(regIdx, borIdx)
-  lastIdx <- max(allIdx)
+    # All indices in either region or border
+    allIdx <- union(regIdx, borIdx)
+    lastIdx <- max(allIdx)
 
-  # maxIdx: the column index per row (i.e. per observation) of the fraction
-  # containing the maximum intensity level.  The rightmost column index is
-  # chosen in the case of ties.  Note that we only consider columns in either
-  # the region of interest or the bordering region.
-  maxIdx <- apply(ms[, allIdx, drop=FALSE], 1, function(x) {
-    last_in_allIdx <- utils::tail(which(x == max(x)), 1L)
-    allIdx[last_in_allIdx]
-  })
+    # maxIdx: the column index per row (i.e. per observation) of the fraction
+    # containing the maximum intensity level.  The rightmost column index is
+    # chosen in the case of ties.  Note that we only consider columns in either
+    # the region of interest or the bordering region.
+    maxIdx <- apply(ms[, allIdx, drop=FALSE], 1, function(x) {
+        last_in_allIdx <- utils::tail(which(x == max(x)), 1L)
+        allIdx[last_in_allIdx]
+    })
 
-  # Evaluate criteria predicates.  Note that all() returns true when there are
-  # no values as happens for criteria 2 when borIdx is integer(0), which is the
-  # desired behavior.
-  critBool <- data.frame( array(dim=c(ms_nr, nCrit)) )
-  row_seq <- seq_len(ms_nr)
-  critBool[, 1L] <- maxIdx %in% regIdx
-  critBool[, 2L] <- sapply(row_seq, function(i) all(ms[i, borIdx] < bord_ratio * ms[i, maxIdx[i]]))
-  critBool[, 3L] <- sapply(row_seq, function(i) (ms[i, min(maxIdx[i] + 1L, lastIdx)] > 0))
-  critBool[, 4L] <- sapply(row_seq, function(i) any(ms[i, regIdx] > min_inten))
-  critBool[, 5L] <- (chg <= max_chg)
+    # Evaluate criteria predicates.  Note that all() returns true when there are
+    # no values as happens for criteria 2 when borIdx is integer(0), which is
+    # the desired behavior.
+    critBool <- data.frame( array(dim=c(ms_nr, nCrit)) )
+    row_seq <- seq_len(ms_nr)
+    critBool[, 1L] <- maxIdx %in% regIdx
+    critBool[, 2L] <- sapply(row_seq, function(i) all(ms[i, borIdx] < bord_ratio * ms[i, maxIdx[i]]))
+    critBool[, 3L] <- sapply(row_seq, function(i) (ms[i, min(maxIdx[i] + 1L, lastIdx)] > 0))
+    critBool[, 4L] <- sapply(row_seq, function(i) any(ms[i, regIdx] > min_inten))
+    critBool[, 5L] <- (chg <= max_chg)
 
-  # Create a vector of indices which satisfy every criterion
-  keepIdx <- which( Reduce("&", critBool) )
+    # Create a vector of indices which satisfy every criterion
+    keepIdx <- which( Reduce("&", critBool) )
 
-  # Extract mass spec fraction names
-  ms_nm <- colnames(ms)
-  if (is.null(ms_nm)) {
-    ms_nm <- as.character(seq_len(ms_nc))
-  }
+    # Extract mass spec fraction names
+    ms_nm <- colnames(ms)
+    if (is.null(ms_nm)) {
+        ms_nm <- as.character(seq_len(ms_nc))
+    }
 
-  # Create filtered mass spectrometry data
-  if (length(keepIdx) > 0) {
-    msDatObj <- msDat(ms[keepIdx, , drop=FALSE], mtoz[keepIdx], chg[keepIdx])
-  }
-  else {
-    msDatObj <- NULL
-    warning("There are no compounds that met all of the criteria\n", call.=FALSE)
-  }
+    # Create filtered mass spectrometry data
+    if (length(keepIdx) > 0) {
+        msDatObj <- msDat(ms[keepIdx, , drop=FALSE], mtoz[keepIdx], chg[keepIdx])
+    }
+    else {
+        msDatObj <- NULL
+        warning("There are no compounds that met all of the criteria\n", call.=FALSE)
+    }
 
-  # Create mass-to-charge and charge datasets for each criterion
-  cmp_by_cr <- stats::setNames(vector("list", nCrit), paste0("c", seq_len(nCrit)))
-  for (j in seq_len(nCrit)) {
-    thisKeep <- critBool[, j]
-    # note: data.frame can handle the case when thisKeep has length 0
-    cmp_by_cr[[j]] <- data.frame( mtoz = mtoz[thisKeep],
-                                  chg  = chg[thisKeep] )
-  }
+    # Create mass-to-charge and charge datasets for each criterion
+    cmp_by_cr <- stats::setNames(vector("list", nCrit), paste0("c", seq_len(nCrit)))
+    for (j in seq_len(nCrit)) {
+        thisKeep <- critBool[, j]
+        # note: data.frame can handle the case when thisKeep has length 0
+        cmp_by_cr[[j]] <- data.frame( mtoz = mtoz[thisKeep],
+                                     chg  = chg[thisKeep] )
+    }
 
-  # Construct return object
-  outObj <- list( msDatObj  = msDatObj,
-                  cmp_by_cr = cmp_by_cr,
-                  summ_info = list( orig_dim   = c(ms_nr, ms_nc),
+    # Construct return object
+    outObj <- list( msDatObj  = msDatObj,
+                   cmp_by_cr = cmp_by_cr,
+                   summ_info = list( orig_dim   = c(ms_nr, ms_nc),
                                     reg_nm     = ms_nm[regIdx],
                                     bor_nm     = ms_nm[borIdx],
                                     border     = border,
@@ -179,7 +182,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
                                     min_inten  = min_inten,
                                     max_chg    = max_chg ) )
 
-  structure(outObj, class=c("filterMS", "msDat"))
+    structure(outObj, class=c("filterMS", "msDat"))
 }
 
 
@@ -197,16 +200,16 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
 
 print.filterMS <- function(x, ...) {
 
-  if (is.null(x$msDatObj)) {
-    cat("An object of class \"filterMS\"; no observations ",
-        "satisfied all of the inclusion criteria.\n", sep="")
-  }
-  else {
-    cat("An object of class \"filterMS\" with ", format(NROW(x$msDatObj$ms), big.mark=","),
-        " compounds and ", NCOL(x$msDatObj$ms), " fractions.\n", sep="")
-  }
-  cat("Use summary to see more details regarding the filtering process.\n",
-      "Use extractMS to extract the filtered mass spectrometry data\n\n", sep="")
+    if (is.null(x$msDatObj)) {
+        cat("An object of class \"filterMS\"; no observations ",
+            "satisfied all of the inclusion criteria.\n", sep="")
+    }
+    else {
+        cat("An object of class \"filterMS\" with ", format(NROW(x$msDatObj$ms), big.mark=","),
+            " compounds and ", NCOL(x$msDatObj$ms), " fractions.\n", sep="")
+    }
+    cat("Use summary to see more details regarding the filtering process.\n",
+        "Use extractMS to extract the filtered mass spectrometry data\n\n", sep="")
 }
 
 
@@ -227,89 +230,89 @@ print.filterMS <- function(x, ...) {
 
 summary.filterMS <- function(object, ...) {
 
-  # Add pointers to summ_info variables for convenience
-  orig_dim   <- object$summ_info$orig_dim
-  reg_nm     <- object$summ_info$reg_nm
-  bor_nm     <- object$summ_info$bor_nm
-  border     <- object$summ_info$border
-  bord_ratio <- object$summ_info$bord_ratio
-  min_inten  <- object$summ_info$min_inten
-  max_chg    <- object$summ_info$max_chg
+    # Add pointers to summ_info variables for convenience
+    orig_dim   <- object$summ_info$orig_dim
+    reg_nm     <- object$summ_info$reg_nm
+    bor_nm     <- object$summ_info$bor_nm
+    border     <- object$summ_info$border
+    bord_ratio <- object$summ_info$bord_ratio
+    min_inten  <- object$summ_info$min_inten
+    max_chg    <- object$summ_info$max_chg
 
-  cat("\n",
-      "The mass spectrometry data prior to filtering had:\n",
-      "--------------------------------------------------\n",
-      "    ", format(orig_dim[1], width=5, big.mark=","), " compounds\n",
-      "    ", format(orig_dim[2], width=6, big.mark=","), " fractions\n",
-      "\n", sep="")
+    cat("\n",
+        "The mass spectrometry data prior to filtering had:\n",
+        "--------------------------------------------------\n",
+        "    ", format(orig_dim[1], width=5, big.mark=","), " compounds\n",
+        "    ", format(orig_dim[2], width=6, big.mark=","), " fractions\n",
+        "\n", sep="")
 
-  cat("The region of interest was specified as (", length(reg_nm), " fractions):\n",
-      rep("-", 53 + nchar(length(reg_nm))), "\n", sep="")
-  for (nm in reg_nm) {
-    cat(nm, "\n", sep="")
-  }
-  cat("\n")
-
-  if ( identical(border, "all") ) {
-    cat("- The bordering regions were specified as:  everthing not the region of interest\n")
-  }
-  else if ( (identical(border, "none")) || all(border == 0) ) {
-    cat("- The bordering regions were specified as:  no bordering regions\n")
-  }
-  else if ( identical(length(border), 1L) ) {
-    cat("The bordering regions were specified as each having length ",
-        border, ", corresponding to:\n",
-        rep("-", 78 + nchar(border)), "\n", sep="")
-    for (nm in bor_nm) {
-      cat(nm, "\n", sep="")
+    cat("The region of interest was specified as (", length(reg_nm), " fractions):\n",
+        rep("-", 53 + nchar(length(reg_nm))), "\n", sep="")
+    for (nm in reg_nm) {
+        cat(nm, "\n", sep="")
     }
     cat("\n")
-  }
-  else {
-    cat("The bordering regions were specified as having lengths ",
-        border[1], " and ", border[2], ", corresponding to:\n",
-        rep("-", 79 + sum(nchar(border))), "\n", sep="")
-    for (nm in bor_nm) {
-      cat(nm, "\n", sep="")
+
+    if ( identical(border, "all") ) {
+        cat("- The bordering regions were specified as:  everthing not the region of interest\n")
     }
-    cat("\n")
-  }
+    else if ( (identical(border, "none")) || all(border == 0) ) {
+        cat("- The bordering regions were specified as:  no bordering regions\n")
+    }
+    else if ( identical(length(border), 1L) ) {
+        cat("The bordering regions were specified as each having length ",
+            border, ", corresponding to:\n",
+            rep("-", 78 + nchar(border)), "\n", sep="")
+        for (nm in bor_nm) {
+            cat(nm, "\n", sep="")
+        }
+        cat("\n")
+    }
+    else {
+        cat("The bordering regions were specified as having lengths ",
+            border[1], " and ", border[2], ", corresponding to:\n",
+            rep("-", 79 + sum(nchar(border))), "\n", sep="")
+        for (nm in bor_nm) {
+            cat(nm, "\n", sep="")
+        }
+        cat("\n")
+    }
 
-  mi <- format(min_inten, big.mark=",")
-  cat("- The minimum intensity was specified as:   ", mi, "\n",
-      "- The maximum charge was specified as:",
-      rep(" ", 5 + nchar(mi), sep=""),  max_chg, "\n",
-      "- The bordering region ratio was:  ",
-      rep(" ", 8 + nchar(mi), sep=""), format(bord_ratio, digits=2, nsmall=2), "\n",
-      "\n", sep="")
+    mi <- format(min_inten, big.mark=",")
+    cat("- The minimum intensity was specified as:   ", mi, "\n",
+        "- The maximum charge was specified as:",
+        rep(" ", 5 + nchar(mi), sep=""),  max_chg, "\n",
+        "- The bordering region ratio was:  ",
+        rep(" ", 8 + nchar(mi), sep=""), format(bord_ratio, digits=2, nsmall=2), "\n",
+        "\n", sep="")
 
-  cat("Individually, each criterion reduced the ",
-      q <- format(orig_dim[1], big.mark=","),
-      " fractions to the following number:\n", sep="")
-  cat(rep("-", 80 + length(q)), "\n", sep="")
+    cat("Individually, each criterion reduced the ",
+        q <- format(orig_dim[1], big.mark=","),
+        " fractions to the following number:\n", sep="")
+    cat(rep("-", 80 + length(q)), "\n", sep="")
 
-  ncri <- sapply(object$cmp_by_cr, function(x) format(nrow(x), big.mark=","))
-  plen <- sapply(ncri, nchar)
-  mlen <- max(plen)
-  bordperc <- paste0(format(100 * bord_ratio, digits=0), "%")
+    ncri <- sapply(object$cmp_by_cr, function(x) format(nrow(x), big.mark=","))
+    plen <- sapply(ncri, nchar)
+    mlen <- max(plen)
+    bordperc <- paste0(format(100 * bord_ratio, digits=0), "%")
 
-  cat("Criterion 1:  ", rep(" ", mlen - plen[1]), ncri[1],
-      "    (fraction with maximum abundance is in region of interest)\n",
-      "Criterion 2:  ", rep(" ", mlen - plen[2]), ncri[2],
-      "    (fractions in bordering region have < ", bordperc, " of maximum abundance)\n",
-      "Criterion 3:  ", rep(" ", mlen - plen[3]), ncri[3],
-      "    (nonzero abundance in right adjacent fraction to maximum)\n",
-      "Criterion 4:  ", rep(" ", mlen - plen[4]), ncri[4],
-      "    (at least 1 intensity > ", format(min_inten, big.mark=","), " in region of interest)\n",
-      "Criterion 5:  ", rep(" ", mlen - plen[5]), ncri[5],
-      "    (must have charge <= ", max_chg, ")\n",
-      "\n", sep="")
+    cat("Criterion 1:  ", rep(" ", mlen - plen[1]), ncri[1],
+        "    (fraction with maximum abundance is in region of interest)\n",
+        "Criterion 2:  ", rep(" ", mlen - plen[2]), ncri[2],
+        "    (fractions in bordering region have < ", bordperc, " of maximum abundance)\n",
+        "Criterion 3:  ", rep(" ", mlen - plen[3]), ncri[3],
+        "    (nonzero abundance in right adjacent fraction to maximum)\n",
+        "Criterion 4:  ", rep(" ", mlen - plen[4]), ncri[4],
+        "    (at least 1 intensity > ", format(min_inten, big.mark=","), " in region of interest)\n",
+        "Criterion 5:  ", rep(" ", mlen - plen[5]), ncri[5],
+        "    (must have charge <= ", max_chg, ")\n",
+        "\n", sep="")
 
-  totcmp <- ifelse(is.null(object$msDatObj), 0, format(nrow(object$msDatObj$ms), big.mark=","))
-  cat("The total number of candidate compounds was reduced to:\n",
-      "-------------------------------------------------------\n",
-      rep(" ", 14 + mlen - nchar(totcmp)), totcmp,
-      "\n\n", sep="")
+    totcmp <- ifelse(is.null(object$msDatObj), 0, format(nrow(object$msDatObj$ms), big.mark=","))
+    cat("The total number of candidate compounds was reduced to:\n",
+        "-------------------------------------------------------\n",
+        rep(" ", 14 + mlen - nchar(totcmp)), totcmp,
+        "\n\n", sep="")
 }
 
 
