@@ -1,11 +1,5 @@
-# Ignore R history files, etc
-.R*
-.Rproj.user
-!bioact.Rproj
-inst/doc
+\.Rbuildignore
+\.Rhistory
 *~
-^vignettes/Paper_Analysis.aux
-^vignettes/Paper_Analysis.log
-^vignettes/Paper_Analysis.pdf
-^vignettes/Paper_Analysis.tex
-^vignettes/auto
+vignettes/*
+!vignettes/Paper_Analysis.Rnw

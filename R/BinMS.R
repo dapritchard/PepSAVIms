@@ -388,7 +388,8 @@ binMS <- function(mass_spec,
 print.binMS <- function(x, ...) {
 
     if (is.null(x$msDatObj)) {
-        cat("An object of class \"binMS\"; no observations satisfied all of the inclusion criteria.\n")
+        cat("An object of class \"binMS\"; no observations ",
+            "satisfied all of the inclusion criteria.\n", sep="")
     }
     else {
         cat("An object of class \"binMS\" with ", NROW(x$msDatObj$ms), " compounds and ",
@@ -416,56 +417,121 @@ print.binMS <- function(x, ...) {
 
 
 summary.binMS <- function(object, ...) {
+    cat(format(object), sep="")
+}
+
+
+
+
+# Return a vector of strings supplying the output for summary.binMS
+
+format.binMS <- function(x, ...) {
 
     # Add pointers to summ_info variables for convenience
-    n_tot        <- object$summ_info$n_tot
-    n_time_pr    <- object$summ_info$n_time_pr
-    n_mass       <- object$summ_info$n_mass
-    n_charge     <- object$summ_info$n_charge
-    n_tiMaCh     <- object$summ_info$n_tiMaCh
-    n_binned     <- object$summ_info$n_binned
-    time_range   <- object$summ_info$time_range
-    mass_range   <- object$summ_info$mass_range
-    charge_range <- object$summ_info$charge_range
-    mtoz_diff    <- object$summ_info$mtoz_diff
-    time_diff    <- object$summ_info$time_diff
+    n_tot        <- x$summ_info$n_tot
+    n_time_pr    <- x$summ_info$n_time_pr
+    n_mass       <- x$summ_info$n_mass
+    n_charge     <- x$summ_info$n_charge
+    n_tiMaCh     <- x$summ_info$n_tiMaCh
+    n_binned     <- x$summ_info$n_binned
+    time_range   <- x$summ_info$time_range
+    mass_range   <- x$summ_info$mass_range
+    charge_range <- x$summ_info$charge_range
+    mtoz_diff    <- x$summ_info$mtoz_diff
+    time_diff    <- x$summ_info$time_diff
 
-    cat("\n",
-        "The mass spectrometry data prior to binning had:\n",
-        "------------------------------------------------\n",
-        "    ", format(n_tot, big.mark=","), " m/z levels\n",
-        "\n", sep="")
+    # Add commas to filter sizes and make a uniform width
+    nlev <- formatC(c(n_time_pr, n_mass, n_charge, n_tiMaCh), format="d",
+                    big.mark=",", preserve.width="common")
+    names(nlev) <- c("time", "mass", "charge", "all")
 
-    cat("The inclusion criteria was specified as follows:\n",
-        "------------------------------------------------\n",
-        "    time of peak retention:  between ", time_range[1],   " and ", time_range[2], "\n",
-        "    mass:                    between ", mass_range[1],   " and ", mass_range[2], "\n",
-        "    charge:                  between ", charge_range[1], " and ", charge_range[2], "\n",
-        "\n", sep="")
+    # Create two columns of numbers with uniform width and that line up
+    incl_crit_lo <- format_float( c(time_range[1L], mass_range[1L], charge_range[1L]) )
+    incl_crit_hi <- format_float( c(time_range[2L], mass_range[2L], charge_range[2L]) )
+    names(incl_crit_lo) <- names(incl_crit_hi) <-  c("time", "mass", "charge")
 
-    nlev <- sapply(c("n_time_pr", "n_mass", "n_charge"), function(x) {
-        formatC(get(x), format="d", big.mark=",")
+
+    # Begin string construction ----------------------------
+
+    # User-specified inclusion criteria values to binMS
+    inclusion_criteria <- sprintf(
+        paste0("The inclusion criteria was specified as follows:\n",
+            "------------------------------------------------\n",
+            "    time of peak retention:  between %s and %s\n",
+            "    mass:                    between %s and %s\n",
+            "    charge:                  between %s and %s\n",
+            "\n", sep=""),
+        incl_crit_lo["time"],
+        incl_crit_hi["time"],
+        incl_crit_lo["mass"],
+        incl_crit_hi["mass"],
+        incl_crit_lo["charge"],
+        incl_crit_hi["charge"])
+
+    # User-specified consolidation criteria
+    consolidation_criteria <- sprintf(
+        paste0("m/z levels were consolidated when each of the following criteria were met:\n",
+               "--------------------------------------------------------------------------\n",
+               "    * m/z levels were no more than %s units apart\n",
+               "    * the time peak retention occured no farther apart than %s units\n",
+               "    * the charge states were the same\n",
+               "\n", collapse=""),
+        format(mtoz_diff),
+        format(time_diff))
+
+    # Size of the data prior to binning
+    size_prior <- sprintf(
+        paste0("The mass spectrometry data prior to binning had:\n",
+               "------------------------------------------------\n",
+               "    %s  m/z levels\n",
+               "\n", collapse=""),
+        format(n_tot, big.mark=","))
+
+    # Number of remaining m/z levels after filtering by the criterions
+    nremain <-  sprintf(
+        paste0("The number of remaining m/z levels after filtering by the inclusion criteria was:\n",
+               "---------------------------------------------------------------------------------\n",
+               "    time of peak retention:  %s\n",
+               "    mass:                    %s\n",
+               "    charge:                  %s\n",
+               "    all combined:            %s\n",
+               "\n", collapse=""),
+        nlev["time"],
+        nlev["mass"],
+        nlev["charge"],
+        nlev["all"])
+
+    # Total number of remaining levels
+    ntotal <- sprintf(
+        paste0("After consolidating the m/z levels, there were:\n",
+               "-----------------------------------------------\n",
+               "    %s levels\n",
+               "\n", collapse=""),
+        formatC(n_binned, format="d", big.mark=","))
+
+    c("\n", inclusion_criteria, consolidation_criteria, size_prior, nremain, ntotal)
+}
+
+
+
+
+# Pretty-prints floats so that they have uniform width and line up at the
+# decimal point
+
+format_float <- function(vals) {
+
+    # Integer part of the numbers
+    intpart <- formatC(trunc(vals), format="d", big.mark=",", preserve.width="common")
+
+    # Decimal part of the numbers
+    decpart <- sapply(strsplit(as.character(vals), "\\."), function(x) {
+        if (identical(length(x), 2L)) {
+            return ( paste0(".", x[2L], collapse="") )
+        } else {
+            return ( "" )
+        }
     })
-    len_nlev <- nchar(nlev)
-    max_nlev <- max( len_nlev )
-    combin <- formatC(n_tiMaCh, format="d", big.mark=",")
-    cat("The number of remaining m/z levels after filtering by the inclusion criteria was:\n",
-        "---------------------------------------------------------------------------------\n",
-        "    time of peak retention:  ", rep(" ", max_nlev - len_nlev[1]), nlev[1], "\n",
-        "    mass:                    ", rep(" ", max_nlev - len_nlev[2]), nlev[2], "\n",
-        "    charge:                  ", rep(" ", max_nlev - len_nlev[3]), nlev[3], "\n",
-        "    all combined:            ", rep(" ", max_nlev - nchar(combin)), combin, "\n",
-        "\n", sep="")
+    decpart <- formatC(decpart, format="s", preserve.width="common")
 
-    cat("m/z levels were consolidated when each of the following criteria were met:\n",
-        "--------------------------------------------------------------------------\n",
-        "    (i)   m/z levels were no more than ", mtoz_diff, " units apart\n",
-        "    (ii)  the time peak retention occured no farther apart than ", time_diff, " units\n",
-        "    (iii) the charge states were the same\n",
-        "\n", sep="")
-
-    cat("After consolidating the m/z levels, there were:\n",
-        "-----------------------------------------------\n",
-        "    ", formatC(n_binned, format="d", big.mark=","), " levels\n",
-        "\n", sep="")
+    paste0(intpart, decpart)
 }
