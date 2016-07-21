@@ -259,9 +259,9 @@ format.filterMS <- function(x, ...) {
 
     # Bordering region specification
     if (identical(border, "all")) {
-        border_spec <- "\"everthing not the region of interest\""
+        border_spec <- "\"all\""
     } else if (identical(border, "none")) {
-        border_spec <- "\"no bordering regions\""
+        border_spec <- "\"none\""
     } else if (identical(length(border), 1L)) {
         border_spec <- paste0("each having length ", border)
     } else {
@@ -269,13 +269,13 @@ format.filterMS <- function(x, ...) {
     }
 
     # A bar (i.e. ----) to place underneath the bordering region header
-    bor_bar <- paste0( rep("-", 40 + nchar(length(border_spec))), collapse="" )
+    bor_bar <- paste0( rep("-", 40 + nchar(border_spec)), collapse="" )
 
     # The bordering region names concatenated together
-    if (identical(border, "all")) {
-        bor_nm_cat  <- "    * all * "
-    } else if (identical(length(bor_nm), 0L)) {
-        bor_nm_cat  <- "    * none * "
+    if (identical(length(bor_nm), 0L)) {
+        bor_nm_cat <- "    * none * "
+    } else if (length(bor_nm) > 10) {
+        bor_nm_cat <- paste0("     * fraction names omitted for brevity *")
     } else {
         bor_nm_cat <- paste0("    ", bor_nm, "\n", collapse="")
     }
@@ -285,12 +285,16 @@ format.filterMS <- function(x, ...) {
     names(filt_crit) <- c("min_inten", "max_chg", "bord_ratio")
 
     # Prior dimension strings with uniform width
-    orig_dim_str <- formatC(orig_dim, format="d", big.mark=",", preserve.width="common")
+    orig_dim_str <- format_int(orig_dim)
     names(orig_dim_str) <- c("compounds", "fractions")
 
     # Individual filtering criterion remaining m/z levels
-    ncrit_remain <- formatC(ncmp_by_cr, format="d", big.mark=",", preserve.width="common")
+    nlevels_fmt <- format(orig_dim[1L], big.mark=",")
+    ncrit_remain <- format_int(ncmp_by_cr)
     names(ncrit_remain) <- paste0("crit", 1:5)
+
+    # A bar (i.e. ----) to place underneath the ind. crit. section
+    ncrit_bar <- paste0( rep("-", 77 + nchar(nlevels_fmt)), collapse="" )
 
     # Final number of remaining levels after all filtering
     nfinal <- ifelse(is.null(msDatObj), 0, nrow(msDatObj))
@@ -350,14 +354,14 @@ format.filterMS <- function(x, ...) {
         "    criterion 4:  %s    (at least 1 intensity > %s in region of interest)\n",
         "    criterion 5:  %s    (must have charge <= %d)\n",
         "\n"),
-        formatC(orig_dim[1L], format="d", big.mark=","),
-        bor_bar,
+        nlevels_fmt,
+        ncrit_bar,
         ncrit_remain["crit1"],
         ncrit_remain["crit2"],
-        formatC(round(100 * bord_ratio), format="d", big.mark=","),
+        format(round(100 * bord_ratio), big.mark=","),
         ncrit_remain["crit3"],
         ncrit_remain["crit4"],
-        formatC(min_inten, format="f", big.mark=","),
+        format(min_inten, big.mark=","),
         ncrit_remain["crit5"],
         max_chg)
 

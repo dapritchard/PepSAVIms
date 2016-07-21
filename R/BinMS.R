@@ -441,8 +441,7 @@ format.binMS <- function(x, ...) {
     time_diff    <- x$summ_info$time_diff
 
     # Add commas to filter sizes and make a uniform width
-    nlev <- formatC(c(n_time_pr, n_mass, n_charge, n_tiMaCh), format="d",
-                    big.mark=",", preserve.width="common")
+    nlev <- format_int( c(n_time_pr, n_mass, n_charge, n_tiMaCh) )
     names(nlev) <- c("time", "mass", "charge", "all")
 
     # Create two columns of numbers with uniform width and that line up
@@ -472,9 +471,9 @@ format.binMS <- function(x, ...) {
     consolidation_criteria <- sprintf(
         paste0("m/z levels were consolidated when each of the following criteria were met:\n",
                "--------------------------------------------------------------------------\n",
-               "    * m/z levels were no more than %s units apart\n",
-               "    * the time peak retention occured no farther apart than %s units\n",
-               "    * the charge states were the same\n",
+               "    m/z levels were no more than %s units apart\n",
+               "    the time peak retention occured no farther apart than %s units\n",
+               "    the charge states were the same\n",
                "\n", collapse=""),
         format(mtoz_diff),
         format(time_diff))
@@ -494,7 +493,7 @@ format.binMS <- function(x, ...) {
                "    time of peak retention:  %s\n",
                "    mass:                    %s\n",
                "    charge:                  %s\n",
-               "    all combined:            %s\n",
+               "    satisfied all:           %s\n",
                "\n", collapse=""),
         nlev["time"],
         nlev["mass"],
@@ -515,13 +514,30 @@ format.binMS <- function(x, ...) {
 
 
 
+# Pretty-prints ints so that they have uniform width and are right-justified
+
+format_int <- function(vals) {
+    format_width( formatC(vals, format="d", big.mark=",") )
+}
+
+
+
+
 # Pretty-prints floats so that they have uniform width and line up at the
 # decimal point
 
 format_float <- function(vals) {
 
     # Integer part of the numbers
-    intpart <- formatC(trunc(vals), format="d", big.mark=",", preserve.width="common")
+    intpart <- formatC(trunc(vals), format="d", big.mark=",")
+    # The above command loses the negative sign for a value such as -0.4 since
+    # it truncates to 0
+    for (i in seq_along(vals)) {
+        if ((-1 < vals[i]) && (vals[i] < 0)) {
+            intpart[i] <- "-0"
+        }
+    }
+    intpart <- format_width(intpart)
 
     # Decimal part of the numbers
     decpart <- sapply(strsplit(as.character(vals), "\\."), function(x) {
@@ -531,7 +547,28 @@ format_float <- function(vals) {
             return ( "" )
         }
     })
-    decpart <- formatC(decpart, format="s", preserve.width="common")
+    decpart <- format_width( formatC(decpart, format="s"), FALSE )
 
     paste0(intpart, decpart)
 }
+
+
+
+
+format_width <- function(strvec, align_right=TRUE) {
+
+    strvec_nchar <- nchar(strvec)
+    padlen <- max(strvec_nchar) - strvec_nchar
+
+    pad <- sapply(padlen, function(n) paste0(rep(" ", n), collapse=""))
+
+    if (align_right) {
+        return( paste0(pad, strvec) )
+    }
+    else {
+        return( paste0(strvec, pad) )
+    }
+}
+
+
+
