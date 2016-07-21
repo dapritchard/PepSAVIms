@@ -167,14 +167,14 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
     for (j in seq_len(nCrit)) {
         thisKeep <- critBool[, j]
         # note: data.frame can handle the case when thisKeep has length 0
-        cmp_by_cr[[j]] <- data.frame( mtoz = mtoz[thisKeep],
+        cmp_by_cr[[j]] <- data.frame(mtoz = mtoz[thisKeep],
                                      chg  = chg[thisKeep] )
     }
 
     # Construct return object
     outObj <- list( msDatObj  = msDatObj,
                    cmp_by_cr = cmp_by_cr,
-                   summ_info = list( orig_dim   = c(ms_nr, ms_nc),
+                   summ_info = list(orig_dim   = c(ms_nr, ms_nc),
                                     reg_nm     = ms_nm[regIdx],
                                     bor_nm     = ms_nm[borIdx],
                                     border     = border,
@@ -197,6 +197,7 @@ filterMS <- function(msObj, region, border="all", bord_ratio=0.05, min_inten=100
 #' @param ... Arguments passed to dot-dot-dot are ignored
 #'
 #' @export
+
 
 print.filterMS <- function(x, ...) {
 
@@ -229,6 +230,153 @@ print.filterMS <- function(x, ...) {
 
 
 summary.filterMS <- function(object, ...) {
+    cat(format(object), sep="")
+}
+
+
+
+
+# Return a vector of strings supplying the output for summary.filterMS
+
+format.filterMS <- function(x, ...) {
+
+    # Add pointers to summ_info variables for convenience
+    orig_dim   <- x$summ_info$orig_dim
+    reg_nm     <- x$summ_info$reg_nm
+    bor_nm     <- x$summ_info$bor_nm
+    border     <- x$summ_info$border
+    bord_ratio <- x$summ_info$bord_ratio
+    min_inten  <- x$summ_info$min_inten
+    max_chg    <- x$summ_info$max_chg
+    ncmp_by_cr <- sapply(x$cmp_by_cr, nrow)
+    msDatObj   <- x$msDatObj
+
+    # A bar (i.e. ----) to place underneath the region of interest header
+    roi_bar <- paste0( rep("-", 53 + nchar(length(reg_nm))), collapse="" )
+
+    # The region of interest names concatenated together
+    roi_nm_cat <- paste0("    ", reg_nm, "\n", collapse="")
+
+    # Bordering region specification
+    if (identical(border, "all")) {
+        border_spec <- "\"everthing not the region of interest\""
+    } else if (identical(border, "none")) {
+        border_spec <- "\"no bordering regions\""
+    } else if (identical(length(border), 1L)) {
+        border_spec <- paste0("each having length ", border)
+    } else {
+        border_spec <- paste0("having lengths ", border[1L], " and ", border[2L])
+    }
+
+    # A bar (i.e. ----) to place underneath the bordering region header
+    bor_bar <- paste0( rep("-", 40 + nchar(length(border_spec))), collapse="" )
+
+    # The bordering region names concatenated together
+    if (identical(border, "all")) {
+        bor_nm_cat  <- "    * all * "
+    } else if (identical(length(bor_nm), 0L)) {
+        bor_nm_cat  <- "    * none * "
+    } else {
+        bor_nm_cat <- paste0("    ", bor_nm, "\n", collapse="")
+    }
+
+    # Filtering criteria strings with uniform width
+    filt_crit <- format_float( c(min_inten, max_chg, bord_ratio) )
+    names(filt_crit) <- c("min_inten", "max_chg", "bord_ratio")
+
+    # Prior dimension strings with uniform width
+    orig_dim_str <- formatC(orig_dim, format="d", big.mark=",", preserve.width="common")
+    names(orig_dim_str) <- c("compounds", "fractions")
+
+    # Individual filtering criterion remaining m/z levels
+    ncrit_remain <- formatC(ncmp_by_cr, format="d", big.mark=",", preserve.width="common")
+    names(ncrit_remain) <- paste0("crit", 1:5)
+
+    # Final number of remaining levels after all filtering
+    nfinal <- ifelse(is.null(msDatObj), 0, nrow(msDatObj))
+    nfinal_str <- formatC(orig_dim[1L], format="d", big.mark=",")
+
+
+    # Begin string construction ----------------------------
+
+    # The region of interest column names
+    region_of_interest <- sprintf(
+        paste0("The region of interest was specified as (%d fractions):\n",
+               "%s\n",
+               "%s\n"),
+        length(reg_nm),
+        roi_bar,
+        roi_nm_cat)
+
+    # The bordering region column names
+    bordering_region <- sprintf(
+        paste0("The bordering regions were specified as %s\n",
+               "%s\n",
+               "%s\n",
+               "\n"),
+        border_spec,
+        bor_bar,
+        bor_nm_cat)
+
+    # The filtering criteria specification
+    filtering_criteria <- sprintf(
+        paste0("The filtering criteria was specified as:\n",
+               "----------------------------------------\n",
+               "    minimum intensity:      %s\n",
+               "    maximum charge:         %s\n",
+               "    bordering region ratio: %s\n",
+               "\n"),
+        filt_crit["min_inten"],
+        filt_crit["max_chg"],
+        filt_crit["bord_ratio"])
+
+    # Dimension of data prior to filtering
+    prior_dimen <- sprintf(
+        paste0("The mass spectrometry data prior to filtering had:\n",
+               "--------------------------------------------------\n",
+               "    %s compounds\n",
+               "    %s fractions\n",
+               "\n"),
+        orig_dim_str["compounds"],
+        orig_dim_str["fractions"])
+
+    # Remaining compounds after individual criterion filtering
+    filtering_remaining <- sprintf( paste0(
+        "Individually, each criterion reduced the %s m/z levels to the following number:\n",
+        "%s\n",
+        "    criterion 1:  %s    (fraction with max. abundance is in region of interest)\n",
+        "    criterion 2:  %s    (fractions in bordering region have < %s of max. abundance)\n",
+        "    criterion 3:  %s    (nonzero abundance in right adjacent fraction to max.)\n",
+        "    criterion 4:  %s    (at least 1 intensity > %s in region of interest)\n",
+        "    criterion 5:  %s    (must have charge <= %d)\n",
+        "\n"),
+        formatC(orig_dim[1L], format="d", big.mark=","),
+        bor_bar,
+        ncrit_remain["crit1"],
+        ncrit_remain["crit2"],
+        formatC(round(100 * bord_ratio), format="d", big.mark=","),
+        ncrit_remain["crit3"],
+        ncrit_remain["crit4"],
+        formatC(min_inten, format="f", big.mark=","),
+        ncrit_remain["crit5"],
+        max_chg)
+
+    # Number of compounds that satisfy all filtering criterion
+    filtering_final_amt <- sprintf(
+        paste0("The total number of candidate compounds was reduced to:\n",
+               "-------------------------------------------------------\n",
+               "    %s\n",
+               "\n"),
+        nfinal_str)
+
+    c("\n", region_of_interest, bordering_region, filtering_criteria,
+      prior_dimen, filtering_remaining, filtering_final_amt)
+}
+
+
+
+
+summary_filterMS <- function(object, ...) {
 
     # Add pointers to summ_info variables for convenience
     orig_dim   <- object$summ_info$orig_dim
