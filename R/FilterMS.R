@@ -263,9 +263,9 @@ format.filterMS <- function(x, ...) {
     } else if (identical(border, "none")) {
         border_spec <- "\"none\""
     } else if (identical(length(border), 1L)) {
-        border_spec <- paste0("each having length ", border)
+        border_spec <- paste0("each having length ", border, ":")
     } else {
-        border_spec <- paste0("having lengths ", border[1L], " and ", border[2L])
+        border_spec <- paste0("having lengths ", border[1L], " and ", border[2L], ":")
     }
 
     # A bar (i.e. ----) to place underneath the bordering region header
@@ -273,9 +273,9 @@ format.filterMS <- function(x, ...) {
 
     # The bordering region names concatenated together
     if (identical(length(bor_nm), 0L)) {
-        bor_nm_cat <- "    * none * "
+        bor_nm_cat <- "    * no fraction names to show *\n"
     } else if (length(bor_nm) > 10) {
-        bor_nm_cat <- paste0("     * fraction names omitted for brevity *")
+        bor_nm_cat <- paste0("     * fraction names omitted for brevity *\n")
     } else {
         bor_nm_cat <- paste0("    ", bor_nm, "\n", collapse="")
     }
@@ -297,8 +297,8 @@ format.filterMS <- function(x, ...) {
     ncrit_bar <- paste0( rep("-", 77 + nchar(nlevels_fmt)), collapse="" )
 
     # Final number of remaining levels after all filtering
-    nfinal <- ifelse(is.null(msDatObj), 0, nrow(msDatObj))
-    nfinal_str <- formatC(orig_dim[1L], format="d", big.mark=",")
+    nfinal <- ifelse(is.null(msDatObj), 0, NROW(msDatObj))
+    nfinal_str <- formatC(nfinal, format="d", big.mark=",")
 
 
     # Begin string construction ----------------------------
@@ -316,7 +316,7 @@ format.filterMS <- function(x, ...) {
     bordering_region <- sprintf(
         paste0("The bordering regions were specified as %s\n",
                "%s\n",
-               "%s\n",
+               "%s",
                "\n"),
         border_spec,
         bor_bar,
@@ -373,98 +373,11 @@ format.filterMS <- function(x, ...) {
                "\n"),
         nfinal_str)
 
-    c("\n", region_of_interest, bordering_region, filtering_criteria,
-      prior_dimen, filtering_remaining, filtering_final_amt)
+    c(newl = "\n",
+      regn = region_of_interest,
+      bord = bordering_region,
+      fcri = filtering_criteria,
+      prir = prior_dimen,
+      frem = filtering_remaining,
+      ffin = filtering_final_amt)
 }
-
-
-
-
-summary_filterMS <- function(object, ...) {
-
-    # Add pointers to summ_info variables for convenience
-    orig_dim   <- object$summ_info$orig_dim
-    reg_nm     <- object$summ_info$reg_nm
-    bor_nm     <- object$summ_info$bor_nm
-    border     <- object$summ_info$border
-    bord_ratio <- object$summ_info$bord_ratio
-    min_inten  <- object$summ_info$min_inten
-    max_chg    <- object$summ_info$max_chg
-
-    cat("\n",
-        "The mass spectrometry data prior to filtering had:\n",
-        "--------------------------------------------------\n",
-        "    ", format(orig_dim[1], width=5, big.mark=","), " compounds\n",
-        "    ", format(orig_dim[2], width=6, big.mark=","), " fractions\n",
-        "\n", sep="")
-
-    cat("The region of interest was specified as (", length(reg_nm), " fractions):\n",
-        rep("-", 53 + nchar(length(reg_nm))), "\n", sep="")
-    for (nm in reg_nm) {
-        cat(nm, "\n", sep="")
-    }
-    cat("\n")
-
-    if ( identical(border, "all") ) {
-        cat("- The bordering regions were specified as:  everthing not the region of interest\n")
-    }
-    else if ( (identical(border, "none")) || all(border == 0) ) {
-        cat("- The bordering regions were specified as:  no bordering regions\n")
-    }
-    else if ( identical(length(border), 1L) ) {
-        cat("The bordering regions were specified as each having length ",
-            border, ", corresponding to:\n",
-            rep("-", 78 + nchar(border)), "\n", sep="")
-        for (nm in bor_nm) {
-            cat(nm, "\n", sep="")
-        }
-        cat("\n")
-    }
-    else {
-        cat("The bordering regions were specified as having lengths ",
-            border[1], " and ", border[2], ", corresponding to:\n",
-            rep("-", 79 + sum(nchar(border))), "\n", sep="")
-        for (nm in bor_nm) {
-            cat(nm, "\n", sep="")
-        }
-        cat("\n")
-    }
-
-    mi <- format(min_inten, big.mark=",")
-    cat("- The minimum intensity was specified as:   ", mi, "\n",
-        "- The maximum charge was specified as:",
-        rep(" ", 5 + nchar(mi), sep=""),  max_chg, "\n",
-        "- The bordering region ratio was:  ",
-        rep(" ", 8 + nchar(mi), sep=""), format(bord_ratio, digits=2, nsmall=2), "\n",
-        "\n", sep="")
-
-    cat("Individually, each criterion reduced the ",
-        q <- format(orig_dim[1], big.mark=","),
-        " fractions to the following number:\n", sep="")
-    cat(rep("-", 80 + length(q)), "\n", sep="")
-
-    ncri <- sapply(object$cmp_by_cr, function(x) format(nrow(x), big.mark=","))
-    plen <- sapply(ncri, nchar)
-    mlen <- max(plen)
-    bordperc <- paste0(format(100 * bord_ratio, digits=0), "%")
-
-    cat("Criterion 1:  ", rep(" ", mlen - plen[1]), ncri[1],
-        "    (fraction with maximum abundance is in region of interest)\n",
-        "Criterion 2:  ", rep(" ", mlen - plen[2]), ncri[2],
-        "    (fractions in bordering region have < ", bordperc, " of maximum abundance)\n",
-        "Criterion 3:  ", rep(" ", mlen - plen[3]), ncri[3],
-        "    (nonzero abundance in right adjacent fraction to maximum)\n",
-        "Criterion 4:  ", rep(" ", mlen - plen[4]), ncri[4],
-        "    (at least 1 intensity > ", format(min_inten, big.mark=","), " in region of interest)\n",
-        "Criterion 5:  ", rep(" ", mlen - plen[5]), ncri[5],
-        "    (must have charge <= ", max_chg, ")\n",
-        "\n", sep="")
-
-    totcmp <- ifelse(is.null(object$msDatObj), 0, format(nrow(object$msDatObj$ms), big.mark=","))
-    cat("The total number of candidate compounds was reduced to:\n",
-        "-------------------------------------------------------\n",
-        rep(" ", 14 + mlen - nchar(totcmp)), totcmp,
-        "\n\n", sep="")
-}
-
-

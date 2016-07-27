@@ -38,7 +38,7 @@ format_float <- function(vals) {
             return ( "" )
         }
     })
-    decpart <- format_width( formatC(decpart, format="s"), FALSE )
+    decpart <- format_width(decpart, FALSE)
 
     paste0(intpart, decpart)
 }
@@ -55,11 +55,14 @@ format_float <- function(vals) {
 
 format_width <- function(strvec, align_right=TRUE) {
 
+    # Num chars per element of strvec
     strvec_nchar <- nchar(strvec)
+    # Num chars to be added as padding to achieve uniform width
     padlen <- max(strvec_nchar) - strvec_nchar
-
+    # Each element is a string consisting of the number of blanks in padlen
     pad <- sapply(padlen, function(n) paste0(rep(" ", n), collapse=""))
 
+    # Return strvec with padding added to the appropriate side
     if (align_right) {
         return( paste0(pad, strvec) )
     }

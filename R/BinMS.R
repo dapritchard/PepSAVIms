@@ -459,7 +459,7 @@ format.binMS <- function(x, ...) {
             "    time of peak retention:  between %s and %s\n",
             "    mass:                    between %s and %s\n",
             "    charge:                  between %s and %s\n",
-            "\n", sep=""),
+            "\n"),
         incl_crit_lo["time"],
         incl_crit_hi["time"],
         incl_crit_lo["mass"],
@@ -474,16 +474,16 @@ format.binMS <- function(x, ...) {
                "    m/z levels were no more than %s units apart\n",
                "    the time peak retention occured no farther apart than %s units\n",
                "    the charge states were the same\n",
-               "\n", collapse=""),
-        format(mtoz_diff),
-        format(time_diff))
+               "\n"),
+        format(mtoz_diff, big.mark=","),
+        format(time_diff, big.mark=","))
 
     # Size of the data prior to binning
     size_prior <- sprintf(
         paste0("The mass spectrometry data prior to binning had:\n",
                "------------------------------------------------\n",
-               "    %s  m/z levels\n",
-               "\n", collapse=""),
+               "    %s m/z levels\n",
+               "\n"),
         format(n_tot, big.mark=","))
 
     # Number of remaining m/z levels after filtering by the criterions
@@ -494,7 +494,7 @@ format.binMS <- function(x, ...) {
                "    mass:                    %s\n",
                "    charge:                  %s\n",
                "    satisfied all:           %s\n",
-               "\n", collapse=""),
+               "\n"),
         nlev["time"],
         nlev["mass"],
         nlev["charge"],
@@ -505,8 +505,13 @@ format.binMS <- function(x, ...) {
         paste0("After consolidating the m/z levels, there were:\n",
                "-----------------------------------------------\n",
                "    %s levels\n",
-               "\n", collapse=""),
-        formatC(n_binned, format="d", big.mark=","))
+               "\n"),
+        format(n_binned, big.mark=","))
 
-    c("\n", inclusion_criteria, consolidation_criteria, size_prior, nremain, ntotal)
+    c(newl = "\n",
+      incl = inclusion_criteria,
+      cons = consolidation_criteria,
+      size = size_prior,
+      nrem = nremain,
+      ntot = ntotal)
 }

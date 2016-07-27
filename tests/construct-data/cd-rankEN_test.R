@@ -3,9 +3,9 @@
 #  Load a saved dataset for testing  #
 # .................................. #
 
-# Load saved simulated data.  See object sim_args in the RData file for the
-# arguments used to generate the data.
-load("tests/data/data-rankEN_sim.RData")
+# Load saved simulated data (from the tests/testthat directory).  See object
+# sim_args in the RData file for the arguments used to generate the data.
+load("../data/data-rankEN_sim.RData")
 
 # msDatObj: a (200 x 50) mass spec data object
 msDatObj <- testDat$msDat
@@ -90,28 +90,28 @@ region_nm <- list(ms  = colnames(msDatObj$ms)[reg_idx],
 
 # Create summ_info objects for each combination of pos_only and ncomp
 generate_summ_info <- function(pos_only, ncomp) {
-  list(
-    data_dim  = data_dim,
-    region_nm = region_nm,
-    lambda    = 0.1,
-    pos_only  = pos_only,
-    ncomp     = ncomp
-  )
+    list(
+        data_dim  = data_dim,
+        region_nm = region_nm,
+        lambda    = 0.1,
+        pos_only  = pos_only,
+        ncomp     = ncomp
+    )
 }
 summ_info <- list(
-  all    = generate_summ_info(FALSE, NULL),
-  pos    = generate_summ_info(TRUE,  NULL),
-  all_10 = generate_summ_info(FALSE, 10L),
-  pos_10 = generate_summ_info(TRUE,  10L)
+    all    = generate_summ_info(FALSE, NULL),
+    pos    = generate_summ_info(TRUE,  NULL),
+    all_10 = generate_summ_info(FALSE, 10L),
+    pos_10 = generate_summ_info(TRUE,  10L)
 )
 
 # Construct rankEN objects for each combination of pos_only and ncomp
 true_rankEN <- mapply(cmpidx, summ_info, SIMPLIFY=FALSE, FUN=function(idx, info) {
-  list(mtoz      = msDatObj$mtoz[idx],
-       charge    = msDatObj$chg[idx],
-       comp_cor  = comp_cor[idx],
-       enet_fit  = enet_fit,
-       summ_info = info)
+    list(mtoz      = msDatObj$mtoz[idx],
+         charge    = msDatObj$chg[idx],
+         comp_cor  = comp_cor[idx],
+         enet_fit  = enet_fit,
+         summ_info = info)
 })
 # Provide names for list elements
 names(true_rankEN) <- names(cmpidx)
@@ -169,21 +169,24 @@ true_rankEN_bio_ave$summ_info$data_dim$repl <- 1L
 #  Save data for use by testing script  #
 # ..................................... #
 
-save(# Objects used in rankEN calls
-     msDatObj,
-     bioact,
-     reg_idx,
-     lambda,
-     # 'True' objects to test against
-     true_rankEN,
-     true_rankEN_bio_ave,
-     # Derived objects for further testing
-     filterMS_obj,
-     bio_df,
-     bio_NA,
-     bio_vec,
-     bio_matr_ave,
-     ms_reg_only,
-     bio_reg_only,
-     bio_vec_reg_only,
-     file="tests/data/data-rankEN_test.RData")
+# Periodically the testing fails for rankEN until this RData file is refreshed.
+# Instead just source the file.
+
+# save(# Objects used in rankEN calls
+#      msDatObj,
+#      bioact,
+#      reg_idx,
+#      lambda,
+#      # 'True' objects to test against
+#      true_rankEN,
+#      true_rankEN_bio_ave,
+#      # Derived objects for further testing
+#      filterMS_obj,
+#      bio_df,
+#      bio_NA,
+#      bio_vec,
+#      bio_matr_ave,
+#      ms_reg_only,
+#      bio_reg_only,
+#      bio_vec_reg_only,
+#      file="tests/data/data-rankEN_test.RData")
