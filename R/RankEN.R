@@ -345,21 +345,21 @@ format.rankEN <- function(x, max_comp_print, ...) {
     ms_roi_nm  <- format(
         c("Mass spec.",
           "----------",
-          out_rankEN$summ_info$region_nm$ms))
+          summ_info$region_nm$ms))
 
     # Column of bioactivity fraction names in region of interest
     bio_rio_nm <- format(
         c("Bioactivity",
           "-----------",
-          out_rankEN$summ_info$region_nm$bio))
+          summ_info$region_nm$bio))
 
     # Parameter arguments to rankEN.  Note that we don't need nsmall as an
     # argument to the inner format call because since there is only one number
     # we do in fact want to ignore trailing 0's in this case.
-    param_arg_vals <- format(
-        c(format(summ_info$lambda, digits=4),
-          ifelse(summ_info$pos_only, "yes", "no"),
-          ifelse(is.null(summ_info$ncomp), "all", as.character(summ_info$ncomp))))
+    param_arg_vals <- c(
+        format(summ_info$lambda, big.mark=","),
+        ifelse(summ_info$pos_only, "yes", "no"),
+        ifelse(is.null(summ_info$ncomp), "all", format(summ_info$ncomp, big.mark=",")))
     names(param_arg_vals) <- c("lambda", "pos_only", "ncomp")
 
     # Ordered compound rankings m/z values
@@ -397,8 +397,7 @@ format.rankEN <- function(x, max_comp_print, ...) {
 
     # Dimensions of the data supplied to rankEN
     data_dim <- sprintf(
-        paste0("\n",
-               "Data dimensions:\n",
+        paste0("Data dimensions:\n",
                "----------------\n",
                "    region of interest:      %s\n",
                "    candidate compounds:     %s\n",
@@ -412,7 +411,7 @@ format.rankEN <- function(x, max_comp_print, ...) {
     region_of_interest <- paste0(
         "Fractions included in region of interest:\n",
         "-----------------------------------------\n",
-        paste0("    ", ms_fmt, "    ", bio_fmt, "\n", collapse=""),
+        paste0("    ", ms_roi_nm, "    ", bio_rio_nm, "\n", collapse=""),
         "\n")
 
     # Parameter arguments supplied to rankEN
@@ -434,92 +433,9 @@ format.rankEN <- function(x, max_comp_print, ...) {
                "    ", comp_rank_corr, "\n", collapse=""),
         "\n", collapse="")
 
-    c(data_dim, region_of_interest, param_args, comp_rank)
+    c(newl = "\n",
+      ddim = data_dim,
+      regi = region_of_interest,
+      args = param_args,
+      rank = comp_rank)
 }
-
-
-
-
-summary_rankEN <- function(object, max_comp_print=20L, ...) {
-
-    # Check argument to max_comp_print
-    if (!is.numeric(max_comp_print)) {
-        stop("max_comp_print must be of mode numeric")
-    }
-    else if ( !identical(length(max_comp_print), 1L) ) {
-        stop("max_comp_print must have length 1")
-    }
-    else if (max_comp_print < 1L) {
-        stop("max_comp_print cannot have value less than 1")
-    }
-
-    # Create links for convenience
-    summ_info <- object$summ_info
-    mtoz      <- object$mtoz
-    chg       <- object$charge
-    ccor      <- object$comp_cor
-
-    # Print restricted mass spectrometry and bioactivity data dimensions
-    dd_char <- format(unlist(summ_info$data_dim), big.mark=",", justify="right")
-    cat(sep="",
-        "\n",
-        "Data dimensions:\n",
-        "----------------\n",
-        "    region of interest:     ", dd_char[1], "\n",
-        "    candidate compounds:    ", dd_char[2], "\n",
-        "    bioactivity replicates: ", dd_char[3], "\n\n")
-
-    # Print a table with the fraction names used for the mass spectrometry and
-    # bioactivity data
-    region_nm_df <- data.frame(summ_info$region_nm)
-    colnames(region_nm_df) <- c("Mass spec", "Bioactivity")
-    region_table <- utils::capture.output( print(region_nm_df, row.names=FALSE, print.gap=2)  )
-    lead_blanks <- rep(" ", min(getOption("width") - max(nchar(region_table)), 2L))
-    cat(sep="",
-        "Fractions included in region of interest:\n",
-        "-----------------------------------------\n")
-    for (row_entry in region_table) {
-        cat(lead_blanks, row_entry, "\n", sep="")
-    }
-    cat("\n")
-
-    # Print arguments to rankEN
-    parm_char <- format(c(format(summ_info$lambda, digits=4),
-                          ifelse(summ_info$pos_only, "yes", "no"),
-                          ifelse(is.null(summ_info$ncomp),
-                                 "all",
-                                 as.character(summ_info$ncomp))),
-                        justify="right")
-    cat(sep="",
-        "Parameter arguments provided to rankEN:\n",
-        "---------------------------------------\n",
-        "    Quadratic penalty parameter:          ", parm_char[1], "\n",
-        "    Consider only positive correlations:  ", parm_char[2], "\n",
-        "    Max number of candidate compounds:    ", parm_char[3], "\n\n")
-
-    # Print a table of the m/z, charge, and correlation values for selected comps
-    maxpr_char <- format(as.integer(max_comp_print), big.mark=",")
-    if (length(mtoz) <= max_comp_print) {
-        cat(sep="",
-            "Compounds in order of entrance (all compounds, earliest at top):\n",
-            "----------------------------------------------------------------\n")
-    }
-    else {
-        cat(sep="",
-            "Compounds in order of entrance (first ", maxpr_char, " compounds, earliest at top):\n",
-            rep("-", 67 + nchar(maxpr_char)), "\n")
-    }
-    comp_df <- data.frame(mtoz, chg, format(round(ccor, 4), nsmall=4))
-    colnames(comp_df) <- c("Mass spec", "Charge", "Correlation")
-    comp_table <- utils::capture.output( print(comp_df, row.names=FALSE, print.gap=2) )
-    lead_blanks <- rep(" ", min(getOption("width") - max(nchar(comp_table)), 2L))
-    for (i in 1:(min(max_comp_print, length(mtoz)) + 1)) {
-        cat(lead_blanks, comp_table[i], "\n", sep="")
-    }
-    cat("\n")
-}
-
-
-
-
-

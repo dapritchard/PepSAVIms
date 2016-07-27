@@ -3,7 +3,7 @@
 #  Load testing data  #
 # ................... #
 
-# See construct-data/cd-filterMS.R for the file used to create the data
+# See construct-data/cd-summary-filterMS.R for the file used to create the data
 load("../data/data-filterMS.RData")
 
 

@@ -3,8 +3,8 @@
 #  Load testing data  #
 # ................... #
 
-# See tests/construct-data/cd-summary-binMS.R for the file used to create the data
-load("../data/data-summary-binMS.RData")
+# See tests/construct-data/cd-summary-rankEN.R for the file used to create the data
+load("../data/data-summary-rankEN.RData")
 
 
 
@@ -12,7 +12,7 @@ load("../data/data-summary-binMS.RData")
 #  Perform testing  #
 # ................. #
 
-context("summary function for binMS")
+context("summary function for rankEN")
 
 test_that("binMS summary: compare outputs from binMS.format", {
 

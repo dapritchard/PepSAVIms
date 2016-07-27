@@ -3,8 +3,8 @@
 #  Load a saved dataset for testing  #
 # .................................. #
 
-# Load saved simulated data (from the tests/testthat directory).  See object
-# sim_args in the RData file for the arguments used to generate the data.
+# Load saved simulated data (with working directory as tests/testthat).  See
+# object sim_args in the RData file for the arguments used to generate the data.
 load("../data/data-rankEN_sim.RData")
 
 # msDatObj: a (200 x 50) mass spec data object

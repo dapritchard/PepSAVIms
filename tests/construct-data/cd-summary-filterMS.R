@@ -3,16 +3,17 @@
 #  Load testing data  #
 # ................... #
 
-# # Piggyback off of the data constructed to test the binMS method.  See
-# # construct-data/cd-filterMS.R for the file used to create the data
+# Load mass spectrometry data
 load("../data/data-filterMS.RData")
 
+# Construct filterMS objects
 out_filterMS <- filterMS(msDatObj, paste0("frac", 3:4), "all", 0.05, 1000, 7L)
 out_filterMS_bord_none <- filterMS(msDatObj, paste0("frac", 3:4), "none", 0.05, 1000, 7L)
 out_filterMS_bord_1val <- filterMS(msDatObj, paste0("frac", 3:4), 0, 0.05, 1000, 7L)
 out_filterMS_bord_2val <- filterMS(msDatObj, paste0("frac", 3:4), c(1, 99), 0.05, 1000, 7L)
 out_filterMS_nfinal_none <- filterMS(msDatObj, paste0("frac", 3:4), c(1, 99), 0.05, 1e9, 7L)
 
+# Obtain summary output in string form
 out_v1 <- format(out_filterMS)
 out_bord_none <- format(out_filterMS_bord_none)
 out_bord_1val <- format(out_filterMS_bord_1val)
@@ -121,4 +122,4 @@ target_nfinal_none <- c(ffin = paste0(
 
 save(out_v1, out_bord_none, out_bord_1val, out_bord_2val, out_nfinal_none,
      target_v1, target_bord_none, target_bord_1val, target_bord_2val, target_nfinal_none,
-     file="tests/data/data-filterMS-summary.RData")
+     file="tests/data/data-summary-filterMS.RData")

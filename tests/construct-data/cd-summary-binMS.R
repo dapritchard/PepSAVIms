@@ -3,8 +3,7 @@
 #  Construct testing data  #
 # ........................ #
 
-# Piggyback off of the data constructed to test the binMS method.  See
-# construct-data/cd-binMS.R for the file used to sample / create this data.
+# Load mass spectrometry data
 load("../data/data-binMS.RData")
 
 out_binMS_v1 <- binMS(testMS, "mtoz", "chg", "mass", "time", c("ms1", "ms2"),
@@ -150,4 +149,4 @@ target_v2 <- unlist(target_v2)
 # ....................... #
 
 save(out_v1, out_v2, target_v1, target_v2,
-     file="tests/data/data-binMS-summary.RData")
+     file="tests/data/data-summary-binMS.RData")
