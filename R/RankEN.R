@@ -155,13 +155,6 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
         ms <- ms[-rem_idx, ]
         mtoz <- mtoz[-rem_idx]
         chg <- chg[-rem_idx]
-
-        # # Notify users of data removal
-        # cat("Compounds with constant values in the region removed:  ")
-        # for (comp_nm in row.names(msDatObj)[rem_idx]) {
-        #     cat(comp_nm, "    ", sep="")
-        # }
-        # cat("\n")
     }
 
     # Convert ms to form where rows are an observation (i.e. fraction) and cols
@@ -178,9 +171,11 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
     enet_fit <- tryCatch({
         elasticnet::enet(ms_regr, bio_regr, lambda)
     }, warning = function(war) {
-        warning("message produced by call to enet from package elasticnet ==>\n", war, call.=FALSE)
+        warning("message produced by call to enet from package elasticnet ==>\n",
+                war[[1L]], call.=FALSE)
     }, error = function(err) {
-        stop("message produced by call to enet from package elasticnet ==>\n", err, call.=FALSE)
+        stop("message produced by call to elasticnet::enet ==>\n",
+             err[[1L]], call.=FALSE)
     })
 
 
@@ -210,8 +205,8 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
 
     # Create info for the summary function
     summ_info <- list(
-        data_dim  = list(reg  = ncol(ms),
-                         comp = nrow(ms),
+        data_dim  = list(reg  = ncol(bio),
+                         comp = nrow(msDatObj),
                          repl = nrow(bio)),
         region_nm = list(ms  = ms_nm,
                          bio = bio_nm),
@@ -376,7 +371,7 @@ format.rankEN <- function(x, max_comp_print, ...) {
               format_float(summ_info$cmp_rm$mtoz)))
         chg_comp_rm <- format(
             c("Charge",
-              "--------------",
+              "------",
               format_float(summ_info$cmp_rm$chg)))
     }
     else {

@@ -88,7 +88,7 @@ cmpidx <- list(all    = enter_idx,
 
 # Dimensions of the data used for analysis
 data_dim  = list(reg  = nrow(ms_regr),
-                 comp = ncol(ms_regr),
+                 comp = ncol(ms_regr) + length(const_idx),
                  repl = nrow(bioact))
 
 # Column names for region of interest

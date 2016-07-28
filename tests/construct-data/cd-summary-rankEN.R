@@ -4,12 +4,13 @@
 # ................... #
 
 # Construct ms and bioactivity data
-source("../construct-data/cd-rankEN_test.R")
+load("../data/data-rankEN-test.RData")
 
 # Construct rankEN objects
 out_rankEN_v1 <- rankEN(filterMS_obj, bioact, reg_idx, reg_idx, lambda)
 out_rankEN_v2 <- rankEN(filterMS_obj, bioact, reg_idx, reg_idx, lambda, TRUE, 6)
 out_rankEN_v2$summ_info$region_nm$ms[1:5 * 2L] <- c("asdf", "987321.555444333", "*", "<.>", "42")
+out_rankEN_v2$summ_info$cmp_rm <- NULL
 
 # Obtain summary output in string form
 out_v1 <- format(out_rankEN_v1, 5L)
@@ -27,11 +28,22 @@ target_v1 <- list()
 target_v1$newl <- "\n"
 
 target_v1$ddim <- paste0(
-    "Data dimensions:\n",
-    "----------------\n",
+    "Data dimensions (some compounds were removed):\n",
+    "----------------------------------------------\n",
     "    region of interest:       10\n",
-    "    candidate compounds:     200\n",
+    "    candidate compounds:     204\n",
     "    bioactivity replicates:    4\n",
+    "\n")
+
+target_v1$crem <- paste0(
+    "Compounds removed for being constant:\n",
+    "-------------------------------------\n",
+    "    Mass-to-charge    Charge\n",
+    "    --------------    ------\n",
+    "    501               701   \n",
+    "    502               702   \n",
+    "    503               703   \n",
+    "    504               704   \n",
     "\n")
 
 target_v1$regi <- paste0(
@@ -91,6 +103,8 @@ target_v2$ddim <- paste0(
     "    candidate compounds:     200\n",
     "    bioactivity replicates:    4\n",
     "\n")
+
+target_v2$rem <- ""
 
 target_v2$regi <- paste0(
     "Fractions included in region of interest:\n",
