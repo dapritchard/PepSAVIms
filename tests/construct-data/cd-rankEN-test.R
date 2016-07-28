@@ -5,10 +5,10 @@
 
 # Load saved simulated data (with working directory as tests/testthat).  See
 # object sim_args in the RData file for the arguments used to generate the data.
-load("../data/data-rankEN_sim.RData")
+load("tests/data/data-rankEN-sim.RData")
 
 # msDatObj: a (200 x 50) mass spec data object
-msDatObj <- testDat$msDat
+msDatObj <- testDat$msDatObj
 
 # bioact: a (4 x 50) bioactivity object
 bioact <- testDat$bioact
@@ -16,6 +16,13 @@ bioact <- testDat$bioact
 # reg_idx: the indices corresponding to the region of interest used in
 # simulation
 reg_idx <- sim_args$regIdx
+
+# Indices that we will be introducting constant compounds for
+const_idx <- 41L * 1:4
+
+# Arbitrary numbers chosen for m/z and charge constant compounds
+const_mtoz <- 501:504
+const_chg <- 701:704
 
 
 
@@ -95,7 +102,9 @@ generate_summ_info <- function(pos_only, ncomp) {
         region_nm = region_nm,
         lambda    = 0.1,
         pos_only  = pos_only,
-        ncomp     = ncomp
+        ncomp     = ncomp,
+        cmp_rm    = list(mtoz = const_mtoz,
+                         chg  = const_chg)
     )
 }
 summ_info <- list(
@@ -121,13 +130,46 @@ true_rankEN <- lapply(true_rankEN, structure, class="rankEN")
 
 
 
+
+# `````````````````````````````````` #
+#  Add constant rows to the ms data  #
+# .................................. #
+
+# Add some constant rows to the data.  These are supposed to be taken out prior
+# to fitting the elastic net model so it should not change the result.
+
+# Calculate dimensions and indices for adding 4 constant rows to the data
+n_new_rows <- nrow(msDatObj) + length(const_idx)
+replace_idx <- setdiff(1:204, const_idx)
+
+# Create new data containers
+ms_vals <- matrix(0, nrow=n_new_rows, ncol=ncol(msDatObj))
+mtoz_vals <- replace(rep(0L, n_new_rows), const_idx, const_mtoz)
+chg_vals <- replace(rep(0L, n_new_rows), const_idx, const_chg)
+
+# Fill the data
+ms_vals[replace_idx, ] <- msDatObj$ms
+mtoz_vals[replace_idx] <- msDatObj$mtoz
+chg_vals[replace_idx] <- msDatObj$chg
+
+
+# Create msDat object
+msDatObj_const <- msDat(ms_vals, mtoz_vals, chg_vals)
+dimnames(msDatObj_const) <- list(replace(rep("asdf", n_new_rows),
+                                         replace_idx,
+                                         row.names(msDatObj)),
+                                 colnames(msDatObj))
+msDatObj <- msDatObj_const
+
+
+
 # `````````````````````````````````````` #
 #  Create related objects for testing    #
 # ...................................... #
 
-# Create a filterMS object from the available msDatObj.  We don't need realistic
-# values for cmp_by_crit and summ_info since rankEN extracts the msDat object
-# from a filterMS object anyway.
+# Create a filterMS object from the available msDat object.  We don't need
+# realistic values for cmp_by_crit and summ_info since rankEN extracts the msDat
+# object from a filterMS object anyway.
 filterMS_obj <- list(msDatObj    = msDatObj,
                      cmp_by_crit = NULL,
                      summ_info   = NULL)
@@ -169,24 +211,21 @@ true_rankEN_bio_ave$summ_info$data_dim$repl <- 1L
 #  Save data for use by testing script  #
 # ..................................... #
 
-# Periodically the testing fails for rankEN until this RData file is refreshed.
-# Instead just source the file.
-
-# save(# Objects used in rankEN calls
-#      msDatObj,
-#      bioact,
-#      reg_idx,
-#      lambda,
-#      # 'True' objects to test against
-#      true_rankEN,
-#      true_rankEN_bio_ave,
-#      # Derived objects for further testing
-#      filterMS_obj,
-#      bio_df,
-#      bio_NA,
-#      bio_vec,
-#      bio_matr_ave,
-#      ms_reg_only,
-#      bio_reg_only,
-#      bio_vec_reg_only,
-#      file="tests/data/data-rankEN_test.RData")
+save(# Objects used in rankEN calls
+     msDatObj,
+     bioact,
+     reg_idx,
+     lambda,
+     # 'True' objects to test against
+     true_rankEN,
+     true_rankEN_bio_ave,
+     # Derived objects for further testing
+     filterMS_obj,
+     bio_df,
+     bio_NA,
+     bio_vec,
+     bio_matr_ave,
+     ms_reg_only,
+     bio_reg_only,
+     bio_vec_reg_only,
+     file="tests/data/data-rankEN-test.RData")

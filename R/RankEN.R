@@ -140,11 +140,32 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
     ms <- extract_var(ms, region_ms, TRUE)
     bio <- extract_var(bioact, region_bio, TRUE)
 
+    # Extract mtoz and charge info
+    mtoz <- msDatObj$mtoz
+    chg <- msDatObj$chg
+
     # Check for missing and that dimensions match
     rankEN_check_regr_args(ms, bio)
 
+    # Check that compounds are nonconstant.  If any are constant then remove
+    # them from the data.
+    is_const <- (apply(ms, 1, var) < .Machine$double.eps)
+    if (sum(is_const) > 0) {
+        rem_idx <- which(is_const)
+        ms <- ms[-rem_idx, ]
+        mtoz <- mtoz[-rem_idx]
+        chg <- chg[-rem_idx]
+
+        # # Notify users of data removal
+        # cat("Compounds with constant values in the region removed:  ")
+        # for (comp_nm in row.names(msDatObj)[rem_idx]) {
+        #     cat(comp_nm, "    ", sep="")
+        # }
+        # cat("\n")
+    }
+
     # Convert ms to form where rows are an observation (i.e. fraction) and cols
-    # arms_te a variable (i.e. a compound)
+    # are a variable (i.e. a compound)
     ms_regr <- t(ms)
 
     # Obtain the mean of the bioactivity replicates and convert to a vector
@@ -198,10 +219,14 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
         pos_only  = pos_only,
         ncomp     = ncomp
     )
+    if (sum(is_const) > 0) {
+        summ_info$cmp_rm <- list(mtoz = msDatObj$mtoz[rem_idx],
+                                 chg  = msDatObj$chg[rem_idx])
+    }
 
     # Construct output object
-    outDat <- list( mtoz     = msDatObj$mtoz[comp_idx_out],
-                   charge    = msDatObj$chg[comp_idx_out],
+    outDat <- list(mtoz      = mtoz[comp_idx_out],
+                   charge    = chg[comp_idx_out],
                    comp_cor  = comp_cor[comp_idx_out],
                    enet_fit  = enet_fit,
                    summ_info = summ_info )
@@ -337,6 +362,27 @@ format.rankEN <- function(x, max_comp_print, ...) {
 
     # Begin variable construction --------------------------
 
+    # Compound removal notification
+    if (! is.null(summ_info$cmp_rm)) {
+        rm_notif     <- " (some compounds were removed)"
+        rm_notif_bar <- "------------------------------"
+
+        comp_rm_header <- paste0(
+            "Compounds removed for being constant:\n",
+            "-------------------------------------\n")
+        ms_comp_rm <- format(
+            c("Mass-to-charge",
+              "--------------",
+              format_float(summ_info$cmp_rm$mtoz)))
+        chg_comp_rm <- format(
+            c("Charge",
+              "--------------",
+              format_float(summ_info$cmp_rm$chg)))
+    }
+    else {
+        rm_notif <- rm_notif_bar <- ""
+    }
+
     # Mass spectrometry and bioactivity data dimensions
     data_dim_vals <- format_int( unlist(summ_info$data_dim) )
     names(data_dim_vals) <- c("nroi", "ncomp", "nbio")
@@ -364,8 +410,8 @@ format.rankEN <- function(x, max_comp_print, ...) {
 
     # Ordered compound rankings m/z values
     comp_rank_mtoz <- format(
-        c("Mass spec.",
-          "----------",
+        c("Mass-to-charge",
+          "--------------",
           format_float( mtoz[1:print_len] )))
 
     # Ordered charge rankings charge values
@@ -397,15 +443,28 @@ format.rankEN <- function(x, max_comp_print, ...) {
 
     # Dimensions of the data supplied to rankEN
     data_dim <- sprintf(
-        paste0("Data dimensions:\n",
-               "----------------\n",
+        paste0("Data dimensions%s:\n",
+               "---------------%s-\n",
                "    region of interest:      %s\n",
                "    candidate compounds:     %s\n",
                "    bioactivity replicates:  %s\n",
                "\n"),
+        rm_notif,
+        rm_notif_bar,
         data_dim_vals["nroi"],
         data_dim_vals["ncomp"],
         data_dim_vals["nbio"])
+
+    # Names of compounds removed for being constant in roi
+    if (! is.null(summ_info$cmp_rm)) {
+        compound_removal <- paste0(
+            comp_rm_header,
+            paste0("    ", ms_comp_rm, "    ", chg_comp_rm, "\n", collapse=""),
+            "\n")
+    }
+    else {
+        compound_removal <- ""
+    }
 
     # Names of fractions included in region of interest
     region_of_interest <- paste0(
@@ -431,10 +490,11 @@ format.rankEN <- function(x, max_comp_print, ...) {
         comp_rank_header,
         paste0("    ", comp_rank_mtoz, "    ", comp_rank_chg,
                "    ", comp_rank_corr, "\n", collapse=""),
-        "\n", collapse="")
+        "\n")
 
     c(newl = "\n",
       ddim = data_dim,
+      crem = compound_removal,
       regi = region_of_interest,
       args = param_args,
       rank = comp_rank)

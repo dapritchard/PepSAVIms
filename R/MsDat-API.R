@@ -77,10 +77,8 @@ dimnames.msDat <- function(msObj) {
     }
 
     dimnames(msObj$ms) <- value
-    names(msObj$mtoz) <- value[[1]]
-    names(msObj$chg) <- value[[1]]
 
-    return (msObj)
+    msObj
 }
 
 

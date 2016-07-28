@@ -3,7 +3,7 @@
 #  Load testing data  #
 # ................... #
 
-source("../construct-data/cd-rankEN_test.R")
+load("../data/data-rankEN-test.RData")
 
 
 
