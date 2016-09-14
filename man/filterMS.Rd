@@ -22,47 +22,50 @@ through partial string matching (see criterion 1, 4).}
 number of fractions to either side of the region of interest to comprise
 the bordering region.  If a single numeric value, then this is the number
 of fractions to each side of the region of interest; if it is two values,
-then the first value is the number of fractions to the left, and the second
-value is the number of fractions to the right.  If there are not enough
-fractions in either direction to completely span the number of specified
-fractions, then all of the available fractions to the side in question are
-considered to be part of the bordering region (see criterion 2).}
+then the first value is the number of fractions to the left, and the
+second value is the number of fractions to the right.  If there are not
+enough fractions in either direction to completely span the number of
+specified fractions, then all of the available fractions to the side in
+question are considered to be part of the bordering region (see criterion
+2).}
 
 \item{bord_ratio}{A single nonnegative numeric value.  A value of 0 will not
-admit any compounds, while a value greater than 1 will admit
-all compounds (see criterion 2).}
+admit any compounds, while a value greater than 1 will admit all
+compounds (see criterion 2).}
 
 \item{min_inten}{A single numeric value.  A value less than the minimum mass
-spectrometry value in the data will admit all compounds (see criterion 4).}
+spectrometry value in the data will admit all compounds (see criterion
+4).}
 
 \item{max_chg}{A single numeric value specifying the maximum charge which a
 compound may exhibit (see criterion 5)}
 }
 \value{
 Returns an object of class \code{filterMS} which inherits from
-  \code{msDat}.  This object is a \code{list} with elements described below.
-  The class is equipped with a \code{print}, \code{summary}, and
-  \code{extractMS} function.
+    \code{msDat}.  This object is a \code{list} with elements described
+    below.  The class is equipped with a \code{print}, \code{summary}, and
+    \code{extractMS} function.
 
-  \describe{
+    \describe{
 
-  \item{\code{msDatObj}}{ An object of class \code{\link{msDat}} such that
-  the encapsulated mass spectrometry data corresponds to each of the
-  candidate compounds that satisfed each of the criteria.  If no criteria are
-  satisfied then \code{NULL} is returned. }
+    \item{\code{msDatObj}}{ An object of class \code{\link{msDat}} such that
+        the encapsulated mass spectrometry data corresponds to each of the
+        candidate compounds that satisfed each of the criteria.  If no
+        criteria are satisfied then \code{NULL} is returned. }
 
-  \item{\code{cmp_by_crit}}{ A list containing \code{data.frame}s, one for
-  each criterion. Each row (if any) in one of the sub-\code{data.frame}s
-  contains the mass-to-charge and charge information for a candidate compound
-  that satisfies the criterion represented by the \code{data.frame}; all of
-  the compounds that satisfied the criterion are included in the data.  The
-  \code{data.frame}s are named \code{c1}, ..., \code{c5}, etc corresponding
-  to criterion 1, ..., criterion 5. }
+    \item{\code{cmp_by_crit}}{ A list containing \code{data.frame}s, one for
+        each criterion. Each row (if any) in one of the
+        sub-\code{data.frame}s contains the mass-to-charge and charge
+        information for a candidate compound that satisfies the criterion
+        represented by the \code{data.frame}; all of the compounds that
+        satisfied the criterion are included in the data.  The
+        \code{data.frame}s are named \code{c1}, ..., \code{c5}, etc
+        corresponding to criterion 1, ..., criterion 5. }
 
-  \item{\code{summ_info}}{ A list containing information pertaining to the
-  filtering process; for use by the summary function. }
+    \item{\code{summ_info}}{ A list containing information pertaining to the
+         filtering process; for use by the summary function. }
 
-  }
+    }
 }
 \description{
 Filters mass spectrometry data using a set of criteria, described in
@@ -71,33 +74,33 @@ Filters mass spectrometry data using a set of criteria, described in
 }
 \details{
 Attempts to filter out candidate compounds via subject-matter
-  knowledge, with the goal of removing spurious noise from downstream models.
-  The criteria for the downstream inclusion of a candidate compound is listed
-  below.
+    knowledge, with the goal of removing spurious noise from downstream
+    models.  The criteria for the downstream inclusion of a candidate
+    compound is listed below.
 
-  \enumerate{
+    \enumerate{
 
-  \item The m/z intensity maximum must fall inside the range of the
-  bioactivity region of interest
+    \item The m/z intensity maximum must fall inside the range of the
+        bioactivity region of interest
 
-  \item The ratio of the m/z intensity of a species in the areas bordering
-  the region of interest and the species maximum intensity must be less than
-  \code{bord_ratio}.  When there is no bordering area then it is taken to
-  mean that all observations satisfy this criterion.
+    \item The ratio of the m/z intensity of a species in the areas bordering
+        the region of interest and the species maximum intensity must be less
+        than \code{bord_ratio}.  When there is no bordering area then it is
+        taken to mean that all observations satisfy this criterion.
 
-  \item The immediately right adjacent fraction to its maximum intensity
-  fraction for a species must have a non-zero abundance.  In the case of ties
-  for the maximum, it is the fraction immediately to the right of the
-  rightmost maximum fraction which cannot have zero abundance.  When the
-  fraction with maximum intensity is the rightmost fraction in the data for
-  an observation, then it is taken to mean that the observation satisfies
-  this criterion.
+    \item The immediately right adjacent fraction to its maximum intensity
+        fraction for a species must have a non-zero abundance.  In the case
+        of ties for the maximum, it is the fraction immediately to the right
+        of the rightmost maximum fraction which cannot have zero abundance.
+        When the fraction with maximum intensity is the rightmost fraction in
+        the data for an observation, then it is taken to mean that the
+        observation satisfies this criterion.
 
-  \item At least 1 fraction in the region of interest must have intensity
-  greater than \code{min_inten}
+    \item At least 1 fraction in the region of interest must have intensity
+        greater than \code{min_inten}
 
-  \item Compound charge state must be less than or equal to \code{max_chg}
+    \item Compound charge state must be less than or equal to \code{max_chg}
 
-  }
+    }
 }
 

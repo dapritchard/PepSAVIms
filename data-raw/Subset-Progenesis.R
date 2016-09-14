@@ -1,4 +1,6 @@
 
+# Read mass spectrometry data --------------------------------------------------
+
 # Arg specifications determined by a visual inspection of the csv file.  The
 # reason for the nrows argument is b/c the last row of data is incomplete.
 
@@ -19,5 +21,32 @@ mass_spec <- progenesis[, c(1:2, 4:5, 77:97, 99:111)]
 names(mass_spec)[ grepl("Sample1", names(mass_spec)) ] <- "20150207_CLK_BAP_VO_32"
 
 
-# Saves mass_spec in the file data/mass_spec.rda
-devtools::use_data(mass_spec)
+
+
+# Read bioactivity data --------------------------------------------------------
+
+biomat <- read.csv("data-raw/20160727_VO all active bioactivity data with replicates.csv",
+                   row.names=1, check.names=FALSE)
+# Some of the names start with an X, remove for consistency
+names(biomat) <- c("Modeling region",
+                   paste0("20150207_CLK_BAP_VO_", 1:43),
+                   "20150207_CLK_BAP_VO_47")
+
+region_idx <- 2:45
+bioact <- list()
+bioact$ec <- biomat[8:10, region_idx]
+bioact$bc <- biomat[11:13, region_idx]
+bioact$pc <- biomat[14:16, region_idx]
+bioact$oc <- biomat[17:19, region_idx]
+bioact$ef <- biomat[20:22, region_idx]
+bioact$ab <- biomat[23:25, region_idx]
+bioact$pa <- biomat[26:28, region_idx]
+bioact$fg <- biomat[29:30, region_idx]
+
+
+
+# Save data to RData format ----------------------------------------------------
+
+# Saves mass_spec in the file data/mass_spec.rda and bioact in the file
+# data/bioact.rda
+devtools::use_data(mass_spec, bioact)

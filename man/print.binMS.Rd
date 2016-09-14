@@ -12,6 +12,7 @@
 \item{...}{Arguments passed to dot-dot-dot are ignored}
 }
 \description{
-Prints the number of m/z levels and fractions of the resultant mass spectrometry data
+Prints the number of m/z levels and fractions of the resultant mass
+spectrometry data
 }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/RankEN.R
 \name{rankEN}
 \alias{rankEN}
-\title{Rank compounds using the Elastic Net path}
+\title{Rank compounds via the Elastic Net path}
 \usage{
 rankEN(msObj, bioact, region_ms = NULL, region_bio = NULL, lambda,
   pos_only = TRUE, ncomp = NULL)
@@ -14,109 +14,114 @@ objects created by the functions \code{binMS}, \code{filterMS}, and
 \code{msDat}.}
 
 \item{bioact}{Either a numeric vector or matrix, or a data frame providing
-bioactivity data.  If a numeric vector, then it is assumed that each entry
-corresponds to a particular fraction.  If the data is 2-dimensional, then
-it is assumed that each column corresponds to a particular fraction, and
-that each row corresponds to a particular bioactivity replicate.}
+bioactivity data.  If a numeric vector, then it is assumed that each
+entry corresponds to a particular fraction.  If the data is
+2-dimensional, then it is assumed that each column corresponds to a
+particular fraction, and that each row corresponds to a particular
+bioactivity replicate.}
 
 \item{region_ms}{Either \code{NULL}, or a vector either of mode character or
-mode numeric providing information specifying which fractions from the mass
-spectrometry abundances data are to be included in the data analysis.  If
-\code{NULL}, then it is assumed that the entirety of the mass spectrometry
-abundances data encapsulated in the argument to \code{msObj} is to be
-included in the analysis.  If numeric then the entries should provide the
-indices for the region of interest in the mass spectrometry data (i.e. the
-indices of the columns corresponding to the appropriate fractions in the
-data).  If character then the entries should uniquely specify the region of
-interest through partial string matching (i.e. the names of the columns
-corresponding to the appropriate fractions in the data).  The methods
-\code{dim}, \code{dimnames}, and \code{colnamesMS} can be used as
-interfaces to the mass spectrometry data encapsulated in \code{msObj}.}
-
-\item{region_bio}{Either \code{NULL}, or a vector either of mode character or
 mode numeric providing information specifying which fractions from the
-bioactivity data are to be included in the data analysis.  If \code{NULL},
-then it is assumed that the entirety of bioactivity data provided as the
-argument to \code{bioact} is to be included in the analysis.  If numeric
-then the entries should provide the indices for the region of interest in
-the bioactivity data (i.e. the indices of the columns corresponding to the
+mass spectrometry abundances data are to be included in the data
+analysis.  If \code{NULL}, then it is assumed that the entirety of the
+mass spectrometry abundances data encapsulated in the argument to
+\code{msObj} is to be included in the analysis.  If numeric then the
+entries should provide the indices for the region of interest in the mass
+spectrometry data (i.e. the indices of the columns corresponding to the
 appropriate fractions in the data).  If character then the entries should
 uniquely specify the region of interest through partial string matching
 (i.e. the names of the columns corresponding to the appropriate fractions
-in the data).}
+in the data).  The methods \code{dim}, \code{dimnames}, and
+\code{colnamesMS} can be used as interfaces to the mass spectrometry data
+encapsulated in \code{msObj}.}
+
+\item{region_bio}{Either \code{NULL}, or a vector either of mode character or
+mode numeric providing information specifying which fractions from the
+bioactivity data are to be included in the data analysis.  If
+\code{NULL}, then it is assumed that the entirety of bioactivity data
+provided as the argument to \code{bioact} is to be included in the
+analysis.  If numeric then the entries should provide the indices for the
+region of interest in the bioactivity data (i.e. the indices of the
+columns corresponding to the appropriate fractions in the data).  If
+character then the entries should uniquely specify the region of interest
+through partial string matching (i.e. the names of the columns
+corresponding to the appropriate fractions in the data).}
 
 \item{lambda}{A single nonnegative numeric value providing the quadratic
-penalty mixture parameter argument for the elastic net model.  The elastic
-net fits the least squares model with penalty function
+penalty mixture parameter argument for the elastic net model.  The
+elastic net fits the least squares model with penalty function
 \deqn{\gamma|\beta|_1 + \lambda|\beta|^2} where \eqn{\beta} is the vector
-of regression coefficients and \eqn{\gamma, \lambda \ge 0}.  \code{rankEN}
-constructs a list of candidate compounds by tracking the entrance of
-compounds into the elastic net model as \eqn{\gamma} is decreased from
-\eqn{\infty} to \eqn{0}.}
+of regression coefficients and \eqn{\gamma, \lambda \ge 0}.
+\code{rankEN} constructs a list of candidate compounds by tracking the
+entrance of compounds into the elastic net model as \eqn{\gamma} is
+decreased from \eqn{\infty} to \eqn{0}.}
 
 \item{pos_only}{Either \code{TRUE} or \code{FALSE}; specifies whether the
-list of candidate compounds that the algorithm produces should include only
-those compounds that are positively correlated with bioactivity levels, or
-conversely should include all compounds.  The correlation is calculated
-using only observations from the region of interest, and when bioactivity
-replicates are present, the within-fraction replicates are averaged prior
-to calculation.}
+list of candidate compounds that the algorithm produces should include
+only those compounds that are positively correlated with bioactivity
+levels, or conversely should include all compounds.  The correlation is
+calculated using only observations from the region of interest, and when
+bioactivity replicates are present, the within-fraction replicates are
+averaged prior to calculation.}
 
 \item{ncomp}{Either \code{NULL}, or a numeric value no less than 1 specifying
-the maximum number of candidate compounds that the function should report.
-When \code{NULL}, this is taken to mean that all compounds that enter the
-model should be reported, possibly after removing compounds nonpositively
-correlated with bioactivity levels, as specified by \code{pos_only}.}
+the maximum number of candidate compounds that the function should
+report.  When \code{NULL}, this is taken to mean that all compounds that
+enter the model should be reported, possibly after removing compounds
+nonpositively correlated with bioactivity levels, as specified by
+\code{pos_only}.}
 }
 \value{
 Returns an object of class \code{rankEN}.  This object is a
-  \code{list} with elements described below.  The class is equipped with a
-  \code{print}, \code{summary}, and \code{extract_candidates} function.
+    \code{list} with elements described below.  The class is equipped with a
+    \code{print}, \code{summary}, and \code{extract_candidates} function.
 
-  \describe{
+    \describe{
 
-  \item{\code{mtoz}}{ A vector providing the mass-to-charge values of the
-  candidate compounds, such that the \code{k}-th element of the vector
-  provides the mass-to-charge value of the \code{k}-th compound to enter the
-  elastic net model, possibly after removing compounds nonpositively
-  correlated with bioactivity levels. }
+    \item{\code{mtoz}}{ A vector providing the mass-to-charge values of the
+    candidate compounds, such that the \code{k}-th element of the vector
+    provides the mass-to-charge value of the \code{k}-th compound to enter
+    the elastic net model, possibly after removing compounds nonpositively
+    correlated with bioactivity levels. }
 
-  \item{\code{charge}}{ A vector providing the charge state of the candidate
-  compounds, such that the \code{k}-th element of the vector provides the
-  charge state of the \code{k}-th compound to enter the elastic net model,
-  possibly after removing compounds nonpositively correlated with bioactivity
-  levels. }
+    \item{\code{charge}}{ A vector providing the charge state of the
+        candidate compounds, such that the \code{k}-th element of the vector
+        provides the charge state of the \code{k}-th compound to enter the
+        elastic net model, possibly after removing compounds nonpositively
+        correlated with bioactivity levels. }
 
-  \item{\code{comp_cor}}{ A vector providing the correlation between each of
-  the candidate compounds and the bioactivity levels, such that the
-  \code{k}-th element of the vector provides the correlation between the
-  \code{k}-th compound to enter the elastic net model and the bioactivity
-  levels, possibly after removing compounds nonpositively correlated with
-  bioactivity levels. }
+    \item{\code{comp_cor}}{ A vector providing the correlation between each
+        of the candidate compounds and the bioactivity levels, such that the
+        \code{k}-th element of the vector provides the correlation between
+        the \code{k}-th compound to enter the elastic net model and the
+        bioactivity levels, possibly after removing compounds nonpositively
+        correlated with bioactivity levels. }
 
-  \item{\code{enet_fit}}{ The fitted model object produced by \code{rankEN}'s
-  internal invokation of the \code{enet} function from the \code{elasticnet}
-  package.}
+    \item{\code{enet_fit}}{ The fitted model object produced by
+        \code{rankEN}'s internal invokation of the \code{enet} function from
+        the \code{elasticnet} package.}
 
-  \item{\code{summ_info}}{ A list containing information related to the data
-  used to fit the elastic net model; used by the summary function. }
+    \item{\code{summ_info}}{ A list containing information related to the
+        data used to fit the elastic net model; used by the summary
+        function. }
 
-  }
+    }
 }
 \description{
-Returns identifying information for the compounds in the order in which they
-first enter the Elastic Net model
+Returns identifying information for the compounds in the order in which the
+corresponding regression coefficient for a given compound first becomes
+nonzero as part of the Elastic Net path
 }
 \details{
 \code{rankEN} prepares the data by extracting the region of interest
-  from the mass spectrometry abundance data and from the bioactivity data.
-  If bioactivity replicates are present, then the within-fraction replicates
-  are averaged.  Once the data has been converted into the appropriate form,
-  then an elastic net model is fitted by invoking the \code{enet} function
-  from the \code{elasticnet} package, and an ordered list of candidate
-  compounds is constructed such that compounds are ranked by the order in
-  which they first enter the model.  The list may be filtered and / or pruned
-  before being returned to the user, as determined by the arguments to
-  \code{pos_only} and \code{ncomp}.
+    from the mass spectrometry abundance data and from the bioactivity data.
+    If bioactivity replicates are present, then the within-fraction
+    replicates are averaged.  Once the data has been converted into the
+    appropriate form, then an elastic net model is fitted by invoking the
+    \code{enet} function from the \code{elasticnet} package, and an ordered
+    list of candidate compounds is constructed such that compounds are ranked
+    by the order in which they first enter the model.  The list may be
+    filtered and / or pruned before being returned to the user, as determined
+    by the arguments to \code{pos_only} and \code{ncomp}.
 }
 

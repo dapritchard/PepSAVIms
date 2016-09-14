@@ -149,7 +149,7 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
 
     # Check that compounds are nonconstant.  If any are constant then remove
     # them from the data.
-    is_const <- (apply(ms, 1, var) < .Machine$double.eps)
+    is_const <- (apply(ms, 1, stats::var) < .Machine$double.eps)
     if (sum(is_const) > 0) {
         rem_idx <- which(is_const)
         ms <- ms[-rem_idx, ]

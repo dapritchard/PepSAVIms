@@ -1,51 +1,8 @@
 
 \documentclass[fleqn]{article}
+% \VignetteIndexEntry{Kirkpatrick et. al (2016) data analysis}
 
-\usepackage[margin=2cm]{geometry}
-\usepackage{amsmath}
-\usepackage{enumitem}
-\usepackage{tikz}
-\usepackage{makecell}  % tikz construct
-\usepackage{float}     % for the H specification in \begin{figure}[H]
-\usepackage{caption}   % caption*
-\usepackage{titlesec}  % titlespacing
-
-
-\usetikzlibrary{shapes, arrows, positioning}
-
-\def\R/{\textsf{R}}
-\def\papernamefull/{\emph{A PRISMS pipeline for natural product bioactive peptide discovery}}
-\def\papername/{\emph{A PRISMS pipeline}}
-\def\binMS/{\texttt{binMS}}
-\def\filterMS/{\texttt{filterMS}}
-\def\rankEN/{\texttt{rankEN}}
-\def\msDat/{\texttt{msDat}}
-\newcommand{\pkg}[1]{\textsf{#1}}
-\newcommand{\code}[1]{\texttt{#1}}
-
-
-
-
-% Spacing before/after sections and subsections
-\titlespacing*{\section}
-{0pt}{5.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
-\titlespacing*{\subsection}
-{0pt}{7.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
-
-
-% Define tikz block styles
-\tikzstyle{decision} = [diamond, draw, fill=blue!20,
-    text width=6em, text badly centered, node distance=5cm, inner sep=0pt]
-\tikzstyle{block} = [rectangle, draw, fill=blue!20,
-    text width=5em, text centered, rounded corners, minimum height=4em]
-\tikzstyle{line} = [draw, -latex']
-\tikzstyle{cloud} = [draw, ellipse, fill=red!20, node distance=3cm,
-    minimum height=2em]
-\tikzstyle{cloudGr} = [draw, ellipse, fill=black!5!green!40!, node distance=3cm,
-    minimum height=2em]
-\tikzstyle{cloudYel} = [draw, ellipse, fill=yellow!40!, node distance=3cm,
-    minimum height=2em]
-
+\input{Shared_Preamble.tex}
 
 
 
@@ -53,6 +10,16 @@
 % Document start ---------------------------------------------------------------
 
 \begin{document}
+
+% Configure global options
+<<setup, cache=FALSE, include=FALSE>>=
+library(knitr)
+knit_theme$set("default")
+opts_chunk$set(cache=TRUE)
+opts_knit$set(root.dir=normalizePath(".."))
+options(width=95)
+@
+
 
 \begin{center} \Large Data analysis performed in the paper: \\[1ex] \papernamefull/ \end{center}
 
@@ -68,11 +35,11 @@ laboratory and statistical procedure proposed in \papernamefull/ (herafter
 abbreviated to \papername/).
 
 This document describes all of the steps and shows the results of the data
-analysis performed in \papername/.  Providing the analysis will hopefully make
-the research more reproducible, give the interested reader a greater
-understanding of the methodology developed in the paper, and to provide a
-working template for researchers who may wish to apply the methodology developed
-in the paper to their own research problems.
+analysis performed in \papername/ (herafter abbreviated to \papername/).
+Providing the analysis will hopefully make the research more reproducible, give
+the interested reader a greater understanding of the methodology developed in
+the paper, and to provide a working template for researchers who may wish to
+apply the methodology developed in the paper to their own research problems.
 
 
 \section{Data collection}
@@ -94,7 +61,7 @@ preparation for bioassays.  The peptide libraries across the fractions were then
 analyzed via a nano-LC-ESI-MS/MS platform (a Waters nanoAcquity UPLC coupled to
 an AB Sciex TripleTOF5600).  This yielded intact mass and relative intensity
 information for peptide constituents contained within each library fraction; the
-analysis obtained 6,430 MS features for \textit{Viola odorata} across 34
+analysis obtained 30,799 MS features for \textit{Viola odorata} across 34
 fractions.
 
 
@@ -109,187 +76,190 @@ irreversible intracellular reduction of resazurin24. Values for each fraction
 were compared to positive and negative controls containing a known therapeutic
 or water, respectively, to determine a percent activity of each library
 fraction.  Percent activity of each well was calculated using the formula:
-\[ \text{percent activity} = 100 \times \frac{ \text{RFU of fraction} - \text{RFU of positive control} }{ \text{RFU of negative control} - \text{RFU of positive control} } \]
+\[ \text{percent activity} = 100 \times \frac{ \text{RFU of fraction} -
+    \text{RFU of positive control} }{ \text{RFU of negative control} -
+    \text{RFU of positive control} }
+\]
 
 
 
 
-% Flowchart and fcn descriptions -----------------------------------------------
+% % Flowchart and fcn descriptions -----------------------------------------------
 
-\section{Package Overview}
+% \section{Package Overview}
 
-A flowchart for a data analysis performed using \pkg{PRISMS} is show in figure
-\ref{fig: flow chart}.  The blue rectangles and diamond are functions in the
-\pkg{PRISMS} ecosystem; the pink oval denotes mass spectrometry data to be used
-as data inputs; the green oval denotes bioactivity data to be used as a data
-input; and the yellow oval denotes the analysis results of using the
-\pkg{PRISMS} methodology and software.
+% A flowchart for a data analysis performed using \pkg{PRISMS} is show in figure
+% \ref{fig: flow chart}.  The blue rectangles and diamond are functions in the
+% \pkg{PRISMS} ecosystem; the pink oval denotes mass spectrometry data to be used
+% as data inputs; the green oval denotes bioactivity data to be used as a data
+% input; and the yellow oval denotes the analysis results of using the
+% \pkg{PRISMS} methodology and software.
 
-The prototypical data analysis workflow is the path described by the solid
-lines; this is the procedure performed in \papername/, and described in more
-detail in Section \ref{sec: prototypical}.  The dashed lines show alternative
-workflows which may be performed in situations where some of the data processing
-steps have already been performed using other tools, or where some of the data
-processing steps may not be appropriate for the particular data analysis in
-hand.
-
-
-\begin{figure}[H]
-
-\caption{Data analysis flow chart} \vspace{-6mm}
-\label{fig: flow chart}
-
-\centering
-\begin{tikzpicture}[node distance = 3cm, auto]
-    % Place nodes
-    \node [decision] (rankEN) {rankEN};
-    \node [block, left of=rankEN] (filterMS) {filterMS};
-    \node [cloudYel, right of=rankEN, node distance=3.75cm] (ranked_data) {\makecell[c]{ranked candid-\\ate compounds}};
-    \node [block, left of=filterMS] (binMS) {binMS};
-    \node [cloud, left of=binMS] (raw_data) {\makecell[c]{raw MS\\data}};
-    \node [block, below left=1.5cm and 1cm of filterMS, node distance=1cm] (msDat1) {msDat};
-    \node [block, below left=1.6cm and 1.45cm of rankEN, node distance=1cm] (msDat2) {msDat};
-    \node [cloud, below of=msDat1] (bin_dat) {\makecell[c]{binned\\MS data}};
-    \node [cloud, below of=msDat2] (filt_dat) {\makecell[c]{filtered\\MS data}};
-    \node [cloudGr, below of=rankEN] (bioact) {\makecell[c]{bioactivity\\data}};
-    % Draw edges
-    \path [line, thick] (raw_data) -- (binMS);
-    \path [line, thick] (binMS) -- (filterMS);
-    \path [line, thick] (filterMS) -- (rankEN);
-    \path [line, thick] (rankEN) -- (ranked_data);
-    \path [line, dashed] (msDat1) -- (filterMS);
-    \path [line, dashed] (msDat2) -- (rankEN);
-    \path [line, dashed] (bin_dat) -- (msDat1);
-    \path [line, dashed] (filt_dat) -- (msDat2);
-    \path [line, thick] (bioact) -- (rankEN);
-    \path [line, dashed] (binMS) to[out=95, in=90] (rankEN);
-\end{tikzpicture} \vspace{4mm}
-
-\caption*{Solid arrows represent the prototypical data analysis workflow;\\ dashed lines
-represent alternative workflows}
-\end{figure}
-
-A conceptual presentation of the functions in the \pkg{PRISMS} package is
-provided in the following subsections.  Please refer to the function
-documentation for more information regarding the application programming
-interface, as well as for further technical detail.
+% The prototypical data analysis workflow is the path described by the solid
+% lines; this is the procedure performed in \papername/, and described in more
+% detail in Section \ref{sec: prototypical}.  The dashed lines show alternative
+% workflows which may be performed in situations where some of the data processing
+% steps have already been performed using other tools, or where some of the data
+% processing steps may not be appropriate for the particular data analysis in
+% hand.
 
 
-\subsection{The \binMS/ function}
+% \begin{figure}[H]
 
-The mass spectrometry abundance data can optionally undergo two preprocessing
-steps.  The first step is a consolidation step - the goal is to to consolidate
-mass spectrometry observations in the data that are believed to belong to the
-same underlying compound.  In other words, the instrumentation may have obtained
-multiple reads of mass spectrometry abundances that in actuality belong to the
-same compound - in which case we wish to attribute all of the elution to a
-single compound.  The function name \binMS/ derives from the fact that we use a
-binning procedure to consolidate the data.
+% \caption{Data analysis flow chart} \vspace{-6mm}
+% \label{fig: flow chart}
 
-The consolidation procedure is undergone as follows.  Firstly, all observations
-must satisfy each of the following criterions or they are removed from
-consideration for consolidation (i.e. they are dropped from the
-data).
+% \centering
+% \begin{tikzpicture}[node distance = 3cm, auto]
+%     % Place nodes
+%     \node [decision] (rankEN) {rankEN};
+%     \node [block, left of=rankEN] (filterMS) {filterMS};
+%     \node [cloudYel, right of=rankEN, node distance=3.75cm] (ranked_data) {\makecell[c]{ranked candid-\\ate compounds}};
+%     \node [block, left of=filterMS] (binMS) {binMS};
+%     \node [cloud, left of=binMS] (raw_data) {\makecell[c]{raw MS\\data}};
+%     \node [block, below left=1.5cm and 1cm of filterMS, node distance=1cm] (msDat1) {msDat};
+%     \node [block, below left=1.6cm and 1.45cm of rankEN, node distance=1cm] (msDat2) {msDat};
+%     \node [cloud, below of=msDat1] (bin_dat) {\makecell[c]{binned\\MS data}};
+%     \node [cloud, below of=msDat2] (filt_dat) {\makecell[c]{filtered\\MS data}};
+%     \node [cloudGr, below of=rankEN] (bioact) {\makecell[c]{bioactivity\\data}};
+%     % Draw edges
+%     \path [line, thick] (raw_data) -- (binMS);
+%     \path [line, thick] (binMS) -- (filterMS);
+%     \path [line, thick] (filterMS) -- (rankEN);
+%     \path [line, thick] (rankEN) -- (ranked_data);
+%     \path [line, dashed] (msDat1) -- (filterMS);
+%     \path [line, dashed] (msDat2) -- (rankEN);
+%     \path [line, dashed] (bin_dat) -- (msDat1);
+%     \path [line, dashed] (filt_dat) -- (msDat2);
+%     \path [line, thick] (bioact) -- (rankEN);
+%     \path [line, dashed] (binMS) to[out=95, in=90] (rankEN);
+% \end{tikzpicture} \vspace{4mm}
 
-\begin{enumerate}[label=(\roman*)]
+% \caption*{Solid arrows represent the prototypical data analysis workflow;\\ dashed lines
+% represent alternative workflows}
+% \end{figure}
 
-\item Each observation must have its peak elution time occur during the
-  specified interval.
-
-\item Each observation must have a mass that falls within the specified
-  interval.
-
-\item Each observation must have an electrical charge state that falls within
-  the specified interval.
-
-\end{enumerate}
-
-
-Once that a set of observations satisfying the above criteria is obtained, then
-a second step attempts to combine observations believed to belong to the same
-underlying compound.  The procedure considers two observations that satisfy each
-of the following criterions to belong to the same compound.
-
-\begin{enumerate}[label=(\roman*)]
-
-\item The absolute difference in Daltons of the mass-to-charge value between the
-  two observations is less the the specified value.
-
-\item The absolute difference of the peak elution time between the two
-  observations is less than the specified value.
-
-\item The electrical charge state must be the same for the two observations.
-
-\end{enumerate}
+% A conceptual presentation of the functions in the \pkg{PRISMS} package is
+% provided in the following subsections.  Please refer to the function
+% documentation for more information regarding the application programming
+% interface, as well as for further technical detail.
 
 
-\subsection{The \code{filterMS} function}
+% \subsection{The \binMS/ function}
 
-The second optional preprocessing step for the mass spectrometry abundance data
-is a filtering step.  The goal of the filtering step is to reduce the level of
-noise in the data by removing any potential candidate compounds with observed
-abundances for which it is not scientifically plausible that they might be a
-compound with an effect on bioactivity levels.  By filtering the candidate set
-prior to a statistical analysis, this step can greatly increase the ability of
-the analysis to effectively differentiate such compounds.  The criteria for the
-downstream inclusion of a candidate compound is listed below.
+% The mass spectrometry abundance data can optionally undergo two preprocessing
+% steps.  The first step is a consolidation step - the goal is to to consolidate
+% mass spectrometry observations in the data that are believed to belong to the
+% same underlying compound.  In other words, the instrumentation may have obtained
+% multiple reads of mass spectrometry abundances that in actuality belong to the
+% same compound - in which case we wish to attribute all of the elution to a
+% single compound.  The function name \binMS/ derives from the fact that we use a
+% binning procedure to consolidate the data.
 
-\begin{enumerate}[label=(\roman*)]
+% The consolidation procedure is undergone as follows.  Firstly, all observations
+% must satisfy each of the following criterions or they are removed from
+% consideration for consolidation (i.e. they are dropped from the
+% data).
 
-\item The m/z intensity maximum must fall inside the range of the bioactivity
-  region of interest.
+% \begin{enumerate}[label=(\roman*)]
 
-\item The ratio of the m/z intensity of a species in the areas bordering the
-  region of interest and the species maximum intensity must be less than the
-  specified value.
+% \item Each observation must have its peak elution time occur during the
+%   specified interval.
 
-\item The immediately right adjacent fraction to its maximum intensity fraction
-  for a species must have a non-zero abundance.
+% \item Each observation must have a mass that falls within the specified
+%   interval.
 
-\item At least 1 fraction in the region of interest must have intensity greater
-  than the specified value.
+% \item Each observation must have an electrical charge state that falls within
+%   the specified interval.
 
-\item The compound charge state must be less than or equal to the specified value.
-
-\end{enumerate}
-
-
-\subsection{The \rankEN/ function}
-
-Once the mass spectrometry abundance data has optionally undergone any
-preprocessing steps, a statistical procedure to search for candidate compounds
-for reduction of bioactivity levels is performed.  This step is performed by the
-\rankEN/ function, and takes as inputs both the preprocessed mass spectrometry
-abundance data and the bioactivity levels data.  The procedure works by
-specifying the level of the $\ell_2$ penalty parameter in the elastic net
-penalty, and tracking the inclusion of the coefficients corresponding to
-compounds into the nonzero set along the elastic net path.  An ordered list of
-candidate compounds for reduction of bioactivity levels is obtained by providing
-the order in which the coefficients corresponding to compounds entered the
-nonzero set.
+% \end{enumerate}
 
 
-\subsection{The \msDat/ function}
+% Once that a set of observations satisfying the above criteria is obtained, then
+% a second step attempts to combine observations believed to belong to the same
+% underlying compound.  The procedure considers two observations that satisfy each
+% of the following criterions to belong to the same compound.
 
-The functions \filterMS/ and \rankEN/ require objects of class \code{msDat} as
-the arguments providing the mass spectrometry abundances data; the \msDat/
-function takes mass spectrometry data as its input and creates an object of this
-class.  Note however, that the \binMS/ and \filterMS/ functions return objects
-that inherit from the \code{msDat} class, and consequently you can provide an
-object created by \binMS/ and \filterMS/ anywhere that an \code{msDat} class
-object is required.
+% \begin{enumerate}[label=(\roman*)]
 
-The reason for having an object of class \code{msDat} is to allow for a
-consistent interface to \filterMS/ and \rankEN/ whether the mass spectrometry
-data is obtained via a prior call to \binMS/, \filterMS/, or
-directly from user (but then via a call to \msDat/).
+% \item The absolute difference in Daltons of the mass-to-charge value between the
+%   two observations is less the the specified value.
+
+% \item The absolute difference of the peak elution time between the two
+%   observations is less than the specified value.
+
+% \item The electrical charge state must be the same for the two observations.
+
+% \end{enumerate}
+
+
+% \subsection{The \code{filterMS} function}
+
+% The second optional preprocessing step for the mass spectrometry abundance data
+% is a filtering step.  The goal of the filtering step is to reduce the level of
+% noise in the data by removing any potential candidate compounds with observed
+% abundances for which it is not scientifically plausible that they might be a
+% compound with an effect on bioactivity levels.  By filtering the candidate set
+% prior to a statistical analysis, this step can greatly increase the ability of
+% the analysis to effectively differentiate such compounds.  The criteria for the
+% downstream inclusion of a candidate compound is listed below.
+
+% \begin{enumerate}[label=(\roman*)]
+
+% \item The m/z intensity maximum must fall inside the range of the bioactivity
+%   region of interest.
+
+% \item The ratio of the m/z intensity of a species in the areas bordering the
+%   region of interest and the species maximum intensity must be less than the
+%   specified value.
+
+% \item The immediately right adjacent fraction to its maximum intensity fraction
+%   for a species must have a non-zero abundance.
+
+% \item At least 1 fraction in the region of interest must have intensity greater
+%   than the specified value.
+
+% \item The compound charge state must be less than or equal to the specified value.
+
+% \end{enumerate}
+
+
+% \subsection{The \rankEN/ function}
+
+% Once the mass spectrometry abundance data has optionally undergone any
+% preprocessing steps, a statistical procedure to search for candidate compounds
+% for reduction of bioactivity levels is performed.  This step is performed by the
+% \rankEN/ function, and takes as inputs both the preprocessed mass spectrometry
+% abundance data and the bioactivity levels data.  The procedure works by
+% specifying the level of the $\ell_2$ penalty parameter in the elastic net
+% penalty, and tracking the inclusion of the coefficients corresponding to
+% compounds into the nonzero set along the elastic net path.  An ordered list of
+% candidate compounds for reduction of bioactivity levels is obtained by providing
+% the order in which the coefficients corresponding to compounds entered the
+% nonzero set.
+
+
+% \subsection{The \msDat/ function}
+
+% The functions \filterMS/ and \rankEN/ require objects of class \code{msDat} as
+% the arguments providing the mass spectrometry abundances data; the \msDat/
+% function takes mass spectrometry data as its input and creates an object of this
+% class.  Note however, that the \binMS/ and \filterMS/ functions return objects
+% that inherit from the \code{msDat} class, and consequently you can provide an
+% object created by \binMS/ and \filterMS/ anywhere that an \code{msDat} class
+% object is required.
+
+% The reason for having an object of class \code{msDat} is to allow for a
+% consistent interface to \filterMS/ and \rankEN/ whether the mass spectrometry
+% data is obtained via a prior call to \binMS/, \filterMS/, or
+% directly from user (but then via a call to \msDat/).
 
 
 
 
 % Paper data analysis ----------------------------------------------------------
 
-\section{Data analysis workflow as presented in \papername/} \label{sec:
+\section{Data analysis presented in \papername/} \label{sec:
   prototypical}
 
 This section describes all of the steps and shows the results of the data
@@ -315,7 +285,10 @@ which calculates and returns the data analysis results.
     % Place nodes
     \node [decision] (rankEN) {rankEN};
     \node [block, left of=rankEN] (filterMS) {filterMS};
-    \node [cloudYel, right of=rankEN, node distance=3.75cm] (ranked_data) {\makecell[c]{ranked candid-\\ate compounds}};
+
+    \node [cloudYel, right of=rankEN, node distance=3.75cm] (ranked_data)
+    {\makecell[c]{ranked candid-\\ate compounds}};
+
     \node [block, left of=filterMS] (binMS) {binMS};
     \node [cloud, left of=binMS] (raw_data) {\makecell[c]{raw MS\\data}};
     \node [cloudGr, below of=rankEN] (bioact) {\makecell[c]{bioactivity\\data}};
@@ -332,51 +305,218 @@ which calculates and returns the data analysis results.
 
 
 
-\subsection{Reading in the data}
+\subsection{Loading the mass spectrometry and bioactivity data}
 
-TODO: describe the reading in the data section
+First we load the mass spectrometry data collected for \papername/; this is the
+data produced by the Progenesis instrumentation and software.  The raw data
+produced by this system is stored as a comma-seperated values (csv) file.
+However, in an effort to minimize the size of the \pkg{PRISMS} package, we have
+removed the columns in the data corresponding to variables not used in the data
+analysis, and have converted the data to a compressed native \R/ format.  The
+values of the data relevent to this data analysis of course remain unchanged
+from their original form.
 
-<<reading-data>>=
-# Read the data
+Some discussion of the bioactivity data collection here ************ \bigskip
 
-# read.table
-# read_table
-# scan
+Readers who wish to obtain the data in its raw form as produced by the
+Progenesis system, may obtain the data as well as the \R/ script used to convert
+the raw data into the form provided with the package from the \pkg{PRISMS}
+package developement repository located at
+\url{https://github.com/dpritchLibre/PRISMS}.
+
+
+\subsubsection{Mass spectrometry data}
+
+The mass spectrometry data produced by the Progenesis system yielded intact mass
+and relative intensity information for peptide constituents contained within
+each library fraction; the analysis obtained 30,799 MS features for
+\textit{Viola odorata} across fractions 1-43 and additionally for fraction 47.
+The data is measured in units of Daltons.
+
+<<reading-data-ms>>=
+# Load mass spectrometry data into memory
+data(mass_spec)
 @
+
+
+
+\subsubsection{Bioactivity data}
+
+Peptide libraries were assayed for growth inhibition against the following
+pathogens: E. coli, S. aureus, K. pneumoniae, A. baumannii, P. aeruginosa, and
+E. cloacae.  Three replicate observations were collected for each of the
+viruses / bacteria (with the exception of fg************, which had two
+replicates), across fractions 1-43 and additionally for fraction 47.  The data
+is measured in percent of activity decrease and is unitless.
+
+<<reading-data-bioact>>=
+# Load bioactivity data into memory
+data(bioact)
+@
+
+
+
+
 
 
 \subsection{Consolidating mass spectrometry data}
 
-TODO: describe the consolidation process
+Now that we have the mass spectrometry data loaded into memory, the first step
+in the \pkg{PRISMS} pipeline is to to consolidate mass spectrometry observations in
+the data that are believed to belong to the same underlying compounds.  This is
+performed via the \binMS/ function.
+
+% In order to perform its task, the consolidation routine needs to be provided
+% with data for each mass-to-charge and charge state, the time of peak retention,
+% and optionally the mass.  These can be provided as data vectors, or can be given
+% as columns in the mass spectrometry data.  When provided as part of the mass
+% spectrometry data, these variables can each be identified either by column
+% index, or by column name.  In this case the values for these variables are
+% included in the \texttt{mass\_spec} data, and we will specify them by (partial)
+% names.
+
+% The mass spectrometry intensities need to be included as part of the data
+% provided as the argument to \texttt{mass\_spec}.  As other types of data are
+% allowed to be included as part of this object, we need to specify which columns
+% in the data correspond to the intensities.  If all of the columns correspond to
+% intensities, then we specify \texttt{NULL}.  Otherwise, we can specify a vector
+% either of column indices, or of column names.  In this example we will take the
+% easy way out and specify the column indices.
+
+% As part of the procedure, we also need to specify acceptable values for the time
+% of peak retention, an allowable mass range, an allowable charge state range.
+% These are provided as length-2 vectors specifying the lower and upper bounds of
+% the acceptable ranges.
+
+% Finally, we need to specify the closeness of mass-to-charge values and times of
+% peak retention for observations which we presume as having come from the same
+% underlying compounds.  This is done by specifying a cutoff value for which
+% differences larger than these values will be considered as coming from two
+% distinct mass-to-charge levels.
+
+
+\subsubsection{Specification of criteria}
+
+Discussion: why choose time range to include all, mass b/w 2000 and 15000,
+charge range all, mtoz difference < 0.05, and time of peak retention to include
+all?
+
+
+
+\subsubsection{Consolidating data with \texttt{binMS}}
+
+We see that the number of list of candidate compounds has been consolidated from
+30,799 to 6,258.  Need more here *************
+
+
 
 <<consolidating-data>>=
-# binMS(ms_data, ...)
+
+# Perform mass spectrometry levels consolidation
+bin_out <- binMS(mass_spec = mass_spec,
+                 mtoz = "m/z",
+                 charge = "Charge",
+                 mass = "Mass",
+                 time_peak_reten = "Reten",
+                 ms_inten = NULL,
+                 time_range = c(14, 45),
+                 mass_range = c(2000, 15000),
+                 charge_range = c(2, 10),
+                 mtoz_diff = 0.05,
+                 time_diff = 60)
+
+# Show some summary information describing the consolidation process
+summary(bin_out)
 @
-
-
 
 \subsection{Filtering mass spectrometry data}
 
-TODO: describe filtering process
+The next step in the \pkg{PRISMS} pipeline is to remove any potential candidate
+compounds with observed abundances for which it is not scientifically plausible
+that they might be a compound with an effect on bioactivity levels.  This step
+is performed by the \texttt{filterMS} function.
+
+
+
+
+\subsubsection{Selecting fraction region of interest(s)}
+
+Some discussion here.  Do we have a figure available here?   *************
+
+
+
+\subsubsection{Filtering criteria selection}
+
+Why was it chosen to have a max bordering ratio of 0.01, a minimum intensity in
+region of interest of 1000, and and max charge of 10
+
+
+\subsubsection{Filtering data with \texttt{filterMS}}
+
 
 <<filtering-data>>=
-# filterMS(binned_data, ...)
+# Perform mass spectrometry levels filtering
+filter_out <- filterMS(msObj = bin_out,
+                       region = paste0("VO_", 17:25),
+                       border = "all",
+                       bord_ratio = 0.01,
+                       min_inten = 1000,
+                       max_chg = 10)
+
+# Show summary information describing the filtering process
+summary(filter_out)
 @
 
 
-\subsection{Statistical analysis}
+\subsection{Candidate compound ranking}
 
 TODO: describe statistical analysis
 
-<<statistical-analysis>>=
+<<cadidate-compound-ranking>>=
 
-# Some statistical analyses ;)
+# Rank the candidate compounds using the ranking procedure for each of the
+# bioactivity datasets
+rank_oc <- rankEN(msObj      = filter_out,
+                  bioact     = bioact$oc,
+                  region_ms  = paste0("VO_", 18:22),
+                  region_bio = paste0("VO_", 18:22),
+                  lambda     = 0.001)
+rank_bc <- rankEN(msObj      = filter_out,
+                  bioact     = bioact$bc,
+                  region_ms  = paste0("VO_", 18:23),
+                  region_bio = paste0("VO_", 18:23),
+                  lambda     = 0.001)
+rank_pc <- rankEN(msObj      = filter_out,
+                  bioact     = bioact$pc,
+                  region_ms  = paste0("VO_", 17:21),
+                  region_bio = paste0("VO_", 17:21),
+                  lambda     = 0.001)
+rank_ab <- rankEN(msObj      = filter_out,
+                  bioact     = bioact$ab,
+                  region_ms  = paste0("VO_", 17:21),
+                  region_bio = paste0("VO_", 17:21),
+                  lambda     = 0.001)
+rank_ef <- rankEN(msObj      = filter_out,
+                  bioact     = bioact$ef,
+                  region_ms  = paste0("VO_", 18:21),
+                  region_bio = paste0("VO_", 18:21),
+                  lambda     = 0.001)
+rank_pa <- rankEN(msObj      = filter_out,
+                  bioact     = bioact$pa,
+                  region_ms  = paste0("VO_", 18:25),
+                  region_bio = paste0("VO_", 18:25),
+                  lambda     = 0.001)
+rank_ec <- rankEN(msObj      = filter_out,
+                  bioact     = bioact$ec,
+                  region_ms  = paste0("VO_", 18:22),
+                  region_bio = paste0("VO_", 18:22),
+                  lambda     = 0.001)
+rank_fg <- rankEN(msObj      = filter_out,
+                  bioact     = bioact$fg,
+                  region_ms  = paste0("VO_", 19:24),
+                  region_bio = paste0("VO_", 19:24),
+                  lambda     = 0.001)
 
-1 + 1
-
-log( exp(5) )
-
-sqrt(2)
 @
 
 
@@ -389,7 +529,7 @@ TODO: conclusion here
 
 \vspace{10mm}
 
-**** Need bibliography ****
+**** Need bibliography (at least the prisms paper) ****
 
 
 \end{document}

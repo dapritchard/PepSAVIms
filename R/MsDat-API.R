@@ -35,14 +35,16 @@
 
 extractMS <- function(msObj, type="matrix") {
 
-    # Check args are of the right type
+    # Check msObj is of the right type
     if (missing(msObj)) {
         stop("Must provide an argument for msObj", call.=FALSE)
     }
     else if (!inherits(msObj, "msDat")) {
         stop("msObj must be of class \"msDat\"", call.=FALSE)
     }
-    else if (!identical(type, "matrix") && !identical(type, "msDat")) {
+
+    # Check that type is of the right type
+    if (!identical(type, "matrix") && !identical(type, "msDat")) {
         stop("type must have a value of \"matrix\" or \"msDat\"", call.=FALSE)
     }
 

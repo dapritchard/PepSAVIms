@@ -12,16 +12,16 @@ class \code{msDat}.}
 
 \item{type}{A character string with value either "matrix", or "msDat".  If
 "matrix" is provided as the argument, then the mass-to-charge values,
-charge values, and mass spectrometry data are combined into a single matrix
-and returned.  If "msDat" is provided as the argument, then an \code{msDat}
-object containing this data is returned.}
+charge values, and mass spectrometry data are combined into a single
+matrix and returned.  If "msDat" is provided as the argument, then an
+\code{msDat} object containing this data is returned.}
 }
 \value{
 Returns either a matrix containing the mass spectrometry data if
-  \code{"matrix"} is specified as the argument to \code{type}, or an object
-  with class \code{msDat} if \code{"msDat"} is specified as the argument to
-  \code{type}.  See \code{Details} for more detail regarding the return
-  objects.
+    \code{"matrix"} is specified as the argument to \code{type}, or an object
+    with class \code{msDat} if \code{"msDat"} is specified as the argument to
+    \code{type}.  See \code{Details} for more detail regarding the return
+    objects.
 }
 \description{
 Extract mass spectrometry data from an object with class \code{binMS}, class
@@ -29,13 +29,14 @@ Extract mass spectrometry data from an object with class \code{binMS}, class
 }
 \details{
 A convenience function for extracting and inspecting the mass
-  spectrometry data in a \code{binMS}, \code{filterMS}, or \code{msDat}
-  object.  \code{binMS} and \code{filterMS} objects are lists that contain an
-  msDat object, and specifying \code{"msDat"} for \code{type} merely returns
-  the \code{msDat} element from the list for these classes of object.
-  specifying \code{"msDat"} for an object with class "msDat" merely returns
-  the argument, i.e. is the identity function.  When \code{"matrix"} is
-  specified, then the elements in the embedded \code{msDat} object are
-  combined into a single matrix using \code{cbind} and returned.
+    spectrometry data in a \code{binMS}, \code{filterMS}, or \code{msDat}
+    object.  \code{binMS} and \code{filterMS} objects are lists that contain
+    an msDat object, and specifying \code{"msDat"} for \code{type} merely
+    returns the \code{msDat} element from the list for these classes of
+    object.  specifying \code{"msDat"} for an object with class "msDat"
+    merely returns the argument, i.e. is the identity function.  When
+    \code{"matrix"} is specified, then the elements in the embedded
+    \code{msDat} object are combined into a single matrix using \code{cbind}
+    and returned.
 }
 

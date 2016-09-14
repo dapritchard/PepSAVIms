@@ -10,9 +10,9 @@ extract_candidates(rankEN_obj, include_cor = TRUE)
 \item{rankEN_obj}{An object of class \code{rankEN}.}
 
 \item{include_cor}{Either \code{TRUE} or \code{FALSE}, specifying whether a
-column should be included in the returning \code{data.frame} providing the
-correlation between the compound and the within-fraction average of the
-bioactivity replicates in the region of interest.}
+column should be included in the returning \code{data.frame} providing
+the correlation between the compound and the within-fraction average of
+the bioactivity replicates in the region of interest.}
 }
 \description{
 Extract an ordered list of candidate compounds from a \code{rankEN} object.

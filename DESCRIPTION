@@ -10,6 +10,8 @@ Description: Suite of software to search for candidate compounds with an effect
     on bioactivity.
 License: GPL-3
 LazyData: TRUE
+Depends: 
+    R (>= 2.10)
 Suggests:
     testthat,
     knitr

@@ -275,7 +275,7 @@ format.filterMS <- function(x, ...) {
     if (identical(length(bor_nm), 0L)) {
         bor_nm_cat <- "    * no fraction names to show *\n"
     } else if (length(bor_nm) > 10) {
-        bor_nm_cat <- paste0("     * fraction names omitted for brevity *\n")
+        bor_nm_cat <- "    * fraction names omitted for brevity *\n"
     } else {
         bor_nm_cat <- paste0("    ", bor_nm, "\n", collapse="")
     }
@@ -349,7 +349,7 @@ format.filterMS <- function(x, ...) {
         "Individually, each criterion reduced the %s m/z levels to the following number:\n",
         "%s\n",
         "    criterion 1:  %s    (fraction with max. abundance is in region of interest)\n",
-        "    criterion 2:  %s    (fractions in bordering region have < %s of max. abundance)\n",
+        "    criterion 2:  %s    (fractions in bordering region have < %s%% of max. abundance)\n",
         "    criterion 3:  %s    (nonzero abundance in right adjacent fraction to max.)\n",
         "    criterion 4:  %s    (at least 1 intensity > %s in region of interest)\n",
         "    criterion 5:  %s    (must have charge <= %d)\n",
