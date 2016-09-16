@@ -3,3 +3,5 @@
 *~
 vignettes/*
 !vignettes/Paper_Analysis.Rnw
+!vignettes/PRISMS_Introduction.Rnw
+!vignettes/images

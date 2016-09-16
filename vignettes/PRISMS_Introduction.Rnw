@@ -1,0 +1,958 @@
+
+\documentclass[fleqn]{article}
+% \VignetteIndexEntry{PRISMS Introduction}
+
+\input{Shared_Preamble.tex}
+
+
+
+
+% Document start ---------------------------------------------------------------
+
+\begin{document}
+
+
+
+\begin{center}
+
+
+  {\Large An introduction to the \prisms/ package}
+  \vspace{10mm}
+
+  {\large \today}
+
+
+\end{center}
+\vspace{10mm}
+
+
+\tableofcontents
+\vspace{10mm}
+
+
+
+% Begin document body ----------------------------------------------------------
+
+% Configure global options
+<<setup, cache=FALSE, include=FALSE>>=
+library(knitr)
+knit_theme$set("default")
+opts_chunk$set(cache=TRUE)
+opts_knit$set(root.dir=normalizePath(".."))
+options(width=90)
+@
+
+
+\setcounter{section}{-1}
+\section{Introduction}
+
+The \prisms/ \R/ package provides a collection of software tools with which
+to search for candidate biological compounds having a promotive effect on the
+reduction of bioactivity levels of an organismal culture.  The package was
+constructed to provide an implementation of the statistical portion of the
+laboratory and statistical procedure proposed in \papernamefull/ (herafter
+abbreviated to \papername/) \cite{kirkpatrick2016}.
+
+This document provides an introduction to the functionality provided by the
+\prisms/ package.
+
+
+
+
+% Flowchart and fcn descriptions -----------------------------------------------
+
+\section{Package Overview}
+
+A flowchart for a data analysis performed using \prisms/ is show in figure
+\ref{fig: flow chart}.  The blue rectangles and diamond are functions in the
+\prisms/ ecosystem; the pink oval denotes mass spectrometry data to be used
+as data inputs; the green oval denotes bioactivity data to be used as a data
+input; and the yellow oval denotes the analysis results of using the
+PRISMS methodology and software.
+
+The prototypical data analysis workflow is the path described by the solid
+lines; this is the procedure performed in \papername/, and described in more
+detail in the \texttt{Paper\_Analysis} vignette.  The dashed lines show
+alternative workflows which may be performed in situations where some of the
+data processing steps have already been performed using other tools, or where
+some of the data processing steps may not be appropriate for the particular data
+analysis in hand.
+
+
+\begin{figure}[H]
+
+  \caption{Data analysis flow chart} \vspace{-6mm}
+  \label{fig: flow chart}
+
+  \centering
+  \begin{tikzpicture}[node distance = 3cm, auto]
+    % Place nodes
+    \node [decision] (rankEN) {rankEN};
+    \node [block, left of=rankEN] (filterMS) {filterMS};
+    \node [cloudYel, right of=rankEN, node distance=3.75cm] (ranked_data) {\makecell[c]{ranked candid-\\ate compounds}};
+    \node [block, left of=filterMS] (binMS) {binMS};
+    \node [cloud, left of=binMS] (raw_data) {\makecell[c]{raw MS\\data}};
+    \node [block, below left=1.5cm and 1cm of filterMS, node distance=1cm] (msDat1) {msDat};
+    \node [block, below left=1.6cm and 1.45cm of rankEN, node distance=1cm] (msDat2) {msDat};
+    \node [cloud, below of=msDat1] (bin_dat) {\makecell[c]{binned\\MS data}};
+    \node [cloud, below of=msDat2] (filt_dat) {\makecell[c]{filtered\\MS data}};
+    \node [cloudGr, below of=rankEN] (bioact) {\makecell[c]{bioactivity\\data}};
+    % Draw edges
+    \path [line, thick] (raw_data) -- (binMS);
+    \path [line, thick] (binMS) -- (filterMS);
+    \path [line, thick] (filterMS) -- (rankEN);
+    \path [line, thick] (rankEN) -- (ranked_data);
+    \path [line, dashed] (msDat1) -- (filterMS);
+    \path [line, dashed] (msDat2) -- (rankEN);
+    \path [line, dashed] (bin_dat) -- (msDat1);
+    \path [line, dashed] (filt_dat) -- (msDat2);
+    \path [line, thick] (bioact) -- (rankEN);
+    \path [line, dashed] (binMS) to[out=95, in=90] (rankEN);
+  \end{tikzpicture} \vspace{4mm}
+
+  \caption*{Solid arrows represent the prototypical data analysis workflow;\\ dashed lines
+    represent alternative workflows}
+\end{figure}
+
+A conceptual presentation of the functions in the \prisms/ package is
+provided in the following subsections.  Please refer to the function
+documentation for more information regarding the application programming
+interface, as well as for further technical detail.
+
+
+\subsection{The \binMS/ function}
+
+The mass spectrometry abundance data can optionally undergo two preprocessing
+steps.  The first step is a consolidation step: the goal is to to consolidate
+mass spectrometry observations in the data that are believed to belong to the
+same underlying compound.  In other words, the instrumentation may have obtained
+multiple reads of mass spectrometry abundances that in actuality belong to the
+same compound - in which case we wish to attribute all of the elution to a
+single compound.  The function name \binMS/ derives from the fact that we use a
+binning procedure to consolidate the data.
+
+The consolidation procedure is undergone as follows.  Firstly, all observations
+must satisfy each of the following criterions or they are removed from
+consideration for consolidation (i.e. they are dropped from the
+data).
+
+\begin{enumerate}[label=(\roman*)]
+
+\item Each observation must have its peak elution time occur during the
+  specified interval.
+
+\item Each observation must have a mass that falls within the specified
+  interval.
+
+\item Each observation must have an electrical charge state that falls within
+  the specified interval.
+
+\end{enumerate}
+
+
+Once that a set of observations satisfying the above criteria is obtained, then
+a second step attempts to combine observations believed to belong to the same
+underlying compound.  The procedure considers two observations that satisfy each
+of the following criterions to belong to the same compound.
+
+\begin{enumerate}[label=(\roman*)]
+
+\item The absolute difference in Daltons of the mass-to-charge value between the
+  two observations is less the the specified value.
+
+\item The absolute difference of the peak elution time between the two
+  observations is less than the specified value.
+
+\item The electrical charge state must be the same for the two observations.
+
+\end{enumerate}
+
+
+\subsection{The \code{filterMS} function}
+
+The second optional preprocessing step for the mass spectrometry abundance data
+is a filtering step.  The goal of the filtering step is to reduce the level of
+noise in the data by removing any potential candidate compounds with observed
+abundances for which it is not scientifically plausible that they might be a
+compound with an effect on bioactivity levels.  By filtering the candidate set
+prior to a statistical analysis, this step can greatly increase the ability of
+the analysis to effectively differentiate such compounds.  The criteria for the
+downstream inclusion of a candidate compound is listed below.
+\begin{enumerate}[label=(\roman*)]
+
+\item The m/z intensity maximum must fall inside the range of the bioactivity
+  region of interest.
+
+\item The ratio of the m/z intensity of a species in the areas bordering the
+  region of interest and the species maximum intensity must be less than the
+  specified value.
+
+\item The immediately right adjacent fraction to its maximum intensity fraction
+  for a species must have a non-zero abundance.
+
+\item At least 1 fraction in the region of interest must have intensity greater
+  than the specified value.
+
+\item The compound charge state must be less than or equal to the specified value.
+
+\end{enumerate}
+The region of interest is typically chosen to be a region where a change in the
+bioactivity levels is observed; the assumption then is that there are some
+compounds eluting during those fractions in the region that are associated with
+bioactivity levels.
+
+
+\subsection{The \rankEN/ function}
+
+Once the mass spectrometry abundance data has optionally undergone any
+preprocessing steps, a statistical procedure to search for candidate compounds
+for reduction of bioactivity levels is performed.  This step is performed by the
+\rankEN/ function, and takes as inputs both the preprocessed mass spectrometry
+abundance data and the bioactivity levels data.  The procedure works by
+specifying the level of the $\ell_2$ penalty parameter in the elastic net
+penalty \cite{zou2005}, and tracking the inclusion of the coefficients
+corresponding to compounds into the nonzero set along the elastic net path.  An
+ordered list of candidate compounds for reduction of bioactivity levels is
+obtained by providing the order in which the coefficients corresponding to
+compounds entered the nonzero set.
+
+
+\subsection{The \msDat/ function}
+
+The functions \filterMS/ and \rankEN/ require objects of class \code{msDat} as
+the arguments providing the mass spectrometry abundances data; the \msDat/
+function takes mass spectrometry data as its input and creates an object of this
+class.  Note however, that the \binMS/ and \filterMS/ functions return objects
+that inherit from the \code{msDat} class, and consequently you can provide an
+object created by \binMS/ and \filterMS/ anywhere that an \code{msDat} class
+object is required.
+
+The raison d'\^{e}tre for an object of class \code{msDat} is to allow for a
+consistent interface to \filterMS/ and \rankEN/ whether the mass spectrometry
+data is obtained via a prior call to \binMS/, \filterMS/, or directly from user
+via a call to \msDat/.
+
+
+
+
+% Flowchart and fcn descriptions -----------------------------------------------
+
+\section{An example case: performing the PRISMS pipeline}
+
+In the following section we will illustrate the usage of the core \prisms/
+functions by walking through the prototypical PRISMS pipeline.  A flowchart for this prototypical
+PRISMS pipeline is shown below.
+
+
+\begin{figure}[H]
+  \caption{Data analysis flow chart for the data analysis performed in \papername/}
+
+  \centering
+  \begin{tikzpicture}[node distance = 3cm, auto]
+    % Place nodes
+    \node [decision] (rankEN) {rankEN};
+    \node [block, left of=rankEN] (filterMS) {filterMS};
+
+    \node [cloudYel, right of=rankEN, node distance=3.75cm] (ranked_data)
+    {\makecell[c]{ranked candid-\\ate compounds}};
+
+    \node [block, left of=filterMS] (binMS) {binMS};
+    \node [cloud, left of=binMS] (raw_data) {\makecell[c]{raw MS\\data}};
+    \node [cloudGr, below of=rankEN] (bioact) {\makecell[c]{bioactivity\\data}};
+    % Draw edges
+    \path [line, thick] (raw_data) -- (binMS);
+    \path [line, thick] (binMS) -- (filterMS);
+    \path [line, thick] (filterMS) -- (rankEN);
+    \path [line, thick] (rankEN) -- (ranked_data);
+    \path [line, thick] (bioact) -- (rankEN);
+  \end{tikzpicture}
+
+  \label{fig: flow chart prototypical}
+\end{figure}
+
+
+\subsection{Reading in the data}
+% Data from \papername/ is included as part of the package; in this document we
+% will use the data to illustrate the usage of the package interface.  The goal of
+% this document is to provide examples for users wishing to
+
+
+\subsubsection{Reading in the mass spectrometry data}
+
+First we load some mass spectrometry data included with the package into memory.
+
+<<reading-data-ms>>=
+# Load data into memory
+data(mass_spec)
+
+# The mass spectrometry data is provided as a data.frame
+is.data.frame(mass_spec)
+
+# There are 30,799 mass-to-charge levels, and 38 variables
+dim(mass_spec)
+
+# The first four variables provide the m/z level, time of peak retention, mass,
+# and charge state of the observations.  The remaining 34 variables are the mass
+# spectrometry intensities for across fractions 11 through 43, and fraction 47.
+names(mass_spec)
+@
+
+
+
+\subsubsection{Reading in the bioactivity data}
+Next we load some bioactivity data included with the package into memory.  The
+object \texttt{bioact} is a list containing bioactivity replicates for several
+species of viruses and bacteria; we will arbitrarily choose the bioactivity data
+for the virus E. coli as an illustrative example, and create an object for this
+data from the element in the list.
+
+<<reading-data-bio>>=
+# Load data into memory
+data(bioact)
+
+# bioact is a list with each element corresponding to bioactivity data
+is.list(bioact)
+
+# Names of the elements in bioact
+names(bioact)
+
+# Arbitrarily select one of the datasets for further examples
+EC <- bioact$ec
+
+# EC is provided as a data.frame
+is.data.frame(EC)
+
+# EC contains data for 3 replicates and 44 fractions
+dim(EC)
+
+# The names of the fractions for which bioactivity observations were obtained
+names(EC)
+@
+
+
+
+\subsection{Using \texttt{binMS}}
+\label{sec: using binMS}
+
+Now that we have the mass spectrometry data loaded into memory, the first step
+in the \prisms/ pipeline is to to consolidate mass spectrometry observations in
+the data that are believed to belong to the same underlying compounds.  This is
+performed via the \binMS/ function.
+
+In order to perform its task, the consolidation routine needs to be provided
+with data for each mass-to-charge and charge state, the time of peak retention,
+and optionally the mass.  These can be provided as data vectors, or can be given
+as columns in the mass spectrometry data.  When provided as part of the mass
+spectrometry data, the variables can each be identified either by column index
+or by column name.
+
+The mass spectrometry intensities are required to be included as part of the
+data provided as the argument to \texttt{mass\_spec}.  If all of the columns in
+\texttt{mass\_spec} correspond either to mass spectrometry intensities or
+alternatively provide data for the m/z, charge, mass, or time of peak retention
+values, then we can specify the argument as \texttt{NULL} which indicates that
+all remaining values are to be included.  In either case, we can always provide
+a vector either of column indices or of column names to specify which columns of
+\texttt{mass\_spec} to include as mass spectrometry intensities.
+
+As part of the procedure, we also need to specify acceptable values for the time
+of peak retention, an allowable mass range, an allowable charge state range.
+These are provided as length-2 vectors specifying the lower and upper bounds of
+the acceptable ranges.
+
+Finally, we need to specify the closeness of mass-to-charge values and times of
+peak retention for observations which we presume as having come from the same
+underlying compounds.  This is done by specifying a cutoff value for which
+differences larger than these values will be considered as coming from two
+distinct mass-to-charge levels.
+
+\begin{figure}[H]
+
+  \caption{\texttt{binMS} data input flowchart}
+  \centering
+  \includegraphics{images/Binning_Flowchart}
+
+\end{figure}
+
+
+\subsubsection{\texttt{binMS} specification via variable names}
+
+In this example we specify the data for the mass-to-charge, charge, mass, and
+time of peak intensity, and the intensities by specifying the names of the
+corresponding columns in \texttt{mass\_spec}.  Note that we do not need to
+provide the exact names of the columns, we only need to provide enough
+information to yield a unique match.
+
+Further notice that we are able to provide \texttt{NULL} as the argument
+specifying the mass spectrometry intensities.  Recall that the mass spectrometry
+data has columns for the m/z, charge, mass, and time of peak retention data, and
+that the remaining columns are intensities.  Thus by specifying \texttt{NULL}
+this causes the function to include all of the remaining columns as intensity
+data after removing the m/z, charge, mass, and time of peak retention data.
+
+<<consolidating-data-names>>=
+
+# Perform consolidation using names
+bin_out <- binMS(mass_spec = mass_spec,
+                 mtoz = "m/z",
+                 charge = "Charge",
+                 mass = "Mass",
+                 time_peak_reten = "Reten",
+                 ms_inten = NULL,
+                 time_range = c(14, 45),
+                 mass_range = c(2000, 15000),
+                 charge_range = c(2, 10),
+                 mtoz_diff = 0.05,
+                 time_diff = 60)
+@
+
+
+
+\subsubsection{\texttt{binMS} via names, indices, and vectors}
+
+In the following example we explicitly provide the data for \texttt{mass} and
+\texttt{time\_peak\_retention} by passing data vectors as their arguments.
+Notice that now we have to specify the columns from \texttt{mass\_spec} to use
+as intensity data, since after removing the columns containing the m/z and
+charge data, there are still non-intensity columns in \texttt{mass\_spec}
+(specifically the columns containing the mass and time of peak retention data).
+
+See Figure \ref{fig: binMS input} for a visual schematic of the internal
+\texttt{binMS} processing of the data inputs for this following example.
+
+<<consolidating-data-all>>=
+
+# Make copies of some of the vectors in mass_spec to pass directly to function
+mass_vals   <- mass_spec[, "Mass"]
+time_vals   <- mass_spec[, "Retention time (min)"]
+
+# Vector of names for the intensity columns.  We include the leading underscore
+# so as to prevent any ambiguity between the fraction number and date.
+inten_nm <- c(paste0("_", 11:43), "_47")
+
+# Perform consolidation alternate input
+bin_out_v2 <- binMS(mass_spec = mass_spec,
+                    mtoz = "m/z",
+                    charge = "Charge",
+                    mass = mass_vals,
+                    time_peak_reten = time_vals,
+                    ms_inten = inten_nm,
+                    time_range = c(14, 45),
+                    mass_range = c(2000, 15000),
+                    charge_range = c(2, 10),
+                    mtoz_diff = 0.05,
+                    time_diff = 60)
+
+# We get the same results whether specifying data via column names or column
+# indices
+identical(bin_out_v2, bin_out)
+@
+
+\begin{figure}[H]
+
+  \caption{\texttt{binMS} data inputs corresponding to \texttt{bin\_out\_v2}}
+  \label{fig: binMS input}
+  \vspace{5mm}
+
+  \centering
+  \includegraphics{images/Binning_Input_v2}
+
+  % \vspace{5mm}
+  % \caption*{
+  %   \begin{minipage}[t]{1\textwidth}
+  %     In this example, the m/z and charge values
+  %     for the data are provided as part of the \texttt{mass\_spec} data, and the
+  %     time of peak retention and mass data are each provided as separate data
+  %     vectors.  The \texttt{binMS} function internally splits apart the data
+  %     before performing the consolidation.
+  %   \end{minipage}
+  % }
+
+\end{figure}
+\vspace{10mm}
+
+\subsubsection{The print and summary function for \texttt{binMS}}
+
+The \texttt{binMS} class is equipped with a print and a summary function.  We
+can see from the output that there were originally 30,799 mass-to-charge levels.
+After filtering by the inclusion criteria this reduced the data to 10,902
+levels, and then consolidation of the data resulted in 6,258 levels.
+
+<<consolidating-data-summary>>=
+# Print the size of the consolidated data
+bin_out
+
+# Show summary information describing the consolidation process
+summary(bin_out)
+@
+
+
+
+
+\subsection{Using \texttt{filterMS}}
+
+The next step in the \prisms/ pipeline is to remove any potential candidate
+compounds with observed abundances for which it is not scientifically plausible
+that they might be a compound with an effect on bioactivity levels.  This step
+is performed by the \texttt{filterMS} function.
+
+When using the \texttt{filterMS} function, a first task is to specify the region
+of interest and bordering region.  This is done by providing an \texttt{msDat}
+object as an argument to \texttt{msObj}, and then:
+\begin{enumerate}[label=(\roman*)]
+\item specifying a contiguous region of columns from the intensity matrix by
+  either providing a vector either of column names or of column indices
+  (\texttt{region} formal argument)
+\item specifying the bordering region relative to the region of interest by
+  providing either the value \texttt{"all"}, the value \texttt{"none"}, or a
+  length-1 or length-2 vector provided the width of the left and right bordering
+  regions (\texttt{border} formal argument)
+\end{enumerate}
+
+\begin{figure}[H]
+
+  \centering
+  \includegraphics{images/Region_Of_Interest} \vspace{6mm}
+
+  \caption{Region of interest and bordering regions}
+\end{figure}
+
+Once the region of interest and bordering region has been specified, the
+remaining variables \texttt{bord\_ratio}, \texttt{min\_inten}, and
+\texttt{max\_chg} are each specified by selecting a single numeric value; see
+the function documentation for the precise definition of these variables.
+% \begin{tabular}{lll}
+%   \toprule
+%   Variable name & Input type & Variable description \\
+%   \midrule
+%   \texttt{bord\_ratio} & a numeric value
+%   \begin{minipage}[t]{0.8\columnwidth}%
+
+%   \end{minipage}\tabularnewline
+%   \bottomrule
+% \end{tabular}
+
+
+\subsubsection{\texttt{filterMS}: specifying the region of interest}
+
+In the following code snippet we provide examples of using \texttt{filterMS}
+with \texttt{region} specified either by using column names or by column
+indices.
+
+<<filtering-data-names>>=
+
+# Invoke filterMS using column names to specify the region of interest
+filter_out <- filterMS(msObj = bin_out,
+                       region = paste0("VO_", 17:25),
+                       border = "all",
+                       bord_ratio = 0.01,
+                       min_inten = 1000,
+                       max_chg = 10)
+
+# The column indices 7-15 correspond to fractions 17-25
+colnames(filter_out)[7:15]
+
+# Invoke filterMS using indices to specify the region of interest
+filter_out_v2 <- filterMS(msObj = bin_out,
+                          region = 7:15,
+                          border = "all",
+                          bord_ratio = 0.01,
+                          min_inten = 1000,
+                          max_chg = 10)
+
+# Confirm that the two objects are equivalent
+identical(filter_out_v2, filter_out)
+@
+
+
+\subsubsection{\texttt{filterMS}: specifying bordering region}
+
+In the following code snippet we provide examples of using \texttt{filterMS}
+with \texttt{border} specified either by using a length-1 or length-2 numeric
+vector.  Since in both cases the choices of \texttt{border} are large enough to
+encompass all of the fractions not included in the region of interest, these
+choices have the same effect as specifying \texttt{"all"}.
+
+<<filtering-data-border>>=
+
+# Use one value to specify the width of both the left and the right bordering
+# region
+filter_out_v3 <- filterMS(msObj = bin_out,
+                          region = paste0("VO_", 17:25),
+                          border = 100,
+                          bord_ratio = 0.01,
+                          min_inten = 1000,
+                          max_chg = 10)
+
+# Use two values to specify the left width and right width of the bordering
+# region
+filter_out_v4 <- filterMS(msObj = bin_out,
+                          region = paste0("VO_", 17:25),
+                          border = c(150, 200),
+                          bord_ratio = 0.01,
+                          min_inten = 1000,
+                          max_chg = 10)
+
+# We get the same result be specifying the left and right bordering regions as
+# having widths 100 as by choosing "all"
+identical(filter_out_v3$msDatObj, filter_out$msDatObj)
+
+# We get the same result be specifying the left and right bordering regions as
+# having widths 150 and 200 as by choosing "all"
+identical(filter_out_v4$msDatObj, filter_out$msDatObj)
+@
+
+
+\subsubsection{The print and summary function for \texttt{filterMS}}
+
+The \texttt{filterMS} class is equipped with a print and a summary function.  We
+see that the number of candidate compounds is reduced from 6,258 compounds to
+225.  Note that when the number of fractions in the region of interest or the
+bordering regions is large, then the summary function omits printing the
+fractions so as to prevent the output from becoming overly lengthy - in this
+case the faction names for the bordering region is omitted.
+
+<<filtering-data-summary>>=
+# Print the size of the filtered data
+filter_out
+
+# Show summary information describing the filtering process
+summary(filter_out)
+@
+
+
+
+
+
+\subsection{Using \texttt{rankEN}}
+
+Once the mass spectrometry abundance data has optionally undergone any
+preprocessing steps, a statistical procedure to search for candidate compounds
+for reduction of bioactivity levels is performed.  This step is performed by the
+\rankEN/ function, and takes as inputs both the preprocessed mass spectrometry
+abundance data and the bioactivity levels data.
+
+
+\subsubsection{\texttt{rankEN}: specifying the region of interest for mass
+  spectrometry and bioactivity data}
+
+The first task in invoking the \texttt{rankEN} procedure is to specify the the
+region of interest for mass spectrometry and bioactivity data.  This can be done
+by specifying the appropriate column names or column indices in the respective
+data.  So the argument for \texttt{region\_ms} should specify the region of
+interest for the mass spectrometry data by providing the appropriate column
+names or column indices with respect to the argument provided for
+\texttt{msObj}.  Similarly, the argument for \texttt{region\_bio} should be with
+respect to the argument for \texttt{bioact}.  It is worth clarifying that it
+should be the same region of interest for the intensity and bioactivity data
+(i.e. the region should correspond to the same fractions for each); it just
+might be the case that the column names or indices may differ.
+
+Once the mass spectrometry and bioactivity data has been provided and the region
+of interest for each has been specified, it remains to specify
+\begin{itemize}
+\item the quadratic penalty paramter for the elastic net penalty
+\item a switch specifying whether the function should retain only compounds that
+  are positively correlated the bioactivity
+\item the maximum number of candidate compounds to retain
+\end{itemize}
+See the function documentation for more detail.
+
+
+<<ranking-data-names>>=
+# Perform the candidate ranking procedure with fractions 21-24 as the region of
+# interest
+rank_out <- rankEN(msObj = filter_out,
+                   bioact = EC,
+                   region_ms = paste0("_", 21:24),
+                   region_bio = paste0("_", 21:24),
+                   lambda = 0.001,
+                   pos_only = TRUE,
+                   ncomp = NULL)
+@
+
+
+\subsubsection{The summary function for \texttt{rankEN}}
+
+The \texttt{rankEN} class is equipped with a print and summary function.  The
+summary function provides a list of the candidate compounds obtained by the
+procedure and their correlation with mean bioactivity levels over replicates.
+
+<<ranking-data-summary>>=
+# Prints the dimensions of the data
+rank_out
+
+# Shows the first 10 candidate compounds obtained by the procedure
+summary(rank_out, 10)
+@
+
+\subsubsection{Accessing the ranked candidate compounds}
+
+The m/z and charge values of the ranked candidate compounds are available as
+elements of the object returned by the \texttt{rankEN} function.  In particular,
+the \texttt{"mtoz"} and \texttt{"charge"} elements of the return object are each
+numeric vectors providing the m/z and charge values of the ranked candidate
+compounds, respectively.
+
+<<ranking-data-compounds>>=
+# Print the m/z values for the first 10 candidate compounds
+rank_out$mtoz[1:10]
+
+# Print the charge values for the first 10 candidate compounds
+rank_out$charge[1:10]
+@
+
+
+
+% PRISMS objects and class methods ---------------------------------------------
+
+\section{Data access and manipulation tools}
+
+In this section we take a deeper look into the objects created by the functions
+in \prisms/ and consider how to further access and manipulate the data
+throughout the process.
+
+
+\subsection{The mass spectrometry data class hierarchy}
+
+The core data structure in the \prisms/ package is the \texttt{msDat}
+\textit{class}; it is the class of the object returned by the \texttt{msDat}
+\textit{function}.  This data structure is used to maintain mass spectrometry
+data.  See the \texttt{msDat} function documentation for further details
+regarding the \texttt{msDat} class internal structure.
+
+The importance of the \texttt{msDat} class lies in the fact that the
+\texttt{binMS} and \texttt{filterMS} \textit{classes} derive from it; these
+classes are the objects that are returned from the \texttt{binMS} and
+\texttt{filterMS} \textit{functions}.  The \texttt{binMS} and \texttt{filterMS}
+classes are essentially objects that decorate the \texttt{msDat} class; each of
+these data structures includes additional information used by the class's
+respective summary function to describe the data processing procedure.  See the
+respective function documentation for more detail regarding the internal
+structure of the \texttt{binMS} and \texttt{filterMS} classes.
+
+
+\begin{figure}[H]
+  \caption{The \prisms/ class hierarchy}
+
+  \centering
+  % Adapted from http://www.texample.net/tikz/examples/tree/
+  \begin{tikzpicture}[sibling distance=10em,
+    every node/.style = {shape=rectangle, rounded corners,
+      draw, align=center, top color=white, bottom color=blue!20}]
+    \node {\texttt{msDat}}
+    child { node {\texttt{binMS}} }
+    child { node {\texttt{filterMS}}
+    };
+  \end{tikzpicture}
+
+  \label{fig: class hierarchy}
+\end{figure}
+
+
+
+\subsection{The \texttt{extractMS} function}
+
+The \texttt{extractMS} function is a convenience function taking an object
+inheriting from the \texttt{msDat} class and returning the encapsulated mass
+spectrometry data as either (as specified by the user):
+\begin{enumerate}[label=\roman*)]
+\item a matrix
+\item an \texttt{msDat} object (strictly an \texttt{msDat} object, i.e. not a
+  subclass)
+\end{enumerate}
+
+
+\subsubsection{Extracting a \texttt{matrix} object}
+
+The user may find it convenient to view and / or manipulate the mass
+spectrometry data encapsulated in an \texttt{msDat} object as a data matrix.
+This data may always be refactored again as an \texttt{msDat} object via the
+\texttt{msDat} function.  Converting an \texttt{msDat} object to a matrix is
+done by specifying \texttt{type} as \texttt{"matrix"}.
+
+The matrix object returned by the \texttt{msDat} function has a form where the
+first two columns provide the mass-to-charge and charge values of the data
+respectively, and the remaining columns provide the intensity data across the
+fractions.
+
+One important situation where the user may wish to refactor the mass
+spectrometry data into the form of a matrix is as an intermediate step if they
+wish to convert the data to for example a comma-separated values file or native
+spreadsheet data format.
+
+<<extractMS-matrix>>=
+
+# Refactor the data as a matrix
+filter_matr <- extractMS(msObj = filter_out, type = "matrix")
+
+# Return object is a matrix
+is.matrix(filter_matr)
+
+# The data has two extra columns, one each for the m/z and charge information
+dim(filter_matr)
+
+# Compare to the result of calling dim on the original msDat object
+dim(filter_out)
+
+# Print the first few rows and columns of the newly formed matrix.  The row
+# names of the matrix are the concatonation of the mass-to-charge ratio and
+# charge state, separated by a /.
+filter_matr[1:5, 1:4]
+@
+
+\vspace{2mm}
+\noindent Once the data has been refactored in matrix form, any of the usual \R/
+data export tools can be used.
+
+<<extractMS-matrix-export, eval=FALSE>>=
+# Save the data as a csv file.  Probably don't want to keep the row names as that
+# information is contained in the first two columns of the data.
+write.csv(filter_matr, file = "filtered_mass_spec.csv", row.names = FALSE)
+@
+
+
+\subsubsection{Extracting an \texttt{msDat} object}
+
+
+An alternative to refactoring a \texttt{binMS} or \texttt{filterMS} object as a
+\texttt{matrix} is to extract the internal \texttt{msDat} object.  This is done
+by specifying \texttt{type} as \texttt{"msDat"}. A potential advantage of
+keeping the data as an \texttt{msDat} object is that it may prevent later
+converting the data back from a matrix into an \texttt{msDat} object.
+
+The \texttt{msDat} class is equipped with fundamental operations common to
+typical matrix classes such as data printing and matrix subsetting (described in
+section \ref{sec: msDat interface}).  The main difference between the extracted
+\texttt{msDat} object and its encapsulating \texttt{binMS} or \texttt{filterMS}
+object is that the print and summary functions for the \texttt{msDat} emulates
+the print and summary functions for a matrix of intensity values rather than
+describing the consolidation or filtering process.
+
+<<extractMS-msDat>>=
+# Extract the encapsulated msDat object
+filter_msDat <- extractMS(filter_out, "msDat")
+
+# For a subclass of msDat the extractMS function has the effect of performing
+# the following command
+filter_msDat_v2 <- filter_out$msDatObj
+
+# extractMS is the same as copying the msDatObj element for a subclass of msDat
+identical(filter_msDat_v2, filter_msDat)
+
+# Calling extractMS on an object that is strictly of class msDat is effectively
+# a noop
+filter_msDat_v3 <- extractMS(filter_msDat, "msDat")
+
+# extractMS on a strictly msDat object returns the original object
+identical(filter_msDat_v3, filter_msDat)
+
+# Printing the extracted msDat object prints the intensity matrix (as opposed to
+# the print function for binMS or filterMS objects.  Also compare this to the
+# extracted matrix in the previous section: in this form the mass-to-charge and
+# charge data is not exposed to the user.
+filter_msDat[1:5, 1:2]
+@
+
+
+\subsection{The \texttt{msDat} function}
+
+As might be expected, the \texttt{msDat} \textit{function} takes mass
+spectrometry data as input and returns an \texttt{msDat} \textit{object}.  In
+one sense the \texttt{msDat} function can be though of as the inverse of the
+\texttt{extractMS} function with \texttt{type} specified as \texttt{"matrix"};
+while in this form \texttt{extractMS} turns an \texttt{msDat} object into a
+matrix, the \texttt{msDat} function turns a matrix into an \texttt{msDat}
+object.
+
+In general, the \texttt{msDat} function is used to create an \texttt{msDat}
+object for use as input for either the \texttt{filterMS} or the \texttt{rankEN}
+function.  This need may occur when the researcher wishes to (i) enter the
+PRISMS pipeline without executing either or both of the \texttt{binMS} or
+\texttt{filterMS} functions or (ii) wants to do some addition processing between
+steps of the pipeline using the raw data.
+
+The forms in which the data can be input is similar to that as for the
+\texttt{binMS} function, so we do not go into great deal here.  In fact the
+internal routines used to process the arguments are the same for both functions.
+
+<<msDat>>=
+
+# Construct an msDat object from object created by a call to extractMS
+filter_out_v5 <- msDat(mass_spec = filterMS_matr,
+                       mtoz = "mtoz",
+                       charge = "charge",
+                       ms_inten = NULL)
+
+# Confirm that reconstructed msDat object is equal.  Need to ignore attributes
+# when testing for equality b/c row names are not retained.
+all.equal(filter_out_v5, filter_out$msDatObj, check.attributes=FALSE)
+
+@
+
+
+
+
+\subsection{The \texttt{msDat} class interface}
+\label{sec: msDat interface}
+
+The \texttt{msDat} class and its subclasses \texttt{binMS} and \texttt{filterMS}
+are equipped with some basic class methods to support fundamental data
+operations.  The basic operations that are supported are the following:
+
+\begin{itemize}
+\item \texttt{dim}, \texttt{nrow}, \texttt{ncol} (in terms of the dimensions of
+  the intensity data)
+\item \texttt{dimnames}, \texttt{colnames}, and \texttt{row.names} read / write
+\item extract or replace via the \texttt{[ ]} operator
+\item \texttt{print}, \texttt{summary}
+\end{itemize}
+We've used many of these functions throughout the rest of this document without
+explanation, but now let us provide some concrete examples.
+
+<<msDat-API>>=
+
+# Check the dimension; can also use nrow, ncol
+dim(filter_msDat)
+
+# Print the first few rows and columns
+filter_msDat[1:5, 1:3]
+
+# Let's change the fraction names to something more concise
+colnames(filter_msDat) <- c(paste0("frac", 11:43), "frac47")
+
+# Print the first few rows and columns with the new fraction names
+filter_msDat[1:5, 1:10]
+
+# Suppose there are some m/z levels that we wish to remove
+filter_msDat <- filter_msDat[-c(2, 4), ]
+
+# Print the first few rows and columns after removing rows 2 and 4
+filter_msDat[1:5, 1:10]
+
+# Suppose that there was an instrumentation error and that we need to change
+# some values
+filter_msDat[1, paste0("frac", 12:17)] <- c(55, 57, 62, 66, 71, 79)
+
+# Print the first few rows and columns after changing some of the values in
+# the first row
+filter_msDat[1:5, 1:10]
+@
+
+
+
+% bibliography -----------------------------------------------------------------
+
+\begin{thebibliography}{9}
+
+\bibitem{kirkpatrick2016} Kirkpatrick et al.  A PRISMS pipeline for natural
+  product bioactive peptide discovery.
+
+\bibitem{zou2005} Zou, H., \& Hastie, T. (2005). Regularization and variable
+  selection via the elastic net. Journal of the Royal Statistical Society:
+  Series B (Statistical Methodology), 67(2), 301-320.
+
+\end{thebibliography}
+
+
+\end{document}

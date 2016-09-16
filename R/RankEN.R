@@ -86,10 +86,10 @@
 #'     \describe{
 #'
 #'     \item{\code{mtoz}}{ A vector providing the mass-to-charge values of the
-#'     candidate compounds, such that the \code{k}-th element of the vector
-#'     provides the mass-to-charge value of the \code{k}-th compound to enter
-#'     the elastic net model, possibly after removing compounds nonpositively
-#'     correlated with bioactivity levels. }
+#'          candidate compounds, such that the \code{k}-th element of the vector
+#'          provides the mass-to-charge value of the \code{k}-th compound to
+#'          enter the elastic net model, possibly after removing compounds
+#'          nonpositively correlated with bioactivity levels. }
 #'
 #'     \item{\code{charge}}{ A vector providing the charge state of the
 #'         candidate compounds, such that the \code{k}-th element of the vector
