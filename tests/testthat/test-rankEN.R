@@ -3,7 +3,7 @@
 #  Load testing data  #
 # ................... #
 
-load("../data/data-rankEN-test.RData")
+load(normalizePath("../data/data-rankEN-test.RData"))
 
 
 

@@ -1,6 +1,6 @@
 
-\documentclass[fleqn]{article}
 % \VignetteIndexEntry{PRISMS Introduction}
+\documentclass[fleqn]{article}
 
 \input{Shared_Preamble.tex}
 
@@ -13,14 +13,14 @@
 
 
 
+% Title and table of contents --------------------------------------------------
+
 \begin{center}
 
-
-  {\Large An introduction to the \prisms/ package}
+  {\LARGE An introduction to the \prisms/ package}
   \vspace{10mm}
 
   {\large \today}
-
 
 \end{center}
 \vspace{10mm}
@@ -36,8 +36,9 @@
 % Configure global options
 <<setup, cache=FALSE, include=FALSE>>=
 library(knitr)
+opts_knit$set(out.format="latex")
 knit_theme$set("default")
-opts_chunk$set(cache=TRUE)
+opts_chunk$set(cache=FALSE)
 opts_knit$set(root.dir=normalizePath(".."))
 options(width=90)
 @
@@ -282,8 +283,8 @@ PRISMS pipeline is shown below.
 First we load some mass spectrometry data included with the package into memory.
 
 <<reading-data-ms>>=
-# Load data into memory
-data(mass_spec)
+# Load package into memory
+library(PRISMS)
 
 # The mass spectrometry data is provided as a data.frame
 is.data.frame(mass_spec)
@@ -455,7 +456,7 @@ identical(bin_out_v2, bin_out)
   \vspace{5mm}
 
   \centering
-  \includegraphics{images/Binning_Input_v2}
+  \includegraphics{images/Binning_Input}
 
   % \vspace{5mm}
   % \caption*{
@@ -521,16 +522,6 @@ Once the region of interest and bordering region has been specified, the
 remaining variables \texttt{bord\_ratio}, \texttt{min\_inten}, and
 \texttt{max\_chg} are each specified by selecting a single numeric value; see
 the function documentation for the precise definition of these variables.
-% \begin{tabular}{lll}
-%   \toprule
-%   Variable name & Input type & Variable description \\
-%   \midrule
-%   \texttt{bord\_ratio} & a numeric value
-%   \begin{minipage}[t]{0.8\columnwidth}%
-
-%   \end{minipage}\tabularnewline
-%   \bottomrule
-% \end{tabular}
 
 
 \subsubsection{\texttt{filterMS}: specifying the region of interest}
@@ -879,7 +870,7 @@ internal routines used to process the arguments are the same for both functions.
 <<msDat>>=
 
 # Construct an msDat object from object created by a call to extractMS
-filter_out_v5 <- msDat(mass_spec = filterMS_matr,
+filter_out_v5 <- msDat(mass_spec = filter_matr,
                        mtoz = "mtoz",
                        charge = "charge",
                        ms_inten = NULL)
@@ -905,7 +896,7 @@ operations.  The basic operations that are supported are the following:
   the intensity data)
 \item \texttt{dimnames}, \texttt{colnames}, and \texttt{row.names} read / write
 \item extract or replace via the \texttt{[ ]} operator
-\item \texttt{print}, \texttt{summary}
+\item \texttt{print}
 \end{itemize}
 We've used many of these functions throughout the rest of this document without
 explanation, but now let us provide some concrete examples.

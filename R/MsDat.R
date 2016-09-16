@@ -123,9 +123,9 @@ msDat <- function(mass_spec, mtoz, charge, ms_inten=NULL) {
 # Class methods ----------------------------------------------------------------
 
 
-#' Basic information for class \code{msDat}
+#' Print method for class \code{msDat}
 #'
-#' Displays the number of candidate compounds left in the data
+#' Prints the mass spectrometry data encapsulated by the \code{msDat} object
 #'
 #' @param x An object of class \code{\link{msDat}}
 #'
@@ -137,8 +137,3 @@ print.msDat <- function(x, ...) {
 
     print(x$ms)
 }
-
-
-
-
-# TODO:  summary method

@@ -1,4 +1,4 @@
 library(testthat)
-library(bioact)
+library(PRISMS)
 
-test_check("bioact")
+test_check("PRISMS")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/MsDat.R
 \name{print.msDat}
 \alias{print.msDat}
-\title{Basic information for class \code{msDat}}
+\title{Print method for class \code{msDat}}
 \usage{
 \method{print}{msDat}(x, ...)
 }
@@ -12,6 +12,6 @@
 \item{...}{Arguments passed to dot-dot-dot are ignored}
 }
 \description{
-Displays the number of candidate compounds left in the data
+Prints the mass spectrometry data encapsulated by the \code{msDat} object
 }
 

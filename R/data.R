@@ -1,11 +1,60 @@
 
-#' Mass spectrometry data
+#' Bioactivity
 #'
 #' The mass spectrometry data collected for and described in Kirkpatrick et
 #' al. (2016).  See the paper for a full description of the data collection
 #' process, or the package vignette for an abridged description.
 #'
-#' @format A data frame with 30799 mass spectrometry levels and 38 variables:
+#' @docType data
+#'
+#' @usage data(bioact)
+#'
+#' @format A \code{list} containing relative growth inhibition bioactivity
+#'     levels for the bacteria and virus strains listed below.  Each of the
+#'     following elements in the \code{list} is a \code{data.frame} with 3 rows
+#'     and 44 columns (with the exception of fg ********* which has 2 rows).
+#'     The rows in each \code{data.frame} correspond to replications of the data
+#'     collection process, while the columns correspond to relative growth
+#'     inhibition bioactivity levels when subject to peptide libraries across
+#'     fractions 1-43 and fraction 47.
+#'
+#' \describe{
+#'
+#'     \item{ec}{E. Coli}
+#'
+#'     \item{bc}{S. aureus}
+#'
+#'     \item{pc}{K. pneumoniae}
+#'
+#'     \item{oc}{A. baumannii}
+#'
+#'     \item{ef}{E. cloacae}
+#'
+#'     \item{ab}{??}
+#'
+#'     \item{pa}{??}
+#'
+#'     \item{fg}{??}
+#'
+#' }
+"bioact"
+
+
+
+
+#' Mass spectrometry data
+#'
+#' The mass spectrometry data collected for and described in Kirkpatrick et
+#' al. (2016).  See paper for a full description of the data collection process,
+#' or the package vignette for an abridged description.
+#'
+#' @docType data
+#'
+#' @usage data(mass_spec)
+#'
+#' @format A \code{data.frame} with 30,799 mass spectrometry levels and 38
+#'     variables:
+#'
 #' \describe{
 #'
 #'     \item{m/z}{mass-to-charge ratio}
@@ -85,5 +134,4 @@
 #'
 #'     \item{20150207_CLK_BAP_VO_47}{intensity state at fraction 47}
 #' }
-
 "mass_spec"

@@ -4,7 +4,8 @@
 # ................... #
 
 # See tests/construct-data/cd-summary-rankEN.R for the file used to create the data
-load("../data/data-summary-rankEN.RData")
+load(normalizePath("../data/data-summary-rankEN.RData"))
+
 
 
 

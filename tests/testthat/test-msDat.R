@@ -1,12 +1,10 @@
 
-
-
 # ``````````````````` #
 #  Load testing data  #
 # ................... #
 
 # See construct-data/cd-filterMS.R for the file used to create the data
-load("../data/data-msDat.RData")
+load(normalizePath("../data/data-msDat.RData"))
 
 
 
@@ -22,7 +20,7 @@ test_that("msDat:  test with valid input  --  ms_inten non-NULL section", {
 
   # mtoz: indices  --  charge: indices  --  ms_inten: indices
   expect_identical(msDat(ms_mat, mtoz_idx, chg_idx, inten_idx), trueDat)
-  
+
   # mtoz: names  --  charge: names  --  ms_inten: names
   expect_identical(msDat(ms_mat, mtoz_nm, chg_nm, inten_nm), trueDat)
 
@@ -34,17 +32,17 @@ test_that("msDat:  test with valid input  --  ms_inten non-NULL section", {
 
   # mtoz: indices  --  charge: names  --  ms_inten: indices
   expect_identical(msDat(ms_mat, mtoz_idx, chg_nm, inten_idx), trueDat)
-  
+
   # mtoz: names  --  charge: indices  --  ms_inten: names
   expect_identical(msDat(ms_mat, mtoz_nm, chg_idx, inten_nm), trueDat)
-  
+
   # mtoz: names  --  charge: data  --  ms_inten: indices
   expect_identical(msDat(ms_mat, mtoz_nm, chg_data, inten_idx), trueDat)
 })
 
 
 test_that("msDat:  test with valid input  --  ms_inten as NULL section", {
-  
+
   # mtoz: indices  --  charge: indices  --  ms_inten: NULL
   expect_identical(msDat(ms_red, mtoz_idx, chg_idx, NULL), trueDat)
 
@@ -68,10 +66,10 @@ test_that("msDat:  test with valid input  --  mass_spec as data.frame section", 
 
   # mtoz: names  --  charge: indices  --  ms_inten: names
   expect_identical(msDat(ms_df, mtoz_nm, chg_idx, inten_nm), trueDat)
-  
+
   # mtoz: names  --  charge: data  --  ms_inten: indices
   expect_identical(msDat(ms_df, mtoz_nm, chg_data, inten_idx), trueDat)
-  
+
   # mtoz: name  --  charge: data  --  ms_inten: NULL
   expect_identical(msDat(ms_red_df[, -chg_idx], mtoz_nm, chg_data, NULL), trueDat)
 })
@@ -177,7 +175,7 @@ test_that("rankEN: argument of wrong type", {
 # ............................... #
 
 test_that("msDat: right type but illegal values  --  mass_spec", {
-  
+
   # mass_spec: 0 columns
   expect_error(msDat(ms_mat[, integer(0)], mtoz_nm, chg_nm, inten_nm),
                "mass_spec cannot have 0 columns")
@@ -189,12 +187,12 @@ test_that("msDat: right type but illegal values  --  mass_spec", {
   # mass_spec: 1 row
   expect_error(msDat(ms_mat[1L, , drop=FALSE], mtoz_nm, chg_nm, inten_nm),
                "mass_spec must have 2 or more rows")
-  
+
   # mass_spec: 0 cols of data after removing mtoz and charge
   expect_error(msDat(ms_mat[, c("mtoz", "chg")], "mtoz", "chg", NULL),
                paste0("There must be at least 2 columns left for mass_spec ",
                       "after removing data for other variables"))
-  
+
   # mass_spec: 1 col of data after removing mtoz and charge
   expect_error(msDat(ms_mat[, c("mtoz", "chg", "ms1")], "mtoz", "chg", NULL),
                paste0("There must be at least 2 columns left for mass_spec ",
@@ -231,7 +229,7 @@ test_that("msDat: right type but illegal values  --  mtoz", {
 
 
 test_that("msDat: right type but illegal values  --  charge", {
-  
+
   # charge: length 0
   expect_error(msDat(ms_mat, mtoz_nm, integer(0L), inten_nm),
                "If non-NULL, then charge must have length no less than 1")
@@ -259,7 +257,7 @@ test_that("msDat: right type but illegal values  --  charge", {
 
 
 test_that("msDat: right type but illegal values  --  ms_inten", {
-  
+
   # ms_inten: length 0
   expect_error(msDat(ms_mat, mtoz_nm, chg_nm, character(0L)),
                "If non-NULL, then ms_inten must have length no less than 1")
@@ -267,15 +265,15 @@ test_that("msDat: right type but illegal values  --  ms_inten", {
   # ms_inten: invalid index 100
   expect_error(msDat(ms_mat, mtoz_nm, chg_nm, c(3L, 4L, 100L)),
                "out of bounds index 100 provided for ms_inten relative to mass_spec")
-  
+
   # ms_inten: invalid name "wrong_name"
   expect_error(msDat(ms_mat, mtoz_nm, chg_nm, c("wrong_name", "ms2", "ms3")),
                "column names in mass_spec do not contain wrong_name element in ms_inten")
-  
+
   # ms_inten: duplicate names "ms1"
   expect_error(msDat(ms_mat, mtoz_nm, chg_nm, c("ms1", "ms1", "ms3")),
                "ms_inten cannot have any duplicate values")
-  
+
   # ms_inten: ambiguous name "ms"
   expect_error(msDat(ms_mat, mtoz_nm, chg_nm, c("ms", "ms2", "ms3")),
                "name provided had multiple matches in data - ms element in ms_inten")
@@ -295,7 +293,7 @@ test_that("msDat: right type but illegal values  --  missing or wrong type in ex
   # character in the region specified for ms_inten
   expect_error(msDat(ms_df, mtoz_nm, chg_nm, c(inten_nm, "junk3")),
                "mass_spec cannot have any non-numeric in the region provided by ms_inten")
-  
+
   # Leave less than two columns for ms_inten
   expect_error(msDat(ms_red[, -(4:5)], mtoz_nm, chg_nm, NULL),
                paste0("There must be at least 2 columns left for mass_spec ",

@@ -4,7 +4,9 @@
 \name{mass_spec}
 \alias{mass_spec}
 \title{Mass spectrometry data}
-\format{A data frame with 30799 mass spectrometry levels and 38 variables:
+\format{A \code{data.frame} with 30,799 mass spectrometry levels and 38
+    variables:
+
 \describe{
 
     \item{m/z}{mass-to-charge ratio}
@@ -85,12 +87,12 @@
     \item{20150207_CLK_BAP_VO_47}{intensity state at fraction 47}
 }}
 \usage{
-mass_spec
+data(mass_spec)
 }
 \description{
 The mass spectrometry data collected for and described in Kirkpatrick et
-al. (2016).  See the paper for a full description of the data collection
-process, or the package vignette for an abridged description.
+al. (2016).  See paper for a full description of the data collection process,
+or the package vignette for an abridged description.
 }
 \keyword{datasets}
 

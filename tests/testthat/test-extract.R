@@ -9,7 +9,7 @@
 # ................... #
 
 # See tests/construct-data/cd-extract.R for the file used to create the data
-load("../data/data-extract.RData")
+load(normalizePath("../data/data-extract.RData"))
 
 
 

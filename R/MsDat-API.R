@@ -62,28 +62,31 @@ extractMS <- function(msObj, type="matrix") {
 }
 
 
-dimnames.msDat <- function(msObj) {
+#' @export
+dimnames.msDat <- function(x) {
 
-    x <- extractMS(msObj, "msDat")
+    x <- extractMS(x, "msDat")
     dimnames(x$ms)
 }
 
 
-`dimnames<-.msDat` <- function(msObj, value) {
+#' @export
+`dimnames<-.msDat` <- function(x, value) {
 
     # case: one of the classes that decorates msDat object.  Recursively call
     # with inner msDat object.
-    if (!identical(class(msObj), "msDat")) {
-        dimnames(msObj$msDatObj) <- value
-        return (msObj)
+    if (!identical(class(x), "msDat")) {
+        dimnames(x$msDatObj) <- value
+        return (x)
     }
 
-    dimnames(msObj$ms) <- value
+    dimnames(x$ms) <- value
 
-    msObj
+    x
 }
 
 
+#' @export
 `[.msDat` <- function(msObj, i, j) {
 
     # case: one of the classes that decorates msDat object.  Recursively call
@@ -101,6 +104,7 @@ dimnames.msDat <- function(msObj) {
 }
 
 
+#' @export
 `[<-.msDat` <- function(msObj, i, j, value) {
 
     # case: one of the classes that decorates msDat object.  Recursively call
@@ -116,6 +120,7 @@ dimnames.msDat <- function(msObj) {
 }
 
 
+#' @export
 dim.msDat <- function(x) {
     msDatObj <- extractMS(x, type="msDat")
     dim(msDatObj$ms)
