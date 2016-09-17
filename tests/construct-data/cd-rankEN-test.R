@@ -5,7 +5,8 @@
 
 # Load saved simulated data (with working directory as tests/testthat).  See
 # object sim_args in the RData file for the arguments used to generate the data.
-load("tests/data/data-rankEN-sim.RData")
+# load("tests/data/data-rankEN-sim.RData")
+load(file.path("..", "data", "data-rankEN-sim.RData"))
 
 # msDatObj: a (200 x 50) mass spec data object
 msDatObj <- testDat$msDatObj
@@ -208,24 +209,27 @@ true_rankEN_bio_ave$summ_info$data_dim$repl <- 1L
 
 
 # ````````````````````````````````````` #
-#  Save data for use by testing script  #
+#  Remove objects from workspace not used by testing script  #
 # ..................................... #
 
-save(# Objects used in rankEN calls
-     msDatObj,
-     bioact,
-     reg_idx,
-     lambda,
-     # 'True' objects to test against
-     true_rankEN,
-     true_rankEN_bio_ave,
-     # Derived objects for further testing
-     filterMS_obj,
-     bio_df,
-     bio_NA,
-     bio_vec,
-     bio_matr_ave,
-     ms_reg_only,
-     bio_reg_only,
-     bio_vec_reg_only,
-     file="tests/data/data-rankEN-test.RData")
+keep_nm <- c(
+    # Objects used in rankEN calls
+    "msDatObj",
+    "bioact",
+    "reg_idx",
+    "lambda",
+    # 'True' objects to test against
+    "true_rankEN",
+    "true_rankEN_bio_ave",
+    # Derived objects for further testing
+    "filterMS_obj",
+    "bio_df",
+    "bio_NA",
+    "bio_vec",
+    "bio_matr_ave",
+    "ms_reg_only",
+    "bio_reg_only",
+    "bio_vec_reg_only")
+
+rm(list = setdiff(ls(), keep_nm))
+

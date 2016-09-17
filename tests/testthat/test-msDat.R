@@ -4,7 +4,7 @@
 # ................... #
 
 # See construct-data/cd-filterMS.R for the file used to create the data
-load(normalizePath("../data/data-msDat.RData"))
+load(file.path("..", "data", "data-msDat.RData"))
 
 
 

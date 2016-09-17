@@ -4,7 +4,7 @@
 # ................... #
 
 # See construct-data/cd-binMS.R for the file used to sample / create the data
-load(normalizePath("../data/data-binMS.RData"))
+load(file.path("..", "data", "data-binMS.RData"))
 
 
 

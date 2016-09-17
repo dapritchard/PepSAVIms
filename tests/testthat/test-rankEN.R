@@ -3,7 +3,8 @@
 #  Load testing data  #
 # ................... #
 
-load(normalizePath("../data/data-rankEN-test.RData"))
+# load(file.path("..", "data", "data-rankEN-test.RData"))
+source(file.path("..", "construct-data", "cd-rankEN-test.R"))
 
 
 
