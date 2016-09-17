@@ -11,7 +11,7 @@ Description: Suite of software to search for candidate compounds with an effect
 License: GPL-3
 LazyData: TRUE
 Depends: 
-    R (>= 2.10)
+    R (>= 3.0.0)
 Suggests:
     testthat,
     knitr

@@ -1,15 +1,16 @@
 
+% \VignetteEngine{knitr::knitr}
 % \VignetteIndexEntry{PRISMS Introduction}
-\documentclass[fleqn]{article}
+
+\documentclass{article}
 
 \input{Shared_Preamble.tex}
-
-
 
 
 % Document start ---------------------------------------------------------------
 
 \begin{document}
+
 
 
 
@@ -31,12 +32,12 @@
 
 
 
+
 % Begin document body ----------------------------------------------------------
 
 % Configure global options
 <<setup, cache=FALSE, include=FALSE>>=
 library(knitr)
-opts_knit$set(out.format="latex")
 knit_theme$set("default")
 opts_chunk$set(cache=FALSE)
 opts_knit$set(root.dir=normalizePath(".."))
@@ -677,6 +678,7 @@ rank_out
 summary(rank_out, 10)
 @
 
+
 \subsubsection{Accessing the ranked candidate compounds}
 
 The m/z and charge values of the ranked candidate compounds as well as their
@@ -694,6 +696,7 @@ is.data.frame(ranked_candidates)
 # Print first few candidates; should be the same as from the summary function
 head(ranked_candidates)
 @
+
 
 
 

@@ -3,8 +3,8 @@
 \docType{data}
 \name{bioact}
 \alias{bioact}
-\title{Bioactivity}
-\format{A \code{list} containing relative growth inhibition bioactivity
+\title{Bioactivity data}
+\format{A \code{list} containing relative growth inhibition of bioactivity
     levels for the bacteria and virus strains listed below.  Each of the
     following elements in the \code{list} is a \code{data.frame} with 3 rows
     and 44 columns (with the exception of fg ********* which has 2 rows).
@@ -36,9 +36,8 @@
 data(bioact)
 }
 \description{
-The mass spectrometry data collected for and described in Kirkpatrick et
-al. (2016).  See the paper for a full description of the data collection
-process, or the package vignette for an abridged description.
+The relative relative growth inhibition of bioactivity levels for the
+    bacteria and virus strains studies in Kirkpatrick et al. (2016).
 }
 \keyword{datasets}
 

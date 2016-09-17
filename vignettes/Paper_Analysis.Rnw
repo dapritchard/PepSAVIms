@@ -1,6 +1,8 @@
 
-\documentclass[fleqn]{article}
 % \VignetteIndexEntry{Kirkpatrick et. al (2016) data analysis}
+% \VignetteEngine{knitr::knitr}
+
+\documentclass{article}
 
 \input{Shared_Preamble.tex}
 
@@ -15,9 +17,9 @@
 <<setup, cache=FALSE, include=FALSE>>=
 library(knitr)
 knit_theme$set("default")
-opts_chunk$set(cache=TRUE)
+opts_chunk$set(cache=FALSE)
 opts_knit$set(root.dir=normalizePath(".."))
-options(width=95)
+options(width=90)
 @
 
 
@@ -334,6 +336,8 @@ each library fraction; the analysis obtained 30,799 MS features for
 The data is measured in units of Daltons.
 
 <<reading-data-ms>>=
+library(PRISMS)
+
 # Load mass spectrometry data into memory
 data(mass_spec)
 @
