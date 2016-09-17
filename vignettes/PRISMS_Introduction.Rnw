@@ -679,18 +679,20 @@ summary(rank_out, 10)
 
 \subsubsection{Accessing the ranked candidate compounds}
 
-The m/z and charge values of the ranked candidate compounds are available as
-elements of the object returned by the \texttt{rankEN} function.  In particular,
-the \texttt{"mtoz"} and \texttt{"charge"} elements of the return object are each
-numeric vectors providing the m/z and charge values of the ranked candidate
-compounds, respectively.
+The m/z and charge values of the ranked candidate compounds as well as their
+correlations with respect to the average bioactivity levels for the region of
+interest can be extracted and returned as a \texttt{data.frame} via the
+\texttt{extract\_ranked} function.
 
 <<ranking-data-compounds>>=
-# Print the m/z values for the first 10 candidate compounds
-rank_out$mtoz[1:10]
+# Extract the ranked candidates
+ranked_candidates <- extract_ranked(rank_out)
 
-# Print the charge values for the first 10 candidate compounds
-rank_out$charge[1:10]
+# Return object is a data.frame
+is.data.frame(ranked_candidates)
+
+# Print first few candidates; should be the same as from the summary function
+head(ranked_candidates)
 @
 
 

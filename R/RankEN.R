@@ -81,7 +81,7 @@
 #'
 #' @return Returns an object of class \code{rankEN}.  This object is a
 #'     \code{list} with elements described below.  The class is equipped with a
-#'     \code{print}, \code{summary}, and \code{extract_candidates} function.
+#'     \code{print}, \code{summary}, and \code{extract_ranked} function.
 #'
 #'     \describe{
 #'
@@ -254,7 +254,7 @@ rankEN <- function(msObj, bioact, region_ms=NULL, region_bio=NULL, lambda,
 #' @export
 
 
-extract_candidates <- function(rankEN_obj, include_cor=TRUE) {
+extract_ranked <- function(rankEN_obj, include_cor=TRUE) {
 
     if (!identical(class(rankEN_obj), "rankEN")) {
         stop("rankEN_obj must be of class rankEN")

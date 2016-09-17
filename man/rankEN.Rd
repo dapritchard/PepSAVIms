@@ -74,7 +74,7 @@ nonpositively correlated with bioactivity levels, as specified by
 \value{
 Returns an object of class \code{rankEN}.  This object is a
     \code{list} with elements described below.  The class is equipped with a
-    \code{print}, \code{summary}, and \code{extract_candidates} function.
+    \code{print}, \code{summary}, and \code{extract_ranked} function.
 
     \describe{
 

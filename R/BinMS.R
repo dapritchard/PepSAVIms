@@ -374,15 +374,6 @@ binMS <- function(mass_spec,
 
 
 
-#' Print routine for class \code{binMS}
-#'
-#' Prints the number of m/z levels and fractions of the resultant mass
-#' spectrometry data
-#'
-#' @param x An object of class \code{\link{binMS}}
-#'
-#' @param ... Arguments passed to dot-dot-dot are ignored
-#'
 #' @export
 
 print.binMS <- function(x, ...) {
