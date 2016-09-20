@@ -114,6 +114,40 @@
 #'
 #'     }
 #'
+#' @examples
+#'
+#' # Load mass spectrometry data
+#' data(mass_spec)
+#'
+#' # Convert mass_spec from a data.frame to an msDat object
+#' ms <- msDat(mass_spec = mass_spec,
+#'             mtoz = "m/z",
+#'             charge = "Charge",
+#'             ms_inten = c(paste0("_", 11:43), "_47"))
+#'
+#' # Load growth inhibition bioactivity data.  Each element in bioact is a
+#' # stand-alone dataset for a species of virus or bacteria.
+#' data(bioact)
+#'
+#' # Perform the candidate ranking procedure with fractions 21-24 as the region
+#' # of interest.  It is not advisable to calculate the elastic net estimates
+#' # with 30,799 candidate compounds on 4 data points, so in this example the
+#' # data is artificially reduced to the first 1,000 candidate compounds.
+#' rank_out <- rankEN(msObj = ms[1:1000, ],
+#'                    bioact = bioact$ec,
+#'                    region_ms = paste0("_", 21:24),
+#'                    region_bio = paste0("_", 21:24),
+#'                    lambda = 0.001,
+#'                    pos_only = TRUE,
+#'                    ncomp = NULL)
+#'
+#' # print, summary function
+#' rank_out
+#' summary(rank_out)
+#'
+#' # Extract ranked compounds as a data.frame
+#' ranked_candidates <- extract_ranked(rank_out)
+#'
 #' @export
 
 

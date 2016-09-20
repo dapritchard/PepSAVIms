@@ -287,6 +287,9 @@ First we load some mass spectrometry data included with the package into memory.
 # Load package into memory
 library(PRISMS)
 
+# Load mass spectrometry data into memory
+data(mass_spec)
+
 # The mass spectrometry data is provided as a data.frame
 is.data.frame(mass_spec)
 
@@ -827,7 +830,7 @@ describing the consolidation or filtering process.
 
 <<extractMS-msDat>>=
 # Extract the encapsulated msDat object
-filter_msDat <- extractMS(filter_out, "msDat")
+filter_msDat <- extractMS(msObj = filter_out, type = "msDat")
 
 # For a subclass of msDat the extractMS function has the effect of performing
 # the following command
@@ -838,7 +841,7 @@ identical(filter_msDat_v2, filter_msDat)
 
 # Calling extractMS on an object that is strictly of class msDat is effectively
 # a noop
-filter_msDat_v3 <- extractMS(filter_msDat, "msDat")
+filter_msDat_v3 <- extractMS(msObj = filter_msDat, type = "msDat")
 
 # extractMS on a strictly msDat object returns the original object
 identical(filter_msDat_v3, filter_msDat)
