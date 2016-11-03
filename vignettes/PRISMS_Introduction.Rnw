@@ -48,9 +48,7 @@ options(width=90)
 \setcounter{section}{-1}
 \section{Introduction}
 
-The \prisms/ \R/ package provides a collection of software tools with which
-to search for candidate biological compounds having a promotive effect on the
-reduction of bioactivity levels of an organismal culture.  The package was
+The \prisms/ \R/ package provides a collection of software tools used to facilitate the prioritization of putative bioactive compounds from a complex biological matrix.  The package was
 constructed to provide an implementation of the statistical portion of the
 laboratory and statistical procedure proposed in \papernamefull/ (herafter
 abbreviated to \papername/) \cite{kirkpatrick2016}.
@@ -65,7 +63,7 @@ This document provides an introduction to the functionality provided by the
 
 \section{Package Overview}
 
-A flowchart for a data analysis performed using \prisms/ is show in figure
+A flowchart for a data analysis performed using \prisms/ is show in Figure
 \ref{fig: flow chart}.  The blue rectangles and diamond are functions in the
 \prisms/ ecosystem; the pink oval denotes mass spectrometry data to be used
 as data inputs; the green oval denotes bioactivity data to be used as a data
@@ -129,7 +127,7 @@ steps.  The first step is a consolidation step: the goal is to to consolidate
 mass spectrometry observations in the data that are believed to belong to the
 same underlying compound.  In other words, the instrumentation may have obtained
 multiple reads of mass spectrometry abundances that in actuality belong to the
-same compound - in which case we wish to attribute all of the elution to a
+same compound - in which case we wish to attribute all of those observations to a
 single compound.  The function name \binMS/ derives from the fact that we use a
 binning procedure to consolidate the data.
 
@@ -146,7 +144,7 @@ data).
 \item Each observation must have a mass that falls within the specified
   interval.
 
-\item Each observation must have an electrical charge state that falls within
+\item Each observation must be detected in a charge state that falls within
   the specified interval.
 
 \end{enumerate}
@@ -159,13 +157,13 @@ of the following criterions to belong to the same compound.
 
 \begin{enumerate}[label=(\roman*)]
 
-\item The absolute difference in Daltons of the mass-to-charge value between the
+\item The absolute difference (in Daltons) of the mass-to-charge values between the
   two observations is less the the specified value.
 
 \item The absolute difference of the peak elution time between the two
   observations is less than the specified value.
 
-\item The electrical charge state must be the same for the two observations.
+\item The charge state must be the same for the two observations.
 
 \end{enumerate}
 
@@ -173,10 +171,7 @@ of the following criterions to belong to the same compound.
 \subsection{The \code{filterMS} function}
 
 The second optional preprocessing step for the mass spectrometry abundance data
-is a filtering step.  The goal of the filtering step is to reduce the level of
-noise in the data by removing any potential candidate compounds with observed
-abundances for which it is not scientifically plausible that they might be a
-compound with an effect on bioactivity levels.  By filtering the candidate set
+is a filtering step.  The goal of the filtering step is to further reduce the data set to focus on only those compounds that could plausibly be contributing to the bioactivity area of interest. Furthermore, these criteria aim to filter out some of the noice detected in the dataset.  By filtering the candidate set
 prior to a statistical analysis, this step can greatly increase the ability of
 the analysis to effectively differentiate such compounds.  The criteria for the
 downstream inclusion of a candidate compound is listed below.
@@ -198,23 +193,22 @@ downstream inclusion of a candidate compound is listed below.
 \item The compound charge state must be less than or equal to the specified value.
 
 \end{enumerate}
-The region of interest is typically chosen to be a region where a change in the
-bioactivity levels is observed; the assumption then is that there are some
-compounds eluting during those fractions in the region that are associated with
+The region of interest is typically chosen to be a region where a high percent of
+bioactivity is observed; the assumption then is that there is some
+compound(s) eluting in those fractions that are associated with
 bioactivity levels.
 
 
 \subsection{The \rankEN/ function}
 
 Once the mass spectrometry abundance data has optionally undergone any
-preprocessing steps, a statistical procedure to search for candidate compounds
-for reduction of bioactivity levels is performed.  This step is performed by the
+preprocessing steps, a statistical procedure to search for putative bioactive compounds is performed.  This step is performed by the
 \rankEN/ function, and takes as inputs both the preprocessed mass spectrometry
-abundance data and the bioactivity levels data.  The procedure works by
+abundance data and the bioactivity data.  The procedure works by
 specifying the level of the $\ell_2$ penalty parameter in the elastic net
 penalty \cite{zou2005}, and tracking the inclusion of the coefficients
 corresponding to compounds into the nonzero set along the elastic net path.  An
-ordered list of candidate compounds for reduction of bioactivity levels is
+ordered list of candidate compounds is
 obtained by providing the order in which the coefficients corresponding to
 compounds entered the nonzero set.
 
@@ -222,7 +216,7 @@ compounds entered the nonzero set.
 \subsection{The \msDat/ function}
 
 The functions \filterMS/ and \rankEN/ require objects of class \code{msDat} as
-the arguments providing the mass spectrometry abundances data; the \msDat/
+the arguments providing the mass spectrometry abundance data; the \msDat/
 function takes mass spectrometry data as its input and creates an object of this
 class.  Note however, that the \binMS/ and \filterMS/ functions return objects
 that inherit from the \code{msDat} class, and consequently you can provide an
@@ -287,9 +281,6 @@ First we load some mass spectrometry data included with the package into memory.
 # Load package into memory
 library(PRISMS)
 
-# Load mass spectrometry data into memory
-data(mass_spec)
-
 # The mass spectrometry data is provided as a data.frame
 is.data.frame(mass_spec)
 
@@ -297,8 +288,8 @@ is.data.frame(mass_spec)
 dim(mass_spec)
 
 # The first four variables provide the m/z level, time of peak retention, mass,
-# and charge state of the observations.  The remaining 34 variables are the mass
-# spectrometry intensities for across fractions 11 through 43, and fraction 47.
+# and charge state of each observation.  The remaining 34 variables are the mass
+# spectrometric intensities for each compound across fractions 11 through 43, and fraction 47.
 names(mass_spec)
 @
 
@@ -306,9 +297,9 @@ names(mass_spec)
 
 \subsubsection{Reading in the bioactivity data}
 Next we load some bioactivity data included with the package into memory.  The
-object \texttt{bioact} is a list containing bioactivity replicates for several
-species of viruses and bacteria; we will arbitrarily choose the bioactivity data
-for the virus E. coli as an illustrative example, and create an object for this
+object \texttt{bioact} is a list containing bioactivity values (in replicates) for sweet violet against several
+bacterial and viral pathogens, as well as some cancer cell lines; we will arbitrarily choose the bioactivity data
+against the Gram-negative bacterium E. coli as an illustrative example, and create an object for this
 data from the element in the list.
 
 <<reading-data-bio>>=
@@ -341,12 +332,12 @@ names(EC)
 
 Now that we have the mass spectrometry data loaded into memory, the first step
 in the \prisms/ pipeline is to to consolidate mass spectrometry observations in
-the data that are believed to belong to the same underlying compounds.  This is
+the data that are believed to belong to the same underlying compound.  This is
 performed via the \binMS/ function.
 
 In order to perform its task, the consolidation routine needs to be provided
-with data for each mass-to-charge and charge state, the time of peak retention,
-and optionally the mass.  These can be provided as data vectors, or can be given
+with data for each mass-to-charge ratio and charge state, the retention time,
+and (optionally) the mass.  These can be provided as data vectors, or can be given
 as columns in the mass spectrometry data.  When provided as part of the mass
 spectrometry data, the variables can each be identified either by column index
 or by column name.
@@ -361,7 +352,7 @@ a vector either of column indices or of column names to specify which columns of
 \texttt{mass\_spec} to include as mass spectrometry intensities.
 
 As part of the procedure, we also need to specify acceptable values for the time
-of peak retention, an allowable mass range, an allowable charge state range.
+of peak retention, an allowable mass range,and an allowable charge state range.
 These are provided as length-2 vectors specifying the lower and upper bounds of
 the acceptable ranges.
 
@@ -382,8 +373,8 @@ distinct mass-to-charge levels.
 
 \subsubsection{\texttt{binMS} specification via variable names}
 
-In this example we specify the data for the mass-to-charge, charge, mass, and
-time of peak intensity, and the intensities by specifying the names of the
+In this example we specify the data for the mass-to-charge, charge, mass,
+time of peak retention, and the intensities by specifying the names of the
 corresponding columns in \texttt{mass\_spec}.  Note that we do not need to
 provide the exact names of the columns, we only need to provide enough
 information to yield a unique match.
@@ -501,7 +492,7 @@ compounds with observed abundances for which it is not scientifically plausible
 that they might be a compound with an effect on bioactivity levels.  This step
 is performed by the \texttt{filterMS} function.
 
-When using the \texttt{filterMS} function, a first task is to specify the region
+When using the \texttt{filterMS} function, the first task is to specify the region
 of interest and bordering region.  This is done by providing an \texttt{msDat}
 object as an argument to \texttt{msObj}, and then:
 \begin{enumerate}[label=(\roman*)]
@@ -671,7 +662,7 @@ rank_out <- rankEN(msObj = filter_out,
 
 The \texttt{rankEN} class is equipped with a print and summary function.  The
 summary function provides a list of the candidate compounds obtained by the
-procedure and their correlation with mean bioactivity levels over replicates.
+procedure and their correlation with mean bioactivity levels across replicates.
 
 <<ranking-data-summary>>=
 # Prints the dimensions of the data
@@ -830,7 +821,7 @@ describing the consolidation or filtering process.
 
 <<extractMS-msDat>>=
 # Extract the encapsulated msDat object
-filter_msDat <- extractMS(msObj = filter_out, type = "msDat")
+filter_msDat <- extractMS(filter_out, "msDat")
 
 # For a subclass of msDat the extractMS function has the effect of performing
 # the following command
@@ -841,7 +832,7 @@ identical(filter_msDat_v2, filter_msDat)
 
 # Calling extractMS on an object that is strictly of class msDat is effectively
 # a noop
-filter_msDat_v3 <- extractMS(msObj = filter_msDat, type = "msDat")
+filter_msDat_v3 <- extractMS(filter_msDat, "msDat")
 
 # extractMS on a strictly msDat object returns the original object
 identical(filter_msDat_v3, filter_msDat)

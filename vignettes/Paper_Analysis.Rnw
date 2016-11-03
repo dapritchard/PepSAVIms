@@ -29,19 +29,18 @@ options(width=90)
 \setcounter{section}{-1}
 \section{Introduction}
 
-The \pkg{PRISMS} \R/ package provides a collection of software tools with
-which to search for candidate biological compounds having a promotive effect on
-the reduction of bioactivity levels of an organismal culture.  The package was
-constructed to provide an implementation of the statistical portion of the
-laboratory and statistical procedure proposed in \papernamefull/ (herafter
-abbreviated to \papername/).
+The \pkg{PRISMS} \R/ package provides a collection of software tools used to
+facilitate the prioritization of putative bioactive compounds from a complex
+biological matrix.  The package was constructed to provide an implementation of
+the statistical portion of the laboratory and statistical procedure proposed in
+\papernamefull/ (herafter abbreviated to \papername/).
 
 This document describes all of the steps and shows the results of the data
-analysis performed in \papername/ (herafter abbreviated to \papername/).
-Providing the analysis will hopefully make the research more reproducible, give
-the interested reader a greater understanding of the methodology developed in
-the paper, and to provide a working template for researchers who may wish to
-apply the methodology developed in the paper to their own research problems.
+analysis performed in \papername/.  Providing the analysis will hopefully make
+the research more reproducible, give the interested reader a greater
+understanding of the methodology developed in the paper, and to provide a
+working template for researchers who may wish to apply the methodology developed
+in the paper to their own research problems.
 
 
 \section{Data collection}
@@ -51,33 +50,36 @@ performed upstream of the data analysis.  Please refer to \papername/ for more
 detail regarding this process. \vspace{-2mm}
 
 
-\subsection{\textit{Viola odorata} liquid chrometography mass
-  spectrometry} \label{sec: lcms}
+\subsection{\textit{Viola odorata} sample preparation and LC-MS/MS analysis; in brief} \label{sec: lcms}
 
-Aqueous extraction was performed on \textit{Viola odorata} botanical samples.
-The resulting extracts were crudely fractionated using strong cation exchange
-(SCX) to maintain structure/activity with chromatography such that individual
-peptides were eluted over multiple sequential fractions with one-minute
-intervals.  Peptide libraries were then desalted via vacuum concentration in
-preparation for bioassays.  The peptide libraries across the fractions were then
-analyzed via a nano-LC-ESI-MS/MS platform (a Waters nanoAcquity UPLC coupled to
-an AB Sciex TripleTOF5600).  This yielded intact mass and relative intensity
-information for peptide constituents contained within each library fraction; the
-analysis obtained 30,799 MS features for \textit{Viola odorata} across 34
-fractions.
+Aqueous extraction of \textit{Viola odorata} aerial tissue was performed to
+selectively extract for AMP-like compounds.  The resulting extract was crudely
+fractionated using strong cation exchange (SCX) chromatgraphy for creation of the
+\textit{Viola odorata} peptide library.  Bioactivity assays against a pannel of
+microibal pathogens were performed using the generated peptide library.  Each
+SCX fraction was then subject to nano-LC-ESI-MS/MS (a Waters nanoAcquity UPLC
+coupled to an AB Sciex TripleTOF5600).  After processing of this
+dataset, accurate intact mass and relative intensity information for peptide
+constituents contained within each fraction was obtained; resulting in 30,799 MS
+features for \textit{Viola odorata} across the 34 fractions.
 
 
 \subsection{Bioactivity screening} \label{sec: bioact}
 
 Peptide libraries were assayed for growth inhibition against the following
 pathogens: E. coli, S. aureus, K. pneumoniae, A. baumannii, P. aeruginosa, and
-E. cloacae. Library fractions were then incubated with microbial cultures from
-the pathogens over an incubation period. The remaining viable cells after the
-incubation were quantified indirectly by spectrophotometric measurement of the
-irreversible intracellular reduction of resazurin24. Values for each fraction
-were compared to positive and negative controls containing a known therapeutic
-or water, respectively, to determine a percent activity of each library
-fraction.  Percent activity of each well was calculated using the formula:
+E. cloacae. Library fractions are incubated with a microbial or cancer cell
+culture and the presence of bioactive peptides in a given fraction will result
+in inhibition of culture growth during the incubation period. For bacterial
+assays, the remaining viable cells are quantified indirectly by
+spectrophotometric measurement of the irreversible intracellular reduction of
+resazurin25. For anticancer bioactivity, cytotoxicity assays are performed using
+MTT-based assays to measure mitochondrial succinate dehydrogenase activity with
+absorbance measurements at 570 nm. Values for each fraction are compared to
+positive and negative controls containing a known therapeutic or water,
+respectively, to determine a percent activity of each library fraction, where a
+small value of remaining viable cells indicates high activity Percent activity
+of each well was calculated using the formula:
 \[ \text{percent activity} = 100 \times \frac{ \text{RFU of fraction} -
     \text{RFU of positive control} }{ \text{RFU of negative control} -
     \text{RFU of positive control} }
@@ -267,8 +269,8 @@ fraction.  Percent activity of each well was calculated using the formula:
 This section describes all of the steps and shows the results of the data
 analyses performed in \papername/, which is the workflow shown in Figure
 \ref{fig: flow chart prototypical}.  In this scenario, mass spectrometry
-abundance data across various fractions for the biological analyte is obtained
-via a mass spectrometer as described in section \ref{sec: lcms}, and is
+abundance values across SCX fractions for each compound is obtained
+using the LC-MS system as described in section \ref{sec: lcms}, and is
 represented by the pink oval.  The mass spectrometry data is consolidated via
 the \binMS/ function, and the resulting consolidated data is filtered by the
 \filterMS/ function.
@@ -309,8 +311,7 @@ which calculates and returns the data analysis results.
 
 \subsection{Loading the mass spectrometry and bioactivity data}
 
-First we load the mass spectrometry data collected for \papername/; this is the
-data produced by the Progenesis instrumentation and software.  The raw data
+First we load the mass spectrometry data collected for \papername/.  The raw data
 produced by this system is stored as a comma-seperated values (csv) file.
 However, in an effort to minimize the size of the \pkg{PRISMS} package, we have
 removed the columns in the data corresponding to variables not used in the data
@@ -320,20 +321,19 @@ from their original form.
 
 Some discussion of the bioactivity data collection here ************ \bigskip
 
-Readers who wish to obtain the data in its raw form as produced by the
-Progenesis system, may obtain the data as well as the \R/ script used to convert
-the raw data into the form provided with the package from the \pkg{PRISMS}
-package developement repository located at
+Readers who wish to obtain the data in its raw form may obtain the data as well
+as the \R/ script used to convert the raw data into the form provided with the
+package from the \pkg{PRISMS} package developement repository located at
 \url{https://github.com/dpritchLibre/PRISMS}.
 
 
 \subsubsection{Mass spectrometry data}
 
-The mass spectrometry data produced by the Progenesis system yielded intact mass
-and relative intensity information for peptide constituents contained within
-each library fraction; the analysis obtained 30,799 MS features for
-\textit{Viola odorata} across fractions 1-43 and additionally for fraction 47.
-The data is measured in units of Daltons.
+The mass spectrometry data yielded intact mass and relative intensity
+information for peptide constituents contained within each library fraction; the
+analysis obtained 30,799 MS features for \textit{Viola odorata} across fractions
+1-43 and additionally for fraction 47.
+
 
 <<reading-data-ms>>=
 library(PRISMS)
@@ -366,9 +366,11 @@ data(bioact)
 \subsection{Consolidating mass spectrometry data}
 
 Now that we have the mass spectrometry data loaded into memory, the first step
-in the \pkg{PRISMS} pipeline is to to consolidate mass spectrometry observations in
-the data that are believed to belong to the same underlying compounds.  This is
-performed via the \binMS/ function.
+in the \pkg{PRISMS} pipeline is to to consolidate mass spectrometry observations
+in the data that are believed to belong to the same underlying compounds.  In
+this way, all of the abundance belonging to the same compound will be aggregated
+together and thus resemble a more accurate depiction of the compound abundance
+accross SCX fractions. This is performed via the \binMS/ function.
 
 % In order to perform its task, the consolidation routine needs to be provided
 % with data for each mass-to-charge and charge state, the time of peak retention,
@@ -401,9 +403,18 @@ performed via the \binMS/ function.
 
 \subsubsection{Specification of criteria}
 
-Discussion: why choose time range to include all, mass b/w 2000 and 15000,
-charge range all, mtoz difference < 0.05, and time of peak retention to include
-all?
+The binMS function contains many criteria to help filter out unwanted compounds
+and thereby focusing the list on potential compounds of interest. Retention time
+limitations are in place to eliminate background ions that are detected before
+(equilibration) or after (wash) the gradient is applied. Mass and charge
+limitations of 2 to 15 kDa and +2 to +10, respectively, restrict compounds to
+the mass and charge ranges of known bioactive peptide. A m/z difference of 0.05
+Da was chosen based off of test data sets in which fluctions in mass accuracy
+and retention time allowed the same peak to be picked multiple times despite
+representing the same compound. A retention time difference can also be
+specified to facilitate the aforementioned process. A rentetion time equal to
+the run time can be used to specify that all compounds of the same mass within
+the m/z difference should be consideree the same feature.
 
 
 
@@ -445,14 +456,30 @@ is performed by the \texttt{filterMS} function.
 
 \subsubsection{Selecting fraction region of interest(s)}
 
-Some discussion here.  Do we have a figure available here?   *************
+Bioactivity regions of interest are selected based on each individual
+bioactivity data set. Based on the SCX peak width, a given peptide should elute
+over a minimum of three fractions in a gaussian-like manner. Beacuse mass
+spectrometry is more sensitive than the bioactivity assays, the defined
+bioactivity region can extend 1-2 fractions beyond the visibile activity range
+on either end. The defined bioactivity regions for each species deemed active
+are depicted by blue bars in the figure below.  *************
 
 
 
 \subsubsection{Filtering criteria selection}
 
-Why was it chosen to have a max bordering ratio of 0.01, a minimum intensity in
-region of interest of 1000, and and max charge of 10
+Similar to the filtering criteria for the binMS function, the main purpose of
+this function is to eliminate noise and focus only on those compounds possibly
+contributing to activity.  To do this, we specify that a compound must have its
+maximum intensity inside the defined bioactivity region. Additionally, that
+compound cannot be more abundant than 0.01 * it's maximum abundance outside the
+bioactivity region. This value accounts for small fluctation from absolute 0
+that are most likely due to noise. A minimum intensity value is applied folowing
+the same logic and can be adjusted to reflect the appropriate noise level of
+each instrument. The resulting list of candidate compounds remaining after the
+\filterMS/ list are all compounds that logically could be contributing to the
+activity.
+
 
 
 \subsubsection{Filtering data with \texttt{filterMS}}
