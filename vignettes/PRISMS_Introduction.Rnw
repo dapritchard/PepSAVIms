@@ -48,10 +48,11 @@ options(width=90)
 \setcounter{section}{-1}
 \section{Introduction}
 
-The \prisms/ \R/ package provides a collection of software tools used to facilitate the prioritization of putative bioactive compounds from a complex biological matrix.  The package was
-constructed to provide an implementation of the statistical portion of the
-laboratory and statistical procedure proposed in \papernamefull/ (herafter
-abbreviated to \papername/) \cite{kirkpatrick2016}.
+The \prisms/ \R/ package provides a collection of software tools used to
+facilitate the prioritization of putative bioactive compounds from a complex
+biological matrix.  The package was constructed to provide an implementation of
+the statistical portion of the laboratory and statistical procedure proposed in
+\papernamefull/ (herafter abbreviated to \papername/) \cite{kirkpatrick2016}.
 
 This document provides an introduction to the functionality provided by the
 \prisms/ package.
@@ -171,7 +172,10 @@ of the following criterions to belong to the same compound.
 \subsection{The \code{filterMS} function}
 
 The second optional preprocessing step for the mass spectrometry abundance data
-is a filtering step.  The goal of the filtering step is to further reduce the data set to focus on only those compounds that could plausibly be contributing to the bioactivity area of interest. Furthermore, these criteria aim to filter out some of the noice detected in the dataset.  By filtering the candidate set
+is a filtering step.  The goal of the filtering step is to further reduce the
+data set to focus on only those compounds that could plausibly be contributing
+to the bioactivity area of interest. Furthermore, these criteria aim to filter
+out some of the noice detected in the dataset.  By filtering the candidate set
 prior to a statistical analysis, this step can greatly increase the ability of
 the analysis to effectively differentiate such compounds.  The criteria for the
 downstream inclusion of a candidate compound is listed below.
@@ -202,15 +206,15 @@ bioactivity levels.
 \subsection{The \rankEN/ function}
 
 Once the mass spectrometry abundance data has optionally undergone any
-preprocessing steps, a statistical procedure to search for putative bioactive compounds is performed.  This step is performed by the
-\rankEN/ function, and takes as inputs both the preprocessed mass spectrometry
-abundance data and the bioactivity data.  The procedure works by
-specifying the level of the $\ell_2$ penalty parameter in the elastic net
-penalty \cite{zou2005}, and tracking the inclusion of the coefficients
-corresponding to compounds into the nonzero set along the elastic net path.  An
-ordered list of candidate compounds is
-obtained by providing the order in which the coefficients corresponding to
-compounds entered the nonzero set.
+preprocessing steps, a statistical procedure to search for putative bioactive
+compounds is performed.  This step is performed by the \rankEN/ function, and
+takes as inputs both the preprocessed mass spectrometry abundance data and the
+bioactivity data.  The procedure works by specifying the level of the $\ell_2$
+penalty parameter in the elastic net penalty \cite{zou2005}, and tracking the
+inclusion of the coefficients corresponding to compounds into the nonzero set
+along the elastic net path.  An ordered list of candidate compounds is obtained
+by providing the order in which the coefficients corresponding to compounds
+entered the nonzero set.
 
 
 \subsection{The \msDat/ function}
@@ -236,8 +240,8 @@ via a call to \msDat/.
 \section{An example case: performing the PRISMS pipeline}
 
 In the following section we will illustrate the usage of the core \prisms/
-functions by walking through the prototypical PRISMS pipeline.  A flowchart for this prototypical
-PRISMS pipeline is shown below.
+functions by walking through the prototypical PRISMS pipeline.  A flowchart for
+this prototypical PRISMS pipeline is shown below.
 
 
 \begin{figure}[H]
@@ -297,10 +301,11 @@ names(mass_spec)
 
 \subsubsection{Reading in the bioactivity data}
 Next we load some bioactivity data included with the package into memory.  The
-object \texttt{bioact} is a list containing bioactivity values (in replicates) for sweet violet against several
-bacterial and viral pathogens, as well as some cancer cell lines; we will arbitrarily choose the bioactivity data
-against the Gram-negative bacterium E. coli as an illustrative example, and create an object for this
-data from the element in the list.
+object \texttt{bioact} is a list containing bioactivity values (in replicates)
+for sweet violet against several bacterial and viral pathogens, as well as some
+cancer cell lines; we will arbitrarily choose the bioactivity data against the
+Gram-negative bacterium E. coli as an illustrative example, and create an object
+for this data from the element in the list.
 
 <<reading-data-bio>>=
 # Load data into memory
