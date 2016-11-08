@@ -99,9 +99,9 @@ positive and negative controls containing a known therapeutic or water,
 respectively, to determine a percent activity of each library fraction, where a
 small value of remaining viable cells indicates high activity.  Percent activity
 of each well was calculated using the formula:
-\[ \text{percent activity} = 100 \times \frac{ \text{RFU of fraction} -
+\[ \text{percent activity} = 1 \minus \frac{ \text{RFU of fraction} -
     \text{RFU of positive control} }{ \text{RFU of negative control} -
-    \text{RFU of positive control} }
+    \text{RFU of positive control} } \times \100
 \]
 where RFU stands for \textit{relative fluorescence units}.
 
