@@ -86,8 +86,8 @@ features for \textit{Viola odorata} across the 34 fractions.
 \subsection{Bioactivity screening} \label{sec: bioact}
 
 Peptide libraries were assayed for growth inhibition against the following
-pathogens: E. coli, S. aureus, K. pneumoniae, A. baumannii, P. aeruginosa, and
-E. cloacae. Library fractions are incubated with a microbial or cancer cell
+pathogens: E. coli (ec), S. aureus (sa), K. pneumoniae (kp), A. baumannii (ab), P. aeruginosa (pa),
+E. cloacae (ec), F. graminearum (fg) and cancer cell lines: breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc). Library fractions are incubated with a microbial or cancer cell
 culture and the presence of bioactive peptides in a given fraction will result
 in inhibition of culture growth during the incubation period.  For bacterial
 assays, the remaining viable cells are quantified indirectly by
@@ -116,8 +116,8 @@ where RFU stands for \textit{relative fluorescence units}.
 This section describes all of the steps and shows the results of the data
 analyses performed in \papername/, which is the workflow shown in Figure
 \ref{fig: flow chart prototypical}.  In this scenario, mass spectrometry
-abundance values across SCX fractions for each compound is obtained
-using the LC-MS system as described in section \ref{sec: lcms}, and is
+abundance values for each compound across the SCX fractions is obtained
+using LC-MS/MS analysis as described in section \ref{sec: lcms}, and is
 represented by the pink oval.  The mass spectrometry data is consolidated via
 the \binMS/ function, and the resulting consolidated data is filtered by the
 \filterMS/ function.
@@ -158,7 +158,7 @@ which calculates and returns the data analysis results.
 
 \subsection{Loading the mass spectrometry and bioactivity data}
 
-First we load the mass spectrometry data collected for \papername/.  The raw
+First, we load the mass spectrometry data collected for \papername/.  The raw
 data produced by this system is stored as a comma-seperated values file.
 However, in an effort to minimize the size of the \pkg{PRISMS} package, we have
 removed the columns in the data corresponding to variables not used in the data
@@ -177,7 +177,7 @@ package from the \pkg{PRISMS} package developement repository located at
 The mass spectrometry data yielded intact mass and relative intensity
 information for peptide constituents contained within each library fraction; the
 analysis obtained 30,799 MS features for \textit{Viola odorata} across fractions
-1-43 and additionally for fraction 47.
+1-43.
 
 
 <<reading-data-ms>>=
@@ -192,11 +192,10 @@ data(mass_spec)
 \subsubsection{Bioactivity data}
 
 Peptide libraries were assayed for growth inhibition against the following
-pathogens: E. coli, S. aureus, K. pneumoniae, A. baumannii, P. aeruginosa, and
-E. cloacae.  Three replicate observations were collected for each of the
-viruses / bacteria (with the exception of fg************, which had two
-replicates), across fractions 1-43 and additionally for fraction 47.  The data
-is measured in percent of activity decrease and is unitless.
+pathogens: E. coli (ec), S. aureus (sa), K. pneumoniae (kp), A. baumannii (ab), P. aeruginosa (pa),
+E. cloacae (ec), F. graminearum (fg) and cancer cell lines: breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc).  Three replicate observations were collected for each of the
+assays (with the exception of fg, which had two
+replicates), across fractions 1-43.  The resulting percent activity of each fraction was quantified using cell viability assays, and the average response across all replicates was used for this analysis. 
 
 <<reading-data-bioact>>=
 # Load bioactivity data into memory
@@ -249,15 +248,15 @@ accross SCX fractions. This is performed via the \binMS/ function.
 The binMS function contains many criteria to help filter out unwanted compounds
 and thereby focusing the list on potential compounds of interest. Retention time
 limitations are in place to eliminate background ions that are detected before
-(equilibration) or after (wash) the gradient is applied. Mass and charge
+(equilibration) or after (wash) the gradient is applied. For our gradeint, 14 and 45 minutes were appropriate retention time filters. Mass and charge
 limitations of 2 to 15 kDa and +2 to +10, respectively, restrict compounds to
-the mass and charge ranges of known bioactive peptide. A m/z difference of 0.05
+the mass and charge ranges of known bioactive peptides. A m/z difference of 0.05
 Da was chosen based off of test data sets in which fluctions in mass accuracy
 and retention time allowed the same peak to be picked multiple times despite
 representing the same compound. A retention time difference can also be
 specified to facilitate the aforementioned process. A rentetion time equal to
 the run time can be used to specify that all compounds of the same mass within
-the m/z difference should be consideree the same feature.
+the m/z difference should be consideree the same feature, as was performed in this analysis.
 
 
 
@@ -330,11 +329,11 @@ are depicted by blue bars in figure \ref{fig:fracs-of-interest}.
 
 Similar to the filtering criteria for the \binMS/ function, the main purpose of
 this function is to eliminate noise and focus only on those compounds possibly
-contributing to activity.  To do this, we specify that a compound must have its
+contributing to activity. To do this, we specify that a compound must have its
 maximum intensity inside the defined bioactivity region. Additionally, that
 compound cannot be more abundant than 0.01 * it's maximum abundance outside the
 bioactivity region. This value accounts for small fluctation from absolute 0
-that are most likely due to noise. A minimum intensity value is applied folowing
+that are most likely due to noise, and was defined through our test data sets. A minimum intensity value of 1000 is applied folowing
 the same logic and can be adjusted to reflect the appropriate noise level of
 each instrument. The resulting list of candidate compounds remaining after the
 \filterMS/ list are all compounds that logically could be contributing to the
@@ -429,9 +428,13 @@ rank_fg <- rankEN(msObj      = filter_out,
 
 \section{Proof-of-method via the cyO2 compound}
 
-The compound cyO2 is known to have a deleterious effect in each of the
-bioactivity peptide libraries.  Here we wish to use the cyO2 compound to
-assess how well the \prisms/ pipeline is able to identify this known compound.
+To validate this pipelne, we demonstrate successful detection and identification of a known AMP 
+from the botanical species Viola odorata. Viola odorata, commonly known as sweet violet, contains 
+many cyclotides - including cycloviolacin O2 (cyO2). CyO2 is a small, cysteine rich cyclotide 
+comprised of 30 amino acids (MWmonoisotopic: 3138.37 Da), which has been shown to have diverse 
+activity against many Gram-negative bacteria (E. coli, K. pneumoniae, and P. aeruginosa), as well
+as several cancer cell.  Here, we demonstrate successful detection and identifiaction of cyO2 thereby
+validating the use of this statistical analysis approach for bioactive peptide discovery.
 
 
 
@@ -451,11 +454,10 @@ approximately (1047.4898, 3), and (1570.2414, 2).  Thus the \R/ function
 \texttt{find\_cyO2\_rank} returns a vector of the rankings of these two
 incarnations of cyO2.
 
-From the output we see that for ef, pc, and bc, one of the versions of cyO2 is
-identified in the first 10 candidate compounds.  cyO2 is identified as the 23rd
+From the output we see that for ef, pc, and bc, at least one charge state corresponding
+to cyO2 is identified in the first 10 candidate compounds.  CyO2 is identified as the 23rd
 and 33rd compounds for ab and pa, respectively, and for the remaining bioactive
-peptide libraries cyO2 is ranked within the top 100 compounds.  Of course this
-out of 38,000 starting compounds.
+peptide libraries cyO2 is ranked within the top 100 compounds. 
 
 <<cyO2-rankings>>=
 # Function to find the rank of cyO2 compounds
