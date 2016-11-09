@@ -5,7 +5,7 @@
 \documentclass{article}
 
 \input{Shared_Preamble.tex}
-\usepackage{color}
+
 
 
 
@@ -187,11 +187,12 @@ analysis obtained 30,799 MS features for \textit{Viola odorata} across fractions
 1-43.
 
 <<reading-data-ms>>=
-library(PRISMS)
+library(PepSAVIms)
 
 # Load mass spectrometry data into memory
 data(mass_spec)
 @
+
 
 
 

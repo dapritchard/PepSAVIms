@@ -1,6 +1,6 @@
 
 % \VignetteEngine{knitr::knitr}
-% \VignetteIndexEntry{PRISMS Introduction}
+% \VignetteIndexEntry{PepSAVIms Introduction}
 
 \documentclass{article}
 
@@ -18,7 +18,7 @@
 
 \begin{center}
 
-  {\LARGE An introduction to the \prisms/ package}
+  {\LARGE An introduction to the \pkgname/ package}
   \vspace{10mm}
 
   {\large \today}
@@ -48,14 +48,14 @@ options(width=90)
 \setcounter{section}{-1}
 \section{Introduction}
 
-The \prisms/ \R/ package provides a collection of software tools used to
+The \pkgname/ \R/ package provides a collection of software tools used to
 facilitate the prioritization of putative bioactive compounds from a complex
 biological matrix.  The package was constructed to provide an implementation of
 the statistical portion of the laboratory and statistical procedure proposed in
 \papernamefull/ (herafter abbreviated to \papername/) \cite{kirkpatrick2016}.
 
 This document provides an introduction to the functionality provided by the
-\prisms/ package.
+\pkgname/ package.
 
 
 
@@ -64,12 +64,12 @@ This document provides an introduction to the functionality provided by the
 
 \section{Package Overview}
 
-A flowchart for a data analysis performed using \prisms/ is show in Figure
+A flowchart for a data analysis performed using \pkgname/ is show in Figure
 \ref{fig: flow chart}.  The blue rectangles and diamond are functions in the
-\prisms/ ecosystem; the pink oval denotes mass spectrometry data to be used
+\pkgname/ ecosystem; the pink oval denotes mass spectrometry data to be used
 as data inputs; the green oval denotes bioactivity data to be used as a data
 input; and the yellow oval denotes the analysis results of using the
-PRISMS methodology and software.
+\methodname/ methodology and software.
 
 The prototypical data analysis workflow is the path described by the solid
 lines; this is the procedure performed in \papername/, and described in more
@@ -90,7 +90,8 @@ analysis in hand.
     % Place nodes
     \node [decision] (rankEN) {rankEN};
     \node [block, left of=rankEN] (filterMS) {filterMS};
-    \node [cloudYel, right of=rankEN, node distance=3.75cm] (ranked_data) {\makecell[c]{ranked candid-\\ate compounds}};
+    \node [cloudYel, right of=rankEN, node distance=3.75cm] (ranked_data)
+    {\makecell[c]{ranked candid-\\ate compounds}};
     \node [block, left of=filterMS] (binMS) {binMS};
     \node [cloud, left of=binMS] (raw_data) {\makecell[c]{raw MS\\data}};
     \node [block, below left=1.5cm and 1cm of filterMS, node distance=1cm] (msDat1) {msDat};
@@ -115,7 +116,7 @@ analysis in hand.
     represent alternative workflows}
 \end{figure}
 
-A conceptual presentation of the functions in the \prisms/ package is
+A conceptual presentation of the functions in the \pkgname/ package is
 provided in the following subsections.  Please refer to the function
 documentation for more information regarding the application programming
 interface, as well as for further technical detail.
@@ -237,11 +238,11 @@ via a call to \msDat/.
 
 % Flowchart and fcn descriptions -----------------------------------------------
 
-\section{An example case: performing the PRISMS pipeline}
+\section{An example case: performing the \methodname/ pipeline}
 
-In the following section we will illustrate the usage of the core \prisms/
-functions by walking through the prototypical PRISMS pipeline.  A flowchart for
-this prototypical PRISMS pipeline is shown below.
+In the following section we will illustrate the usage of the core \pkgname/
+functions by walking through the prototypical \methodname/ pipeline.  A flowchart for
+this prototypical \methodname/ pipeline is shown below.
 
 
 \begin{figure}[H]
@@ -283,7 +284,7 @@ First we load some mass spectrometry data included with the package into memory.
 
 <<reading-data-ms>>=
 # Load package into memory
-library(PRISMS)
+library(PepSAVIms)
 
 # The mass spectrometry data is provided as a data.frame
 is.data.frame(mass_spec)
@@ -336,7 +337,7 @@ names(EC)
 \label{sec: using binMS}
 
 Now that we have the mass spectrometry data loaded into memory, the first step
-in the \prisms/ pipeline is to to consolidate mass spectrometry observations in
+in the \pkgname/ pipeline is to to consolidate mass spectrometry observations in
 the data that are believed to belong to the same underlying compound.  This is
 performed via the \binMS/ function.
 
@@ -492,7 +493,7 @@ summary(bin_out)
 
 \subsection{Using \texttt{filterMS}}
 
-The next step in the \prisms/ pipeline is to remove any potential candidate
+The next step in the \pkgname/ pipeline is to remove any potential candidate
 compounds with observed abundances for which it is not scientifically plausible
 that they might be a compound with an effect on bioactivity levels.  This step
 is performed by the \texttt{filterMS} function.
@@ -699,18 +700,18 @@ head(ranked_candidates)
 
 
 
-% PRISMS objects and class methods ---------------------------------------------
+% PepSAVIms objects and class methods ------------------------------------------
 
 \section{Data access and manipulation tools}
 
 In this section we take a deeper look into the objects created by the functions
-in \prisms/ and consider how to further access and manipulate the data
+in \pkgname/ and consider how to further access and manipulate the data
 throughout the process.
 
 
 \subsection{The mass spectrometry data class hierarchy}
 
-The core data structure in the \prisms/ package is the \texttt{msDat}
+The core data structure in the \pkgname/ package is the \texttt{msDat}
 \textit{class}; it is the class of the object returned by the \texttt{msDat}
 \textit{function}.  This data structure is used to maintain mass spectrometry
 data.  See the \texttt{msDat} function documentation for further details
@@ -728,7 +729,7 @@ structure of the \texttt{binMS} and \texttt{filterMS} classes.
 
 
 \begin{figure}[H]
-  \caption{The \prisms/ class hierarchy}
+  \caption{The \pkgname/ class hierarchy}
 
   \centering
   % Adapted from http://www.texample.net/tikz/examples/tree/
@@ -863,7 +864,7 @@ object.
 In general, the \texttt{msDat} function is used to create an \texttt{msDat}
 object for use as input for either the \texttt{filterMS} or the \texttt{rankEN}
 function.  This need may occur when the researcher wishes to (i) enter the
-PRISMS pipeline without executing either or both of the \texttt{binMS} or
+\methodname/ pipeline without executing either or both of the \texttt{binMS} or
 \texttt{filterMS} functions or (ii) wants to do some addition processing between
 steps of the pipeline using the raw data.
 
@@ -941,7 +942,7 @@ filter_msDat[1:5, 1:10]
 \begin{thebibliography}{9}
 
 \bibitem{kirkpatrick2016} Kirkpatrick et al.  A PRISMS pipeline for natural
-  product bioactive peptide discovery.
+  product bioactive peptide discovery. {\color{red} Update when title is finalized}
 
 \bibitem{zou2005} Zou, H., \& Hastie, T. (2005). Regularization and variable
   selection via the elastic net. Journal of the Royal Statistical Society:
