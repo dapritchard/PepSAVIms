@@ -89,13 +89,14 @@ contained within each fraction was obtained, resulting in 30,799 MS features for
 Peptide libraries were assayed for growth inhibition against the following
 pathogens: E. coli (ec), S. aureus (sa), K. pneumoniae (kp), A. baumannii (ab),
 P. aeruginosa (pa), E. cloacae (ec), F. graminearum (fg), and cancer cell lines:
-breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc). Library
-fractions are incubated with a microbial or cancer cell culture and the presence
-of bioactive peptides in a given fraction will result in inhibition of culture
-growth during the incubation period.  For bacterial assays, the remaining viable
-cells are quantified indirectly by spectrophotometric measurement of the
-irreversible intracellular reduction of resazurin25.  For anticancer
-bioactivity, cytotoxicity assays are performed using MTT-based assays to measure
+breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc). {\color{red}
+  There's no sa or kp in the data, and there is an ef.} Library fractions are
+incubated with a microbial or cancer cell culture and the presence of bioactive
+peptides in a given fraction will result in inhibition of culture growth during
+the incubation period.  For bacterial assays, the remaining viable cells are
+quantified indirectly by spectrophotometric measurement of the irreversible
+intracellular reduction of resazurin25.  For anticancer bioactivity,
+cytotoxicity assays are performed using MTT-based assays to measure
 mitochondrial succinate dehydrogenase activity with absorbance measurements at
 570 nm. Values for each fraction are compared to positive and negative controls
 containing a known therapeutic or water, respectively, to determine a percent
@@ -117,14 +118,14 @@ where RFU refers to \textit{relative fluorescence units}.
 \section{Data analysis presented in \papername/} \label{sec:
   prototypical}
 
-]This section describes all of the steps and shows the results of the data
+This section describes all of the steps and shows the results of the data
 analyses performed in \papername/, which is the workflow shown in Figure
 \ref{fig: flow chart prototypical}.  In this scenario, mass spectrometry
-abundance values for each compound across the SCX fractions is obtained
-using LC-MS/MS analysis as described in section \ref{sec: lcms}, and is
-represented by the pink oval.  The mass spectrometry data is consolidated via
-the \binMS/ function, and the resulting consolidated data is filtered by the
-\filterMS/ function.
+abundance values for each compound across the SCX fractions are obtained using
+LC-MS/MS analysis as described in section \ref{sec: lcms}, and is represented by
+the pink oval.  The mass spectrometry data is consolidated via the \binMS/
+function, and the resulting consolidated data is filtered by the \filterMS/
+function.
 
 Bioactivity data is collected as described in section \ref{sec: bioact}, and is
 represented by the green oval. The bioactivity data is then then provided along
@@ -197,10 +198,15 @@ data(mass_spec)
 \subsubsection{Bioactivity data}
 
 Peptide libraries were assayed for growth inhibition against the following
-pathogens: E. coli (ec), S. aureus (sa), K. pneumoniae (kp), A. baumannii (ab), P. aeruginosa (pa),
-E. cloacae (ec), F. graminearum (fg) and cancer cell lines: breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc).  Three replicate observations were collected for each of the
-assays (with the exception of fg, which had two
-replicates), across fractions 1-43.  The resulting percent activity of each fraction was quantified using cell viability assays, and the average response across all replicates was used for this analysis.
+pathogens: E. coli (ec), S. aureus (sa), K. pneumoniae (kp), A. baumannii (ab),
+P. aeruginosa (pa), E. cloacae (ec), F. graminearum (fg) and cancer cell lines:
+breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc) {\color{red}
+  these are already given in section 1.2, maybe just refer to that}.  Three
+replicate observations were collected for each of the assays (with the exception
+of F. graminearum, which had two replicates), across fractions 1-43.  The
+resulting percent activity of each fraction was quantified using cell viability
+assays, and the average response across all replicates was used for this
+analysis.
 
 <<reading-data-bioact>>=
 # Load bioactivity data into memory
@@ -212,7 +218,7 @@ data(bioact)
 
 \subsection{Consolidating mass spectrometry data}
 
-Now that the mass spectrometry data loaded into memory, the first step in the
+Now that the mass spectrometry data is loaded into memory, the first step in the
 \pkg{\pkgname/} pipeline is to consolidate MS features in the data believed to
 belong to the same underlying compounds.  In this way, all of the abundance
 belonging to the same compound will be aggregated together and thus resemble a
@@ -236,14 +242,14 @@ and charge ranges of known bioactive peptides.
 MS features that satisfy this initial exclusion process are then consolidated
 when features are believed to belong to the same underlying compound.  This
 consolidation step required choices to be made in specifying the criteria by
-which features determined to belong to the same compound.  An m/z difference of
-0.05 Da was chosen for our data analysis to be the maximum difference for which
-two compounds could have in m/z levels to be considered to belong to the same
-compound.  The value of 0.05 Da was chosen by performing multiple runs of the
-MS-LC data collection process and studying the variation in the observations;
-this value was chosen so that fluctuations in mass accuracy and retention time
-for the test data allowed the same peak to be picked multiple times despite
-representing the same compound.
+which features are determined to belong to the same compound.  An m/z difference
+of 0.05 Da was chosen for our data analysis to be the maximum difference for
+which two compounds could have in m/z levels to be considered to belong to the
+same compound.  The value of 0.05 Da was chosen by performing multiple runs of
+the MS-LC data collection process and studying the variation in the
+observations; this value was chosen so that fluctuations in mass accuracy and
+retention time for the test data allowed the same peak to be picked multiple
+times despite representing the same compound.
 
 The other criterion that must be met for two MS feature observations to be
 considered to belong to the same compound is that the retention times for the
@@ -252,7 +258,7 @@ analysis we chose to allow all MS features that were below the threshold for
 difference in Da and had the same charge state to be considered to belong to the
 same compound, effectively ignoring this criterion.  This was chosen because
 {\color{red} discuss why}, and is implemented by specifying the appropriate
-parameter to be equal to the run time, in this case 60 minutes.
+parameter to be equal to the run time, which in this case was 60 minutes.
 
 
 
@@ -277,8 +283,8 @@ bnfo <- binMS(mass_spec = mass_spec,
 
 Here we perform the mass spectrometry consolidation prodedure, using the
 criteria as described in Section \ref{sec:ms_criteria}.  We can see from the
-summary output below that overall, the number of of candidate compounds has been
-reduced from an initial amount of
+summary output below that in totality, the number of of candidate compounds has
+been reduced from an initial amount of
 \Sexpr{fcom(bnfo$n_tot)} observations to \Sexpr{fcom(bnfo$n_binned)} compounds.
 
 The reduction of candidate compounds can be considered more granularly as
@@ -328,7 +334,7 @@ is performed by the \filterMS/ function.
 
 Bioactivity regions of interest are selected based on each individual
 bioactivity data set. Based on the SCX peak width, a given peptide should elute
-over a minimum of three fractions in a Gaussian manner. Beacuse mass
+over a minimum of three fractions in a Gaussian manner. Because mass
 spectrometry is more sensitive than the bioactivity assays, the defined
 bioactivity region can extend 1-2 fractions beyond the visible activity range on
 either end.  The bioactivity regions for each species that were deemed to be
@@ -337,12 +343,12 @@ regions chosen for each bioactivity data ranged from a size of as small as 3
 fractions to as large as 6 fractions, and each region was contained within the
 window of fractions 17-25.
 
-For typical analyses we recommend filtering the MS dataset according the region
-chosen as dictated by the bioactivity data as described above.  However, for the
-analysis performed for \papername/, for simplicity of presentation and since a
-single region rather tightly encapsulated the chosen region for all of the
+For typical analyses we recommend filtering the MS dataset using the region
+chosen as dictated by the bioactivity data (as described above).  However, for
+the analysis performed for \papername/, for simplicity of presentation and since
+a single region rather tightly encapsulates the chosen region for all of the
 bioactivity datasets, we simply filtered the MS dataset with the region chosen
-to be the smallest one that included the chosen region for each individual
+to be the smallest one that included the chosen region for every individual
 datset, namely fractions 17-25.
 
 \begin{figure}[p]
@@ -369,8 +375,8 @@ for bordering region, which is that every fraction not in the region of interest
 is to be considered the bordering region.
 
 Another criterion that we filter by is that a candidate compound may not by more
-abundant in the bordering region than some specified small fraction of its
-maximum abundance in the region of interest.  Allowing for small nonzero value
+abundant in the bordering region than some specified proportion of its maximum
+abundance in the region of interest.  Allowing for a small nonzero elution
 outside of the region of interest accounts for small fluctations from absolute 0
 that are most likely due to noise in the instrumentation readings.  The
 allowable proportion of abundance relative to the maximum is data dependent; we
@@ -384,10 +390,12 @@ level should be chosen to reflect the appropriate amount of noice apparent in
 the instrumentation; for our analysis we selected 1000 Da as an appropriate
 value.
 
-Finally, an option to filter by maximum charge is included in the pipeline.
-This has already been considered in the consolidation step, but is included in
-the filtering step in the event that researcher does not wish to use the \binMS/
-consolidation apparatus with the data analysis in hand.
+Finally, an option to filter the data by maximum allowed charge state is
+included in the pipeline.  This has already been considered in the consolidation
+step, but is included in the filtering step in the event that researcher does
+not wish to use the \binMS/ consolidation apparatus with the data analysis in
+hand.  We selected a maximum charge state of +10, concurring with our choice in
+Section \ref{sec:ms_criteria}.
 
 
 
@@ -396,11 +404,11 @@ consolidation apparatus with the data analysis in hand.
 
 Here we perform the filtering operation to remove any potential candidate
 compounds with observed abundances for which it is not scientifically plausible
-that they might be a compound with an effect on bioactivity level using the
+that they might be a compound with an effect on bioactivity level via the
 \filterMS/ function.  We can see from the summary output below that 3,428
 compounds satisfied criterion 1, 3,428 compounds satisfied criterion 2, 3,428
 compounds satisfied criterion 3, 3,428 compounds satisfied criterion 4, and
-3,428 compounds satisfied criterion 5 (see \papername/ or the function
+3,428 compounds satisfied criterion 5 (see \papername/ or the \binMS/
 documentation for a description of the criteria).  In total, 225 compounds
 satisfied each each of the 5 criteria.
 
@@ -421,31 +429,37 @@ summary(filter_out)
 \subsection{Candidate compound ranking} \label{sec:ranking}
 
 In this section potential candidate compounds are ranked with the goal of
-facilitating the investigation of compounds with a negative effect on each of
-the bioactivity peptide libraries, using the \rankEN/ function.  For each
-library the mass spectrometry data remains the same.  Also note that the region
-of interest changes over the peptitde libraries, according to the selections
-shown in Figure \ref{fig:fracs-of-interest}.
+facilitating the investigation of compounds with a deleterious effect on each of
+the bioactivity peptide libraries via the \rankEN/ function.  For each library
+the mass spectrometry data remains the same.  Also note that the region of
+interest changes over the peptitde libraries according to the selections shown
+in Figure \ref{fig:fracs-of-interest}.
 
 
 \subsubsection{Selecting the quadratic penalty parameter}
 
-The \rankEN/ function works by selecting a choice of quadratic penalty parameter
-and tracking the order in which the coefficients corresponding to candidate
-compounds first become nonzero along the elastic net path for the $\ell_1$
-penalty parameter.  Then it is presumed that compounds with corresponding
-coefficients that become nonzero earlier in the path may be better candidates
-for having an effect on bioactivity levels then those with corresponding
-coefficients that become nonzero later in the path.  So it remains to select a
-quadratic penalty parameter; we selected 0.001 as a small nonzero penalty
-parameter, with the thought that being near to the lasso penalty we might
-achieve good behavior in terms of variable selection.
-
+The \rankEN/ function works by selecting a choice of quadratic penalty
+parameter, and for fixed value of quadratic penalty parameter tracking the order
+in which the coefficients corresponding to candidate compounds first become
+nonzero along the elastic net path as the $\ell_1$ penalty parameter changes.
+Then it is presumed that compounds with corresponding coefficients that become
+nonzero earlier in the path may be better candidates for having an effect on
+bioactivity levels then those with corresponding coefficients that become
+nonzero later in the path.  To select a quadratic penalty parameter we recommend
+a small nonzero value with the thought that being near to the lasso penalty we
+might achieve good behavior in terms of variable selection.  The reason for not
+choosing a penalty of 0 is that in that case the elastic net reduces to the
+lasso model, which can have no more than one less than the number of bioactivity
+data points of nonzero coefficients, and thus severly reduces the size of the
+list of candidate compounds generated by this approach.  We also note that we do
+not consider this choice to be data-driven; for our analysis we chose a value of
+0.001.
 
 <<candidate-compound-ranking>>=
 
 # Rank the candidate compounds using the ranking procedure for each of the
 # bioactivity datasets
+
 rank_oc <- rankEN(msObj      = filter_out,
                   bioact     = bioact$oc,
                   region_ms  = paste0("VO_", 18:22),
@@ -502,36 +516,44 @@ rank_fg <- rankEN(msObj      = filter_out,
 
 \section{Proof-of-method via the cyO2 compound}
 
-To validate this pipelne, we demonstrate successful detection and identification of a known AMP
-from the botanical species Viola odorata. Viola odorata, commonly known as sweet violet, contains
-many cyclotides - including cycloviolacin O2 (cyO2). CyO2 is a small, cysteine rich cyclotide
-comprised of 30 amino acids (MWmonoisotopic: 3138.37 Da), which has been shown to have diverse
-activity against many Gram-negative bacteria (E. coli, K. pneumoniae, and P. aeruginosa), as well
-as several cancer cell.  Here, we demonstrate successful detection and identifiaction of cyO2 thereby
-validating the use of this statistical analysis approach for bioactive peptide discovery.
+To validate this pipeline, we demonstrate successful detection and
+identification of a known AMP from the botanical species Viola odorata. Viola
+odorata, commonly known as sweet violet, contains many cyclotides - including
+cycloviolacin O2 (cyO2). CyO2 is a small, cysteine rich cyclotide comprised of
+30 amino acids (MWmonoisotopic: 3138.37 Da), which has been shown to have
+diverse activity against many Gram-negative bacteria (E. coli, K. pneumoniae,
+and P. aeruginosa), as well as several cancer cell {\color{red} is this sentence
+  missing something?}.  Here, we demonstrate successful detection and
+identifiaction of cyO2 thereby validating the use of this statistical analysis
+approach for bioactive peptide discovery.
 
 
 
 
 \subsection{CyO2 compound ranking results}
 
-Each of the \R/ objects created in section \ref{sec:ranking} contains a ranking
-of the candidate compound obtained using the procedure.  The ranked compounds'
-m/z values is provided in the \texttt{mtoz} element of the \texttt{rankEN}
+Each of the \R/ objects created in Section \ref{sec:ranking} contains a ranking
+of the candidate compounds obtained using the procedure.  The ranked compounds'
+m/z values are provided in the \texttt{mtoz} element of the \texttt{rankEN}
 object, while the ranked compounds' corresponding charge values are found in the
-\texttt{charge} element.
+\texttt{charge} element (we can also obtain the m/z and charge values through
+the \texttt{extract\_ranked} function).
 
 The exact m/z and charge values for cyO2 were obtained by comparing the
 candidate compounds list after the consolidation and filtering process to the
-known range of values; the m/z and charge pairs were determined to be
-approximately (1047.4898, 3), and (1570.2414, 2).  Thus the \R/ function
-\texttt{find\_cyO2\_rank} returns a vector of the rankings of these two
-incarnations of cyO2.
+known range of values; the m/z and charge pairs corresponding to cyO2 were
+determined to be approximately (1047.4898, 3), and (1570.2414, 2) in our data.
+Thus the \R/ function \texttt{find\_cyO2\_rank} shown below returns a vector of
+the rankings of these two incarnations of cyO2. {\color{red} is there a more
+  appropriate word than incarnation?}
 
-From the output we see that for ef, pc, and bc, at least one charge state corresponding
-to cyO2 is identified in the first 10 candidate compounds.  CyO2 is identified as the 23rd
-and 33rd compounds for ab and pa, respectively, and for the remaining bioactive
-peptide libraries cyO2 is ranked within the top 100 compounds.
+From the output below we see that for ef {\color{red} which is this?}, prostate
+cancer, and breast cancer data, at least one charge state corresponding to cyO2
+is identified in the first 10 candidate compounds.  CyO2 is identified as the
+23rd and 33rd compounds for the A. baumannii and P. aeruginosa data,
+respectively, and for the remaining bioactive peptide libraries cyO2 is ranked
+within the top 100 compounds {\color{red} add remaining after we know which one
+  ef is}.
 
 <<cyO2-rankings>>=
 # Function to find the rank of cyO2 compounds
@@ -553,12 +575,31 @@ lapply(list(ab=rank_ab, bc=rank_bc, ec=rank_ec, ef=rank_ef,
 
 
 
+% Conclusion -------------------------------------------------------------------
+
+\section{Conclusion}
+
+In this document, the data processing and analysis portion of the data analysis
+performed in \papername/ is performed.  The choices that were made when
+performing the analysis were explained, and will hopefully provide a template
+for laboratories wishing to use methodology for their own research questions.
+As a result of the analysis, we see that out of 30,799 MS features originally
+measured by the MS-LC process, for each of the eight bioactivity peptide
+libraries the pipeline was able to identify the cyO2 compound as one of the
+first 100 candidate compounds with a possibility of having deleterious effect on
+bioactivity levels, and furthermore as one of the first 10 for three of the
+peptide libraries.
+
+
+
+
 % bibliography -----------------------------------------------------------------
 
 \begin{thebibliography}{9}
 
 \bibitem{kirkpatrick2016} Kirkpatrick et al.  A PepSAVI-MS pipeline for natural
-  product bioactive peptide discovery.
+  product bioactive peptide discovery.  {\color{red} finish citation once the
+    parts are finalized}
 
 \end{thebibliography}
 
