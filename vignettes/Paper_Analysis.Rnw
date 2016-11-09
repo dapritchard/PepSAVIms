@@ -102,7 +102,8 @@ containing a known therapeutic or water, respectively, to determine a percent
 activity of each library fraction, where a small value of remaining viable cells
 indicates high activity.  Percent activity of each well was calculated using the
 formula:
-\[ \text{percent activity} = 100 \times \frac{ \text{RFU of fraction} -
+\[
+  \text{percent activity} = 100 \times \frac{ \text{RFU of fraction} -
     \text{RFU of positive control} }{ \text{RFU of negative control} -
     \text{RFU of positive control} }
 \]
@@ -116,7 +117,7 @@ where RFU refers to \textit{relative fluorescence units}.
 \section{Data analysis presented in \papername/} \label{sec:
   prototypical}
 
-This section describes all of the steps and shows the results of the data
+]This section describes all of the steps and shows the results of the data
 analyses performed in \papername/, which is the workflow shown in Figure
 \ref{fig: flow chart prototypical}.  In this scenario, mass spectrometry
 abundance values for each compound across the SCX fractions is obtained
@@ -183,7 +184,7 @@ The mass spectrometry data yielded intact mass and relative intensity
 information for peptide constituents contained within each library fraction; the
 analysis obtained 30,799 MS features for \textit{Viola odorata} across fractions
 1-43.
-]
+
 <<reading-data-ms>>=
 library(PRISMS)
 
@@ -258,25 +259,38 @@ parameter to be equal to the run time, in this case 60 minutes.
 
 \subsubsection{Consolidating data with \texttt{binMS}}
 
+<<bin-info, echo=FALSE>>=
+
+# Perform mass spectrometry levels consolidation
+bnfo <- binMS(mass_spec = mass_spec,
+              mtoz = "m/z",
+              charge = "Charge",
+              mass = "Mass",
+              time_peak_reten = "Reten",
+              ms_inten = NULL,
+              time_range = c(14, 45),
+              mass_range = c(2000, 15000),
+              charge_range = c(2, 10),
+              mtoz_diff = 0.05,
+              time_diff = 60)$summ_info
+@
+
 Here we perform the mass spectrometry consolidation prodedure, using the
 criteria as described in Section \ref{sec:ms_criteria}.  We can see from the
 summary output below that overall, the number of of candidate compounds has been
 reduced from an initial amount of
-\Sexpr{fcom(bin_out$summ_info$n_tot)} observations to
-\Sexpr{fcom(bin_out$summ_info$n_binned)}
-compounds.
+\Sexpr{fcom(bnfo$n_tot)} observations to \Sexpr{fcom(bnfo$n_binned)} compounds.
 
 The reduction of candidate compounds can be considered more granularly as
 occuring in two separate steps.  The first is an exclusion process, and we can
 see that the number of elution levels that satisfied the criterion for time of
 peak retention, mass, and charge level were
-\Sexpr{fcom(bin_out$summ_info$n_time_pr)},
-\Sexpr{fcom(bin_out$summ_info$n_mass)}, and
-\Sexpr{fcom(bin_out$summ_info$n_charge)} levels, respectively.  The number of
-elution levels that satisfied all of the inclusion criteria was
-\Sexpr{fcom(bin_out$summ_info$n_tiMaCh)}.  Then the consolidation step
-consolidated those \Sexpr{fcom(bin_out$summ_info$n_tiMaCh)} elution levels into
-\Sexpr{fcom(bin_out$summ_info$n_binned)} candidate compounds.
+\Sexpr{fcom(bnfo$n_time_pr)}, \Sexpr{fcom(bnfo$n_mass)}, and
+\Sexpr{fcom(bnfo$n_charge)} levels, respectively.  The number of elution levels
+that satisfied all of the inclusion criteria was \Sexpr{fcom(bnfo$n_tiMaCh)}.
+Then the consolidation step consolidated those
+\Sexpr{fcom(bnfo$n_tiMaCh)} elution levels into \Sexpr{fcom(bnfo$n_binned)}
+candidate compounds.
 
 <<consolidating-data>>=
 
@@ -406,12 +420,27 @@ summary(filter_out)
 
 \subsection{Candidate compound ranking} \label{sec:ranking}
 
-In this section potential candidate compounds are ranked in order to facilitate
-the investigation of compounds with a negative effect on each of the bioactivity
-peptide libraries, using the \rankEN/ function.  For each library the mass
-spectrometry data remains the same.  Also note that the region of interest
-changes over the peptitde libraries, according to the selections shown in figure
-\ref{fig:fracs-of-interest}.
+In this section potential candidate compounds are ranked with the goal of
+facilitating the investigation of compounds with a negative effect on each of
+the bioactivity peptide libraries, using the \rankEN/ function.  For each
+library the mass spectrometry data remains the same.  Also note that the region
+of interest changes over the peptitde libraries, according to the selections
+shown in Figure \ref{fig:fracs-of-interest}.
+
+
+\subsubsection{Selecting the quadratic penalty parameter}
+
+The \rankEN/ function works by selecting a choice of quadratic penalty parameter
+and tracking the order in which the coefficients corresponding to candidate
+compounds first become nonzero along the elastic net path for the $\ell_1$
+penalty parameter.  Then it is presumed that compounds with corresponding
+coefficients that become nonzero earlier in the path may be better candidates
+for having an effect on bioactivity levels then those with corresponding
+coefficients that become nonzero later in the path.  So it remains to select a
+quadratic penalty parameter; we selected 0.001 as a small nonzero penalty
+parameter, with the thought that being near to the lasso penalty we might
+achieve good behavior in terms of variable selection.
+
 
 <<candidate-compound-ranking>>=
 
@@ -422,36 +451,43 @@ rank_oc <- rankEN(msObj      = filter_out,
                   region_ms  = paste0("VO_", 18:22),
                   region_bio = paste0("VO_", 18:22),
                   lambda     = 0.001)
+
 rank_bc <- rankEN(msObj      = filter_out,
                   bioact     = bioact$bc,
                   region_ms  = paste0("VO_", 18:23),
                   region_bio = paste0("VO_", 18:23),
                   lambda     = 0.001)
+
 rank_pc <- rankEN(msObj      = filter_out,
                   bioact     = bioact$pc,
                   region_ms  = paste0("VO_", 17:21),
                   region_bio = paste0("VO_", 17:21),
                   lambda     = 0.001)
+
 rank_ab <- rankEN(msObj      = filter_out,
                   bioact     = bioact$ab,
                   region_ms  = paste0("VO_", 17:21),
                   region_bio = paste0("VO_", 17:21),
                   lambda     = 0.001)
+
 rank_ef <- rankEN(msObj      = filter_out,
                   bioact     = bioact$ef,
                   region_ms  = paste0("VO_", 18:21),
                   region_bio = paste0("VO_", 18:21),
                   lambda     = 0.001)
+
 rank_pa <- rankEN(msObj      = filter_out,
                   bioact     = bioact$pa,
                   region_ms  = paste0("VO_", 18:25),
                   region_bio = paste0("VO_", 18:25),
                   lambda     = 0.001)
+
 rank_ec <- rankEN(msObj      = filter_out,
                   bioact     = bioact$ec,
                   region_ms  = paste0("VO_", 18:22),
                   region_bio = paste0("VO_", 18:22),
                   lambda     = 0.001)
+
 rank_fg <- rankEN(msObj      = filter_out,
                   bioact     = bioact$fg,
                   region_ms  = paste0("VO_", 19:24),
