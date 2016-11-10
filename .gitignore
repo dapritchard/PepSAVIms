@@ -4,4 +4,5 @@
 vignettes/*
 !vignettes/Paper_Analysis.Rnw
 !vignettes/PepSAVIms_Introduction.Rnw
+!vignettes/Shared_Preamble.tex
 !vignettes/images

@@ -1,0 +1,52 @@
+
+\usepackage[margin=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage{makecell}  % tikz construct
+\usepackage{float}     % for the H specification in \begin{figure}[H]
+\usepackage{caption}   % caption*
+\usepackage{titlesec}  % titlespacing
+\usepackage[hidelinks]{hyperref}  % url
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+\usetikzlibrary{shapes, arrows, positioning}
+
+\def\R/{\textsf{R}}
+
+\def\papernamefull/{\emph{The PepSAVI-MS pipeline for natural product bioactive
+    peptide discovery}}
+\def\papername/{\emph{The PepSAVI-MS pipeline}}
+\def\binMS/{\texttt{binMS}}
+\def\filterMS/{\texttt{filterMS}}
+\def\rankEN/{\texttt{rankEN}}
+\def\msDat/{\texttt{msDat}}
+\newcommand{\pkg}[1]{\textsf{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+\def\pkgname/{\pkg{PepSAVIms}}
+\def\methodname/{PepSAVI-MS}
+\def\githubLoc/{https://github.com/dpritchLibre/PepSAVI-MS}
+
+
+
+
+% Spacing before/after sections and subsections
+\titlespacing*{\section}
+{0pt}{5.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
+\titlespacing*{\subsection}
+{0pt}{7.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
+
+
+% Define tikz block styles
+\tikzstyle{decision} = [diamond, draw, fill=blue!20,
+text width=6em, text badly centered, node distance=5cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20,
+text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse, fill=red!20, node distance=3cm,
+minimum height=2em]
+\tikzstyle{cloudGr} = [draw, ellipse, fill=black!5!green!40!, node distance=3cm,
+minimum height=2em]
+\tikzstyle{cloudYel} = [draw, ellipse, fill=yellow!40!, node distance=3cm,
+minimum height=2em]
