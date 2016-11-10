@@ -77,7 +77,7 @@ detail in the \texttt{Paper\_Analysis} vignette.  The dashed lines show
 alternative workflows which may be performed in situations where some of the
 data processing steps have already been performed using other tools, or where
 some of the data processing steps may not be appropriate for the particular data
-analysis in hand.
+analysis at hand.
 
 
 \begin{figure}[H]
@@ -152,14 +152,14 @@ data).
 \end{enumerate}
 
 
-Once that a set of observations satisfying the above criteria is obtained, then
+Once the subset of observations satisfying the above criteria is obtained,
 a second step attempts to combine observations believed to belong to the same
-underlying compound.  The procedure considers two observations that satisfy each
+underlying compound.  This procedure considers two observations that satisfy each
 of the following criterions to belong to the same compound.
 
 \begin{enumerate}[label=(\roman*)]
 
-\item The absolute difference (in Daltons) of the mass-to-charge values between the
+\item The absolute difference (in Daltons) of the mass-to-charge (m/z) values between the
   two observations is less the the specified value.
 
 \item The absolute difference of the peak elution time between the two
@@ -176,10 +176,10 @@ The second optional preprocessing step for the mass spectrometry abundance data
 is a filtering step.  The goal of the filtering step is to further reduce the
 data set to focus on only those compounds that could plausibly be contributing
 to the bioactivity area of interest. Furthermore, these criteria aim to filter
-out some of the noice detected in the dataset.  By filtering the candidate set
-prior to a statistical analysis, this step can greatly increase the ability of
-the analysis to effectively differentiate such compounds.  The criteria for the
-downstream inclusion of a candidate compound is listed below.
+out some of the noise detected in the dataset.  By filtering the candidate set
+prior to statistical analysis, the ability of
+the analysis to effectively differentiate such compounds is greatly increased.  The criteria for the
+downstream inclusion of a candidate compound are listed below.
 \begin{enumerate}[label=(\roman*)]
 
 \item The m/z intensity maximum must fall inside the range of the bioactivity
@@ -189,8 +189,8 @@ downstream inclusion of a candidate compound is listed below.
   region of interest and the species maximum intensity must be less than the
   specified value.
 
-\item The immediately right adjacent fraction to its maximum intensity fraction
-  for a species must have a non-zero abundance.
+\item The right adjacent fraction to the fraction with maximum intensity
+  for a given species must have a non-zero abundance.
 
 \item At least 1 fraction in the region of interest must have intensity greater
   than the specified value.
@@ -198,17 +198,17 @@ downstream inclusion of a candidate compound is listed below.
 \item The compound charge state must be less than or equal to the specified value.
 
 \end{enumerate}
-The region of interest is typically chosen to be a region where a high percent of
-bioactivity is observed; the assumption then is that there is some
+The region of interest is chosen to be a region where a high percent of
+bioactivity is observed in multiple sequential fractions; the assumption then is that there is some
 compound(s) eluting in those fractions that are associated with
-bioactivity levels.
+the observed bioactivity.
 
 
 \subsection{The \rankEN/ function}
 
 Once the mass spectrometry abundance data has optionally undergone any
 preprocessing steps, a statistical procedure to search for putative bioactive
-compounds is performed.  This step is performed by the \rankEN/ function, and
+peptides is performed.  This step is performed by the \rankEN/ function, which
 takes as inputs both the preprocessed mass spectrometry abundance data and the
 bioactivity data.  The procedure works by specifying the level of the $\ell_2$
 penalty parameter in the elastic net penalty \cite{zou2005}, and tracking the
@@ -305,7 +305,7 @@ Next we load some bioactivity data included with the package into memory.  The
 object \texttt{bioact} is a list containing bioactivity values (in replicates)
 for sweet violet against several bacterial and viral pathogens, as well as some
 cancer cell lines; we will arbitrarily choose the bioactivity data against the
-Gram-negative bacterium E. coli as an illustrative example, and create an object
+Gram-negative bacterium \textit{E. coli} as an illustrative example, and create an object
 for this data from the element in the list.
 
 <<reading-data-bio>>=
@@ -494,8 +494,8 @@ summary(bin_out)
 \subsection{Using \texttt{filterMS}}
 
 The next step in the \pkgname/ pipeline is to remove any potential candidate
-compounds with observed abundances for which it is not scientifically plausible
-that they might be a compound with an effect on bioactivity levels.  This step
+compounds with observed abundances for which it is scientifically unlikely
+that they might correspond to compound with an effect on the bioactivity area of interest.  This step
 is performed by the \texttt{filterMS} function.
 
 When using the \texttt{filterMS} function, the first task is to specify the region
