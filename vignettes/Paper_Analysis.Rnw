@@ -356,9 +356,9 @@ datset, namely fractions 17-25.
 \begin{figure}[p]
   \centering
   \includegraphics[width=0.80\textwidth]{images/Analysis_Regions}
-  \caption{Percent decrease in bioactivity levels, averaged over replicates.
-    The fractions selected as the region of interest are shown in
-    blue. {\color{red} What are the CI bars?}}
+  \caption{\textit{Viola odorata} peptide library bioactivity against all pathogens in which strong activity was seen in the region of cyO2 elution.
+    Average % activity values for each fraction are plotted with error bars representing +1 standard deviation. The fractions selected as the region of interest are shown using
+    blue bars.
   \label{fig:fracs-of-interest}
 \end{figure}
 
