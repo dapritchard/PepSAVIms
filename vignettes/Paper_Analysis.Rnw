@@ -54,34 +54,30 @@ biological matrix.  The package was constructed to provide an implementation of
 the statistical portion of the laboratory and statistical procedure proposed in
 \papernamefull/ (herafter abbreviated to \papername/) \cite{kirkpatrick2016}.
 
-This document describes all of the steps and shows the results of the data
-analysis performed in \papername/.  Providing the analysis will hopefully make
-the research more reproducible, give the interested reader a greater
-understanding of the methodology developed in the paper, and provide a working
-template for researchers who may wish to apply the methodology developed in the
-paper to their own research problems.
+This document describes in detail all of the data processing and analysis steps performed in \papername/. 
+Providing the analysis will hopefully facilitate a deeper understanding of the methodology and results described in the paper, 
+and provide a working template for researchers who may wish to apply this methodology to their own research.
 
 
 \section{Data collection}
 
 This section describes in brief the data collection procedures that are
-performed upstream of the data analysis.  Please refer to \papername/ for far
-greater detail regarding this process. \vspace{-2mm}
+performed upstream of the data analysis.  Please refer to \papername/ for a detailed explanation. \vspace{-2mm}
 
 
 \subsection{\textit{Viola odorata} sample preparation and LC-MS/MS
   analysis} \label{sec: lcms}
 
-Aqueous extraction of \textit{Viola odorata} aerial tissue was performed to
-selectively extract for AMP-like compounds.  The resulting extract was crudely
+\textit{V. odorata} aerial tissue was aqueously extracted using size exclusion steps to 
+selectively target AMP-like molecules.  The resulting extract was crudely
 fractionated using strong cation exchange (SCX) chromatography for creation of
 the \textit{Viola odorata} peptide library.  Bioactivity assays against a panel
-of microbial pathogens were performed using the generated peptide library.  Each
-SCX fraction was then subject to nano-LC-ESI-MS/MS (a Waters nanoAcquity UPLC
-coupled to an AB Sciex TripleTOF5600).  After processing of this dataset,
+of microbial pathogens were performed using the generated peptide library. Each
+SCX fraction was then subject to nano-LC-ESI-MS/MS (Waters nanoAcquity UPLC
+coupled to an AB Sciex TripleTOF 5600) analysis.  After processing of this dataset,
 accurate intact mass and relative intensity information for peptide constituents
 contained within each fraction was obtained, resulting in 30,799 MS features for
-\textit{Viola odorata} across the 34 fractions.
+\textit{Viola odorata} across the SCX fractions.
 
 
 \subsection{Bioactivity screening} \label{sec: bioact}
@@ -89,13 +85,13 @@ contained within each fraction was obtained, resulting in 30,799 MS features for
 Peptide libraries were assayed for growth inhibition against the following
 pathogens: \textit{E. coli} (ec), \textit{E. faecium} (ef), \textit{S. aureus} (sa), \textit{K. pneumoniae} (kp), \textit{A. baumannii} (ab),
 \textit{P. aeruginosa} (pa), \textit{E. cloacae} (ecl), \textit{F. graminearum} (fg), and cancer cell lines:
-breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc). Library fractions are
-incubated with a microbial or cancer cell culture and the presence of bioactive
+breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc). Library fractions were
+incubated with a microbial or cancer cell culture in a manner such that the presence of bioactive
 peptides in a given fraction will result in inhibition of culture growth during
-the incubation period.  For bacterial assays, the remaining viable cells are
+the incubation period.  For bacterial assays, the remaining viable cells were
 quantified indirectly by spectrophotometric measurement of the irreversible
-intracellular reduction of resazurin25.  For anticancer bioactivity,
-cytotoxicity assays are performed using MTT-based assays to measure
+intracellular reduction of resazurin.  For anticancer bioactivity,
+cytotoxicity assays were performed using MTT-based assays to measure
 mitochondrial succinate dehydrogenase activity with absorbance measurements at
 570 nm. Values for each fraction are compared to positive and negative controls
 containing a known therapeutic or water, respectively, to determine a percent
@@ -118,7 +114,7 @@ where RFU refers to \textit{relative fluorescence units}.
   prototypical}
 
 This section describes all of the steps and shows the results of the data
-analyses performed in \papername/, which is the workflow shown in Figure
+analyses performed in \papername/, as depicted in Figure
 \ref{fig: flow chart prototypical}.  In this scenario, mass spectrometry
 abundance values for each compound across the SCX fractions are obtained using
 LC-MS/MS analysis as described in section \ref{sec: lcms}, and is represented by
@@ -168,7 +164,7 @@ comma-seperated values (csv) file.  However, in order to minimize the size of
 the \pkg{\pkgname/} package, we have removed the columns in the data
 corresponding to variables not used in the data analysis, and have converted the
 data to a compressed native \R/ format.  The values of the data relevent to this
-data analysis of course remain unchanged from their original form.
+data analysis remain unchanged from their original form.
 
 Readers who wish to obtain the data in its raw form may obtain the data as well
 as the \R/ script used to convert the raw data into the form provided with the
@@ -197,16 +193,16 @@ data(mass_spec)
 
 \subsubsection{Bioactivity data}
 
-Peptide libraries were assayed for growth inhibition against the following
-pathogens listed in section 1.2.  Three
-replicate observations were collected for each of the assays (with the exception
-of F. graminearum, which had two replicates), across fractions 1-43.  The
+Peptide libraries were assayed for growth inhibition against the
+pathogens listed in section 1.2. Three
+replicate observations were collected for each of the assays with the exception
+of F. graminearum, which had two replicates. The
 resulting percent activity of each fraction was quantified using cell viability
 assays, and the average response across all replicates was used for this
 analysis. Assays showing promising activity in the region of cyO2 elution include \textit{E. coli} (ec), \textit{E. faecium} (ef), \textit{A. baumannii} (ab),
 \textit{P. aeruginosa} (pa), \textit{F. graminearum} (fg),
-breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc). Each region of activity is defined using blue % activity bars,
-as depicted in Figure 2.
+breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc), as depicted in Figure 2. Each region of activity is defined using blue % activity bars.
+
 
 <<reading-data-bioact>>=
 # Load bioactivity data into memory
@@ -231,7 +227,7 @@ performed via the \binMS/ function.
 \subsubsection{Specification of criteria} \label{sec:ms_criteria}
 
 The \binMS/ function contains a number of criteria to exclude unwanted compounds
-and thereby restrict attention to potential compounds of interest. Retention
+and thereby restrict compounds to those of potential interest. Retention
 time limitations are put in place to eliminate background ions that are detected
 either before (equilibration) or after (wash) the gradient is applied; for the
 gradient performed in our laboratory, 14 and 45 minutes were appropriate
@@ -241,12 +237,11 @@ and charge ranges of known bioactive peptides.
 
 MS features that satisfy this initial exclusion process are then consolidated
 when features are believed to belong to the same underlying compound.  This
-consolidation step required choices to be made in specifying the criteria by
-which features are determined to belong to the same compound.  An m/z difference
+consolidation step requires choices to be made through the specification of criteria deeming 
+two MS features to be considered the same compound.  An m/z difference
 of 0.05 Da was chosen for our data analysis to be the maximum difference for
-which two compounds could have in m/z levels to be considered to belong to the
-same compound.  The value of 0.05 Da was chosen by performing multiple runs of
-the MS-LC data collection process and studying the variation in the
+which two compounds could have in m/z to be considered to belong to the
+same compound. The value of 0.05 Da was chosen by performing multiple LC-MS runs studying the variation in the
 observations; this value was chosen so that fluctuations in mass accuracy and
 retention time for the test data allowed the same peak to be picked multiple
 times despite representing the same compound.
@@ -255,10 +250,10 @@ The other criterion that must be met for two MS feature observations to be
 considered to belong to the same compound is that the retention times for the
 two features cannot be more than a specified amount of time apart.  For this
 analysis we chose to allow all MS features that were below the threshold for
-difference in Da and had the same charge state to be considered to belong to the
-same compound, effectively ignoring this criterion.  This was chosen because
-{\color{red} discuss why}, and is implemented by specifying the appropriate
-parameter to be equal to the run time, which in this case was 60 minutes.
+m/z difference and had the same charge state to be considered to belong to the
+same compound because we used prior retention time alignment.  The option to effectively 
+ignore this criterion is implemented by specifying the appropriate parameter to be 
+equal to the run time, which in this case was 60 minutes.
 
 
 
@@ -323,8 +318,8 @@ summary(bin_out)
 \subsection{Filtering mass spectrometry data}
 
 The next step in the \pkg{\pkgname/} pipeline is to remove any potential candidate
-compounds with observed abundances for which it is not scientifically plausible
-that they might be a compound with an effect on bioactivity levels.  This step
+compounds with observed abundances for which it is scientifically unlikely
+that they might be a compound with an effect on the observed bioactivity.  This step
 is performed by the \filterMS/ function.
 
 
@@ -403,8 +398,8 @@ Section \ref{sec:ms_criteria}.
 \subsubsection{Filtering data with \texttt{filterMS}}
 
 Here we perform the filtering operation to remove any potential candidate
-compounds with observed abundances for which it is not scientifically plausible
-that they might be a compound with an effect on bioactivity level via the
+compounds with observed abundances for which it is scientifically unlikely
+that they might be a compound with an effect on bioactivity via the
 \filterMS/ function.  We can see from the summary output below that 3,428
 compounds satisfied criterion 1, 3,428 compounds satisfied criterion 2, 3,428
 compounds satisfied criterion 3, 3,428 compounds satisfied criterion 4, and
@@ -522,8 +517,8 @@ odorata}, commonly known as sweet violet, contains many cyclotides - including
 cycloviolacin O2 (cyO2). CyO2 is a small, cysteine rich cyclotide comprised of
 30 amino acids (MWmonoisotopic: 3138.37 Da), which has been shown to have
 diverse activity against many Gram-negative bacteria (\textit{E. coli}, \textit{K. pneumoniae},
-and \textit{P. aeruginosa}), as well as several cancer cell lines.  Here, we demonstrate successful detection and
-identifiaction of cyO2 thereby validating the use of this statistical analysis
+and \textit{P. aeruginosa}), as well as several cancer cell lines.  Here, we demonstrate successful 
+detection, prioritization, and identifiaction of cyO2 thereby validating the use of this statistical analysis
 approach for bioactive peptide discovery.
 
 
@@ -541,7 +536,7 @@ the \texttt{extract\_ranked} function).
 The exact m/z and charge values for cyO2 were obtained by comparing the
 candidate compounds list after the consolidation and filtering process to the
 known range of values; the m/z and charge pairs corresponding to cyO2 were
-determined to be approximately (1047.4898, 3), and (1570.2414, 2) in our data.
+determined to be (1047.4898, 3), and (1570.2414, 2) in our data.
 Thus the \R/ function \texttt{find\_cyO2\_rank} shown below returns a vector of
 the rankings of each charge state of cyO2.
 
@@ -576,16 +571,14 @@ lapply(list(ab=rank_ab, bc=rank_bc, ec=rank_ec, ef=rank_ef,
 
 \section{Conclusion}
 
-In this document, the data processing and analysis portion of the data analysis
-performed in \papername/ is performed.  The choices that were made when
-performing the analysis were explained, and will hopefully provide a template
-for laboratories wishing to use methodology for their own research questions.
+This document describes in detail the data processing and analysis steps as
+implimented in \papername/, including explanations for the choices that were made when
+performing the analysis. We hope that in conjunction with the Pipeline Introduction these 
+vignettes provide a valuable template for laboratories wishing to impliment this methodology for their own research purposes.
 As a result of the analysis, we see that out of 30,799 MS features originally
-measured by the MS-LC process, for each of the eight bioactivity peptide
-libraries the pipeline was able to identify the cyO2 compound as one of the
-first 100 candidate compounds with a possibility of having deleterious effect on
-bioactivity levels, and furthermore as one of the first 10 for three of the
-peptide libraries.
+measured by the LC-MS process, this pipeline 
+was able to identify cyO2 as a top-10 likely contributor to bioactivity against three of the eight pathogens, 
+and as one of the first 100 candidate compounds for all bioactivity data sets.
 
 
 
