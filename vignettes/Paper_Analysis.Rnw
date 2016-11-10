@@ -87,10 +87,9 @@ contained within each fraction was obtained, resulting in 30,799 MS features for
 \subsection{Bioactivity screening} \label{sec: bioact}
 
 Peptide libraries were assayed for growth inhibition against the following
-pathogens: E. coli (ec), S. aureus (sa), K. pneumoniae (kp), A. baumannii (ab),
-P. aeruginosa (pa), E. cloacae (ec), F. graminearum (fg), and cancer cell lines:
-breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc). {\color{red}
-  There's no sa or kp in the data, and there is an ef.} Library fractions are
+pathogens: \textit{E. coli} (ec), \textit{E. faecium} (ef), \textit{S. aureus} (sa), \textit{K. pneumoniae} (kp), \textit{A. baumannii} (ab),
+\textit{P. aeruginosa} (pa), \textit{E. cloacae} (ecl), \textit{F. graminearum} (fg), and cancer cell lines:
+breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc). Library fractions are
 incubated with a microbial or cancer cell culture and the presence of bioactive
 peptides in a given fraction will result in inhibition of culture growth during
 the incubation period.  For bacterial assays, the remaining viable cells are
@@ -104,9 +103,9 @@ activity of each library fraction, where a small value of remaining viable cells
 indicates high activity.  Percent activity of each well was calculated using the
 formula:
 \[
-  \text{percent activity} = 1 - \frac{ \text{RFU of fraction} -
+  \text{percent activity} = (1 - \frac{ \text{RFU of fraction} -
     \text{RFU of positive control} }{ \text{RFU of negative control} -
-    \text{RFU of positive control} } \times 100
+    \text{RFU of positive control} }) \times 100
 \]
 where RFU refers to \textit{relative fluorescence units}.
 
@@ -199,15 +198,15 @@ data(mass_spec)
 \subsubsection{Bioactivity data}
 
 Peptide libraries were assayed for growth inhibition against the following
-pathogens: E. coli (ec), S. aureus (sa), K. pneumoniae (kp), A. baumannii (ab),
-P. aeruginosa (pa), E. cloacae (ec), F. graminearum (fg) and cancer cell lines:
-breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc) {\color{red}
-  these are already given in section 1.2, maybe just refer to that}.  Three
+pathogens listed in section 1.2.  Three
 replicate observations were collected for each of the assays (with the exception
 of F. graminearum, which had two replicates), across fractions 1-43.  The
 resulting percent activity of each fraction was quantified using cell viability
 assays, and the average response across all replicates was used for this
-analysis.
+analysis. Assays showing promising activity in the region of cyO2 elution include \textit{E. coli} (ec), \textit{E. faecium} (ef), \textit{A. baumannii} (ab),
+\textit{P. aeruginosa} (pa), \textit{F. graminearum} (fg),
+breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc). Each region of activity is defined using blue % activity bars,
+as depicted in Figure 2.
 
 <<reading-data-bioact>>=
 # Load bioactivity data into memory
@@ -515,16 +514,15 @@ rank_fg <- rankEN(msObj      = filter_out,
 
 % Candidate compound ranking ---------------------------------------------------
 
-\section{Proof-of-method via the cyO2 compound}
+\section{\pkg{\pkgname/} pipeline validation using cyO2}
 
 To validate this pipeline, we demonstrate successful detection and
-identification of a known AMP from the botanical species Viola odorata. Viola
-odorata, commonly known as sweet violet, contains many cyclotides - including
+identification of a known AMP from the botanical species \textit{Viola odorata}. \textit{Viola
+odorata}, commonly known as sweet violet, contains many cyclotides - including
 cycloviolacin O2 (cyO2). CyO2 is a small, cysteine rich cyclotide comprised of
 30 amino acids (MWmonoisotopic: 3138.37 Da), which has been shown to have
-diverse activity against many Gram-negative bacteria (E. coli, K. pneumoniae,
-and P. aeruginosa), as well as several cancer cell {\color{red} is this sentence
-  missing something?}.  Here, we demonstrate successful detection and
+diverse activity against many Gram-negative bacteria (\textit{E. coli}, \textit{K. pneumoniae},
+and \textit{P. aeruginosa}), as well as several cancer cell lines.  Here, we demonstrate successful detection and
 identifiaction of cyO2 thereby validating the use of this statistical analysis
 approach for bioactive peptide discovery.
 
@@ -545,16 +543,14 @@ candidate compounds list after the consolidation and filtering process to the
 known range of values; the m/z and charge pairs corresponding to cyO2 were
 determined to be approximately (1047.4898, 3), and (1570.2414, 2) in our data.
 Thus the \R/ function \texttt{find\_cyO2\_rank} shown below returns a vector of
-the rankings of these two incarnations of cyO2. {\color{red} is there a more
-  appropriate word than incarnation?}
+the rankings of each charge state of cyO2.
 
-From the output below we see that for ef {\color{red} which is this?}, prostate
-cancer, and breast cancer data, at least one charge state corresponding to cyO2
+From the output below we see that for the \textit{E. faecium}, prostate
+cancer, and breast cancer data sets, at least one charge state corresponding to cyO2
 is identified in the first 10 candidate compounds.  CyO2 is identified as the
-23rd and 33rd compounds for the A. baumannii and P. aeruginosa data,
-respectively, and for the remaining bioactive peptide libraries cyO2 is ranked
-within the top 100 compounds {\color{red} add remaining after we know which one
-  ef is}.
+23rd and 33rd compounds for the \textit{A. baumannii} and \textit{P. aeruginosa} data sets,
+respectively, and for the remaining bioactive data sets cyO2 is ranked
+within the top 100 compounds.
 
 <<cyO2-rankings>>=
 # Function to find the rank of cyO2 compounds
@@ -598,7 +594,7 @@ peptide libraries.
 
 \begin{thebibliography}{9}
 
-\bibitem{kirkpatrick2016} Kirkpatrick et al.  A PepSAVI-MS pipeline for natural
+\bibitem{kirkpatrick2016} Kirkpatrick et al.  The PepSAVI-MS pipeline for natural
   product bioactive peptide discovery.  {\color{red} finish citation once the
     parts are finalized}
 
