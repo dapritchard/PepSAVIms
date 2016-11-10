@@ -8,13 +8,13 @@ Authors@R: c(
     person("Kirkpatrick", "Christine", email="ckirkpat@live.unc.edu", role="aut"))
 Description: An implementation of the data processing and data analysis portion of the
     pipeline proposed in Kirkpatrick et al.:  The PepSAVI-MS Pipeline for Natural Product
-    Bioactive Peptide Discovery.  In more detail, the package provides a collection of
-    software tools used to facilitate the prioritization of putative bioactive compounds
-    from a complex biological matrix.  Tools are provided by which to consolidate mass
-    spectrometry features in the data believed to belong to the same underlying compounds,
-    filter compounds not believed to have an effect on peptide library bioactivity
-    quantities, and search for a list of potential candidate compounds with an effect on
-    bioactivity.
+    Bioactive Peptide Discovery.  The statistical analysis package presented herein provides 
+    a collection of software tools used to facilitate the prioritization of putative bioactive peptides
+    from a complex biological matrix.  Tools are provided to deconvolute mass
+    spectrometry features into a single representation for each peptide charge state,
+    filter compounds to include only those possibly contributing to the observed bioactivity, 
+    and prioritize these remain compounds for those most likely contributing to each
+    bioactivity data set.
 License: GPL-3
 LazyData: TRUE
 Depends:
