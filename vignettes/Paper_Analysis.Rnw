@@ -55,7 +55,7 @@ the statistical portion of the laboratory and statistical procedure proposed in
 \papernamefull/ (herafter abbreviated to \papername/) \cite{kirkpatrick2016}.
 
 This document describes in detail all of the data processing and analysis steps
-performed in \papername/.  Providing the analysis will hopefully facilitate a
+performed in \papername/.  By providing this analysis, we hope to facilitate a
 deeper understanding of the methodology and results described in the paper, and
 provide a working template for researchers who may wish to apply this
 methodology to their own research.
@@ -74,11 +74,11 @@ detailed explanation. \vspace{-2mm}
 \textit{V. odorata} aerial tissue was aqueously extracted using size exclusion
 steps to selectively target AMP-like molecules.  The resulting extract was
 crudely fractionated using strong cation exchange (SCX) chromatography for
-creation of the \textit{Viola odorata} peptide library.  Bioactivity assays
+creation of the \textit{V. odorata} peptide library.  Bioactivity assays
 against a panel of microbial pathogens were performed using the generated
 peptide library. Each SCX fraction was then subject to nano-LC-ESI-MS/MS (Waters
 nanoAcquity UPLC coupled to an AB Sciex TripleTOF 5600) analysis.  After
-processing of this dataset, accurate intact mass and relative intensity
+the processing of this dataset, accurate intact mass and relative intensity
 information for peptide constituents contained within each fraction was
 obtained, resulting in 30,799 MS features for \textit{Viola odorata} across the
 SCX fractions.
@@ -96,7 +96,7 @@ cell culture in a manner such that the presence of bioactive peptides in a given
 fraction will result in inhibition of culture growth during the incubation
 period.  For bacterial assays, the remaining viable cells were quantified
 indirectly by spectrophotometric measurement of the irreversible intracellular
-reduction of resazurin.  For anticancer bioactivity, cytotoxicity assays were
+bioreduction of resazurin.  For anticancer bioactivity, cytotoxicity assays were
 performed using MTT-based assays to measure mitochondrial succinate
 dehydrogenase activity with absorbance measurements at 570 nm. Values for each
 fraction are compared to positive and negative controls containing a known
@@ -104,11 +104,11 @@ therapeutic or water, respectively, to determine a percent activity of each
 library fraction, where a small value of remaining viable cells indicates high
 activity.  Percent activity of each well was calculated using the formula:
 \[
-  \text{percent activity} = \left( 1 - \frac{ \text{RFU of fraction} -
-    \text{RFU of positive control} }{ \text{RFU of negative control} -
-    \text{RFU of positive control} } \right) \times 100
+  \text{percent activity} = \left( 1 - \frac{ \text{Response of fraction} -
+    \text{Response of positive control} }{ \text{Response of negative control} -
+    \text{Response of positive control} } \right) \times 100
 \]
-where RFU refers to \textit{relative fluorescence units}.
+where response refers to relative fluorescence units for antibacterial assays and absorbance for anticancer assays.
 
 
 
@@ -219,10 +219,10 @@ data(bioact)
 
 \subsection{Consolidating mass spectrometry data}
 
-Now that the mass spectrometry data is loaded into memory, the first step in the
-\pkg{\pkgname/} pipeline is to consolidate MS features in the data believed to
-belong to the same underlying compounds.  In this way, all of the abundance
-belonging to the same compound will be aggregated together and thus resemble a
+Now that the mass spectrometry data is loaded into memory, we begin data processing using
+\pkg{\pkgname/} pipeline by consolidating MS features in the data believed to
+belong to the same compound.  In this way, all of the abundance
+belonging to the same compound will be grouped together and thus resemble a
 more accurate depiction of the compound abundance accross SCX fractions. This is
 performed via the \binMS/ function.
 
@@ -235,7 +235,7 @@ The \binMS/ function contains a number of criteria to exclude unwanted compounds
 and thereby restrict compounds to those of potential interest. Retention
 time limitations are put in place to eliminate background ions that are detected
 either before (equilibration) or after (wash) the gradient is applied; for the
-gradient performed in our laboratory, 14 and 45 minutes were appropriate
+gradient performed in our laboratory, 14 and 45 minutes are appropriate
 retention time lower and upper bounds. Mass and charge limitations of 2 to 15
 kDa and +2 to +10, respectively, were chosen to restrict compounds to the mass
 and charge ranges of known bioactive peptides.
@@ -259,8 +259,7 @@ analysis, because we used prior retention time alignment, we chose to allow all
 MS features that were below the threshold for m/z difference and had the same
 charge state to be considered to belong to the same compound.  The option to
 effectively ignore this criterion is implemented by specifying the appropriate
-parameter to be equal to the run time, which in this case was 60 minutes (of
-course any value greater than 60 would have the same effect also).
+parameter to be equal to the run time, which in this case was 60 minutes (likewise, any value greater than 60 would have the same effect).
 
 
 
@@ -325,7 +324,7 @@ summary(bin_out)
 \subsection{Filtering mass spectrometry data}
 
 The next step in the \pkg{\pkgname/} pipeline is to remove any potential candidate
-compounds with observed abundances for which it is scientifically unlikely
+compounds with observed abundances for which it is unlikely
 that they might be a compound with an effect on the observed bioactivity.  This step
 is performed by the \filterMS/ function.
 
@@ -335,7 +334,7 @@ is performed by the \filterMS/ function.
 \subsubsection{Selecting fraction region of interest}
 
 Bioactivity regions of interest are selected based on each individual
-bioactivity data set. Based on the SCX peak width, a given peptide should elute
+bioactivity data set. Because of the crude nature of SCX, a given peptide should elute
 over a minimum of three fractions in a Gaussian manner. Because mass
 spectrometry is more sensitive than the bioactivity assays, the defined
 bioactivity region can extend 1-2 fractions beyond the visible activity range on
@@ -389,15 +388,15 @@ data that fit the profile of what we might expect for a compound with an effect
 on bioactivity levels in the region.
 
 Another filtering criterion that we consider for a candidate compound is a
-minimum value for the maximum intensity value over the MS-LC profile.  This
-level should be chosen to reflect the appropriate amount of noice apparent in
+minimum value for the maximum intensity value over the LC-MS profile.  This
+level should be chosen to reflect the appropriate amount of noise apparent in
 the instrumentation; for our analysis we selected 1000 Da as an appropriate
 value.
 
-Finally, an option to filter the data by maximum allowed charge state is
+Finally, an option to filter the data by a maximum allowed charge state is
 included in the pipeline.  This has already been considered in the consolidation
 step, but is included in the filtering step in the event that researcher does
-not wish to use the \binMS/ consolidation apparatus with the data analysis in
+not wish to use the \binMS/ consolidation function with the data analysis in
 hand.  We selected a maximum charge state of +10, consistent with our choice in
 Section \ref{sec:ms_criteria}.
 
