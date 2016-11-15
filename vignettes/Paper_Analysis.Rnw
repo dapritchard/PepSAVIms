@@ -68,17 +68,19 @@ performed upstream of the data analysis.  Please refer to \papername/ for a
 detailed explanation. \vspace{-2mm}
 
 
+
+
 \subsection{\textit{Viola odorata} sample preparation and LC-MS/MS
   analysis} \label{sec: lcms}
 
 \textit{V. odorata} aerial tissue was aqueously extracted using size exclusion
 steps to selectively target AMP-like molecules.  The resulting extract was
 crudely fractionated using strong cation exchange (SCX) chromatography for
-creation of the \textit{V. odorata} peptide library.  Bioactivity assays
-against a panel of microbial pathogens were performed using the generated
-peptide library. Each SCX fraction was then subject to nano-LC-ESI-MS/MS (Waters
-nanoAcquity UPLC coupled to an AB Sciex TripleTOF 5600) analysis.  After
-the processing of this dataset, accurate intact mass and relative intensity
+creation of the \textit{V. odorata} peptide library.  Bioactivity assays against
+a panel of microbial pathogens were performed using the generated peptide
+library. Each SCX fraction was then subject to nano-LC-ESI-MS/MS (Waters
+nanoAcquity UPLC coupled to an AB Sciex TripleTOF 5600) analysis.  After the
+processing of this dataset, accurate intact mass and relative intensity
 information for peptide constituents contained within each fraction was
 obtained, resulting in 30,799 MS features for \textit{Viola odorata} across the
 SCX fractions.
@@ -108,7 +110,8 @@ activity.  Percent activity of each well was calculated using the formula:
     \text{Response of positive control} }{ \text{Response of negative control} -
     \text{Response of positive control} } \right) \times 100
 \]
-where response refers to relative fluorescence units for antibacterial assays and absorbance for anticancer assays.
+where response refers to relative fluorescence units for antibacterial assays
+and absorbance for anticancer assays.
 
 
 
@@ -219,11 +222,11 @@ data(bioact)
 
 \subsection{Consolidating mass spectrometry data}
 
-Now that the mass spectrometry data is loaded into memory, we begin data processing using
-\pkg{\pkgname/} pipeline by consolidating MS features in the data believed to
-belong to the same compound.  In this way, all of the abundance
-belonging to the same compound will be grouped together and thus resemble a
-more accurate depiction of the compound abundance accross SCX fractions. This is
+Now that the mass spectrometry data is loaded into memory, we begin data
+processing using \pkg{\pkgname/} pipeline by consolidating MS features in the
+data believed to belong to the same compound.  In this way, all of the abundance
+belonging to the same compound will be grouped together and thus resemble a more
+accurate depiction of the compound abundance accross SCX fractions. This is
 performed via the \binMS/ function.
 
 
@@ -259,7 +262,8 @@ analysis, because we used prior retention time alignment, we chose to allow all
 MS features that were below the threshold for m/z difference and had the same
 charge state to be considered to belong to the same compound.  The option to
 effectively ignore this criterion is implemented by specifying the appropriate
-parameter to be equal to the run time, which in this case was 60 minutes (likewise, any value greater than 60 would have the same effect).
+parameter to be equal to the run time, which in this case was 60 minutes
+(likewise, any value greater than 60 would have the same effect).
 
 
 
@@ -323,10 +327,10 @@ summary(bin_out)
 
 \subsection{Filtering mass spectrometry data}
 
-The next step in the \pkg{\pkgname/} pipeline is to remove any potential candidate
-compounds with observed abundances for which it is unlikely
-that they might be a compound with an effect on the observed bioactivity.  This step
-is performed by the \filterMS/ function.
+The next step in the \pkg{\pkgname/} pipeline is to remove any potential
+candidate compounds with observed abundances for which it is unlikely that they
+might be a compound with an effect on the observed bioactivity.  This step is
+performed by the \filterMS/ function.
 
 
 
@@ -334,8 +338,8 @@ is performed by the \filterMS/ function.
 \subsubsection{Selecting fraction region of interest}
 
 Bioactivity regions of interest are selected based on each individual
-bioactivity data set. Because of the crude nature of SCX, a given peptide should elute
-over a minimum of three fractions in a Gaussian manner. Because mass
+bioactivity data set. Because of the crude nature of SCX, a given peptide should
+elute over a minimum of three fractions in a Gaussian manner. Because mass
 spectrometry is more sensitive than the bioactivity assays, the defined
 bioactivity region can extend 1-2 fractions beyond the visible activity range on
 either end.  The bioactivity regions for each species that were deemed to be
@@ -365,17 +369,18 @@ datset, namely fractions 17-25.
 
 
 
+
 \subsubsection{Filtering criteria selection}
 
 In addition to selecting the region of interest for which to filter by, we must
 also specify a bordering region; this is the region that we consider when
 filtering for candidate compounds by criterion 3: a candidate compound's elution
-in the bordering region cannot be greater than 1\% of its maximum abundance, and
-criterion 4: a candidate compound must have a nonzero level of elution in the
-right adjacent fraction to the fraction with the maximum elution.  For the data
-analysis performed for \papername/, we specified the most conservative choice
-for bordering region, which is that every fraction not in the region of interest
-is to be considered the bordering region.
+in the bordering region cannot be greater than a specified proportion of its
+maximum abundance, and criterion 4: a candidate compound must have a nonzero
+level of elution in the right adjacent fraction to the fraction with the maximum
+elution.  For the data analysis performed for \papername/, we specified the most
+conservative choice for bordering region, which is that every fraction not in
+the region of interest is to be considered the bordering region.
 
 Another criterion that we filter by is that a candidate compound may not by more
 abundant in the bordering region than some specified proportion of its maximum
@@ -406,14 +411,14 @@ Section \ref{sec:ms_criteria}.
 \subsubsection{Filtering data with \texttt{filterMS}}
 
 Here we perform the filtering operation to remove any potential candidate
-compounds with observed abundances for which it is scientifically unlikely
-that they might be a compound with an effect on bioactivity via the
-\filterMS/ function.  We can see from the summary output below that 3,428
-compounds satisfied criterion 1, 3,428 compounds satisfied criterion 2, 3,428
-compounds satisfied criterion 3, 3,428 compounds satisfied criterion 4, and
-3,428 compounds satisfied criterion 5 (see \papername/ or the \binMS/
-documentation for a description of the criteria).  In total, 225 compounds
-satisfied each each of the 5 criteria.
+compounds with observed abundances for which it is scientifically unlikely that
+they might be a compound with an effect on bioactivity via the \filterMS/
+function.  We can see from the summary output below that 3,428 compounds
+satisfied criterion 1, 3,428 compounds satisfied criterion 2, 3,428 compounds
+satisfied criterion 3, 3,428 compounds satisfied criterion 4, and 3,428
+compounds satisfied criterion 5 (see \papername/ or the \binMS/ documentation
+for a description of the criteria).  In total, 225 compounds satisfied each each
+of the 5 criteria.
 
 <<filtering-data>>=
 # Perform mass spectrometry levels filtering
@@ -439,24 +444,26 @@ interest changes over the peptitde libraries according to the selections shown
 in Figure \ref{fig:fracs-of-interest}.
 
 
+
+
 \subsubsection{Selecting the quadratic penalty parameter}
 
 The \rankEN/ function works by selecting a choice of quadratic penalty
 parameter, and for fixed value of quadratic penalty parameter tracking the order
 in which the coefficients corresponding to candidate compounds first become
-nonzero along the elastic net path as the $\ell_1$ penalty parameter changes.
-Then it is presumed that compounds with corresponding coefficients that become
-nonzero earlier in the path may be better candidates for having an effect on
-bioactivity levels then those with corresponding coefficients that become
-nonzero later in the path.  To select a quadratic penalty parameter we recommend
-a small nonzero value with the thought that being near to the lasso penalty we
-might achieve good behavior in terms of variable selection.  The reason for not
-choosing a penalty of 0 is that in that case the elastic net reduces to the
-lasso model, which can have no more than one less than the number of bioactivity
-data points of nonzero coefficients, and thus severly reduces the size of the
-list of candidate compounds generated by this approach.  We also note that we do
-not consider this choice to be data-driven; for our analysis we chose a value of
-0.001.
+nonzero along the elastic net \cite{zou2005} path as the $\ell_1$ penalty
+parameter changes.  Then it is presumed that compounds with corresponding
+coefficients that become nonzero earlier in the path may be better candidates
+for having an effect on bioactivity levels then those with corresponding
+coefficients that become nonzero later in the path.  To select a quadratic
+penalty parameter we recommend a small nonzero value with the thought that being
+near to the lasso penalty \cite{tibshirani1996} we might achieve good behavior
+in terms of variable selection.  The reason for not choosing a penalty of 0 is
+that in that case the elastic net reduces to the lasso model, which can have no
+more than one less than the number of bioactivity data points of nonzero
+coefficients, and thus severly reduces the size of the list of candidate
+compounds generated by this approach.  We also note that we do not consider this
+choice to be data-driven; for our analysis we chose a value of 0.001.
 
 <<candidate-compound-ranking>>=
 
@@ -599,7 +606,15 @@ and as one of the first 100 candidate compounds for all bioactivity data sets.
 
 \bibitem{kirkpatrick2016} Kirkpatrick et al.  The PepSAVI-MS pipeline for natural
   product bioactive peptide discovery.  {\color{red} finish citation once the
-    parts are finalized. Also add citation for elastic net and lasso.}
+    parts are finalized.}
+
+\bibitem{zou2005} Zou, H., \& Hastie, T. (2005). Regularization and variable
+  selection via the elastic net. Journal of the Royal Statistical Society:
+  Series B (Statistical Methodology), 67(2), 301-320.
+
+\bibitem{tibshirani1996} Tibshirani, R. (1996). Regression shrinkage and
+  selection via the lasso. Journal of the Royal Statistical Society. Series B
+  (Methodological), 267-288.
 
 \end{thebibliography}
 
