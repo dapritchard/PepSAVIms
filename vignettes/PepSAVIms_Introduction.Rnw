@@ -942,7 +942,7 @@ filter_msDat[1:5, 1:10]
 \begin{thebibliography}{9}
 
 \bibitem{kirkpatrick2016} Kirkpatrick et al.  A PRISMS pipeline for natural
-  product bioactive peptide discovery. {\color{red} Update when title is finalized}
+  product bioactive peptide discovery. Under review.
 
 \bibitem{zou2005} Zou, H., \& Hastie, T. (2005). Regularization and variable
   selection via the elastic net. Journal of the Royal Statistical Society:

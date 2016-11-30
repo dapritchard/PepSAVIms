@@ -480,14 +480,14 @@ rank_oc <- rankEN(msObj      = filter_out,
 
 rank_bc <- rankEN(msObj      = filter_out,
                   bioact     = bioact$bc,
-                  region_ms  = paste0("VO_", 18:23),
-                  region_bio = paste0("VO_", 18:23),
+                  region_ms  = paste0("VO_", 18:22),
+                  region_bio = paste0("VO_", 18:22),
                   lambda     = 0.001)
 
 rank_pc <- rankEN(msObj      = filter_out,
                   bioact     = bioact$pc,
-                  region_ms  = paste0("VO_", 17:21),
-                  region_bio = paste0("VO_", 17:21),
+                  region_ms  = paste0("VO_", 18:23),
+                  region_bio = paste0("VO_", 18:23),
                   lambda     = 0.001)
 
 rank_ab <- rankEN(msObj      = filter_out,
@@ -498,20 +498,20 @@ rank_ab <- rankEN(msObj      = filter_out,
 
 rank_ef <- rankEN(msObj      = filter_out,
                   bioact     = bioact$ef,
-                  region_ms  = paste0("VO_", 18:21),
-                  region_bio = paste0("VO_", 18:21),
+                  region_ms  = paste0("VO_", 17:21),
+                  region_bio = paste0("VO_", 17:21),
                   lambda     = 0.001)
 
 rank_pa <- rankEN(msObj      = filter_out,
                   bioact     = bioact$pa,
-                  region_ms  = paste0("VO_", 18:25),
-                  region_bio = paste0("VO_", 18:25),
+                  region_ms  = paste0("VO_", 18:21),
+                  region_bio = paste0("VO_", 18:21),
                   lambda     = 0.001)
 
 rank_ec <- rankEN(msObj      = filter_out,
                   bioact     = bioact$ec,
-                  region_ms  = paste0("VO_", 18:22),
-                  region_bio = paste0("VO_", 18:22),
+                  region_ms  = paste0("VO_", 18:25),
+                  region_bio = paste0("VO_", 18:25),
                   lambda     = 0.001)
 
 rank_fg <- rankEN(msObj      = filter_out,
@@ -558,12 +558,12 @@ determined to be (1047.4898, 3), and (1570.2414, 2) in our data.
 Thus the \R/ function \texttt{find\_cyO2\_rank} shown below returns a vector of
 the rankings of each charge state of cyO2.
 
-From the output below we see that for the \textit{E. faecium}, prostate cancer,
+From the output below we see that for the \textit{E. coli}, \textit{E. faecium},
 and breast cancer data sets, at least one charge state corresponding to cyO2 is
-identified in the first 10 candidate compounds.  CyO2 is identified as the 23rd
-and 33rd compounds for the \textit{A. baumannii} and \textit{P. aeruginosa} data
-sets, respectively, and for the remaining bioactive data sets cyO2 is ranked
-within the top 100 compounds.
+identified in the first 20 candidate compounds.  For the \textit{A. baumannii},
+\textit{P. aeruginosa}, and prostate cancer data cets, CyO2 is identified in the
+first 50 compounds; and for the \textit{F. graminearum} and ovarian cancer data
+sets cyO2 is identified in the first 50 compounds.
 
 <<cyO2-rankings>>=
 # Function to find the rank of cyO2 compounds
@@ -596,7 +596,7 @@ Introduction these vignettes provide a valuable template for laboratories
 wishing to implement this methodology for their own research purposes.  As a
 result of the analysis, we see that out of 30,799 MS features originally
 measured by the LC-MS process, this pipeline was able to identify cyO2 as a
-top-10 likely contributor to bioactivity against three of the eight pathogens,
+top-20 likely contributor to bioactivity against three of the eight pathogens,
 and as one of the first 100 candidate compounds for all bioactivity data sets.
 
 
@@ -607,8 +607,7 @@ and as one of the first 100 candidate compounds for all bioactivity data sets.
 \begin{thebibliography}{9}
 
 \bibitem{kirkpatrick2016} Kirkpatrick et al.  The PepSAVI-MS pipeline for natural
-  product bioactive peptide discovery.  {\color{red} finish citation once the
-    parts are finalized.}
+  product bioactive peptide discovery.  Under review.
 
 \bibitem{zou2005} Zou, H., \& Hastie, T. (2005). Regularization and variable
   selection via the elastic net. Journal of the Royal Statistical Society:

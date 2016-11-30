@@ -2,7 +2,7 @@ Package: PepSAVIms
 Type: Package
 Title: PepSAVI-MS Data Analysis
 Version: 0.9.0
-Date: 2016-11-09
+Date: 2016-11-30
 Authors@R: c(
     person("Pritchard", "David", email="dpritch@live.unc.edu", role=c("aut", "cre")),
     person("Kirkpatrick", "Christine", email="ckirkpat@live.unc.edu", role="aut"))
