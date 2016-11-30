@@ -1,4 +1,4 @@
 library(testthat)
-library(PRISMS)
+library(PepSAVIms)
 
-test_check("PRISMS")
+test_check("PepSAVIms")
