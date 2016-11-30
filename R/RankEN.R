@@ -132,8 +132,8 @@
 #' # Perform the candidate ranking procedure with fractions 21-24 as the region
 #' # of interest.  It is not advisable to calculate the elastic net estimates
 #' # with 30,799 candidate compounds on 4 data points, so in this example the
-#' # data is artificially reduced to the first 1,000 candidate compounds.
-#' rank_out <- rankEN(msObj = ms[1:1000, ],
+#' # data is artificially reduced to the first 500 candidate compounds.
+#' rank_out <- rankEN(msObj = ms[1:500, ],
 #'                    bioact = bioact$ec,
 #'                    region_ms = paste0("_", 21:24),
 #'                    region_bio = paste0("_", 21:24),
