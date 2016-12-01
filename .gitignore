@@ -1,6 +1,7 @@
 \.Rbuildignore
 \.Rhistory
 *~
+
 vignettes/*
 !vignettes/Paper_Analysis.Rnw
 !vignettes/PepSAVIms_Introduction.Rnw
