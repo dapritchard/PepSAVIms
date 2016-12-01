@@ -145,20 +145,20 @@ data(bioact)
 
 \dontrun{
 
-rank_out <- rankEN(msObj = ms,
-                   bioact = bioact$ec,
-                   region_ms = paste0("_", 21:24),
-                   region_bio = paste0("_", 21:24),
-                   lambda = 0.001,
-                   pos_only = TRUE,
-                   ncomp = NULL)
+    rank_out <- rankEN(msObj = ms,
+                       bioact = bioact$ec,
+                       region_ms = paste0("_", 21:24),
+                       region_bio = paste0("_", 21:24),
+                       lambda = 0.001,
+                       pos_only = TRUE,
+                       ncomp = NULL)
 
-# print, summary function
-rank_out
-summary(rank_out)
+    # print, summary function
+    rank_out
+    summary(rank_out)
 
-# Extract ranked compounds as a data.frame
-ranked_candidates <- extract_ranked(rank_out)
+    # Extract ranked compounds as a data.frame
+    ranked_candidates <- extract_ranked(rank_out)
 
 }
 

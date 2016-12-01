@@ -16,7 +16,7 @@ Description: An implementation of the data processing and data analysis portion
     compounds to include only those possibly contributing to the observed
     bioactivity, and prioritize these remaining compounds for those most likely
     contributing to each bioactivity data set.
-License: CC BY-NC-SA 3.0
+License: CC BY-NC-SA 4.0
 LazyData: TRUE
 Depends:
     R (>= 3.0.0)
