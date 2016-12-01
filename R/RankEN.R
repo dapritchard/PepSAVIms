@@ -130,23 +130,27 @@
 #' data(bioact)
 #'
 #' # Perform the candidate ranking procedure with fractions 21-24 as the region
-#' # of interest.  It is not advisable to calculate the elastic net estimates
-#' # with 30,799 candidate compounds on 4 data points, so in this example the
-#' # data is artificially reduced to the first 500 candidate compounds.
-#' rank_out <- rankEN(msObj = ms[1:500, ],
-#'                    bioact = bioact$ec,
-#'                    region_ms = paste0("_", 21:24),
-#'                    region_bio = paste0("_", 21:24),
-#'                    lambda = 0.001,
-#'                    pos_only = TRUE,
-#'                    ncomp = NULL)
+#' # of interest.  Note that it is not advisable to calculate the elastic net
+#' # estimates with 30,799 candidate compounds on 4 data points!
 #'
-#' # print, summary function
-#' rank_out
-#' summary(rank_out)
+#' \dontrun{
 #'
-#' # Extract ranked compounds as a data.frame
-#' ranked_candidates <- extract_ranked(rank_out)
+#'     rank_out <- rankEN(msObj = ms,
+#'                        bioact = bioact$ec,
+#'                        region_ms = paste0("_", 21:24),
+#'                        region_bio = paste0("_", 21:24),
+#'                        lambda = 0.001,
+#'                        pos_only = TRUE,
+#'                        ncomp = NULL)
+#'
+#'     # print, summary function
+#'     rank_out
+#'     summary(rank_out)
+#'
+#'     # Extract ranked compounds as a data.frame
+#'     ranked_candidates <- extract_ranked(rank_out)
+#'
+#' }
 #'
 #' @export
 
