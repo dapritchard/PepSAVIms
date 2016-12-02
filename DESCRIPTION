@@ -7,7 +7,7 @@ Authors@R: c(
     person("Pritchard", "David", email="dpritch@live.unc.edu", role=c("aut", "cre")),
     person("Kirkpatrick", "Christine", email="ckirkpat@live.unc.edu", role="aut"))
 Description: An implementation of the data processing and data analysis portion
-    of a pipeline named the PepSAVI-MS which is currently under developement by
+    of a pipeline named the PepSAVI-MS which is currently under development by
     the Hicks laboratory at the University of North Carolina.  The statistical
     analysis package presented herein provides a collection of software tools
     used to facilitate the prioritization of putative bioactive peptides from a
