@@ -1,6 +1,6 @@
 
 % \VignetteEngine{knitr::knitr}
-% \VignetteIndexEntry{PepSAVIms Introduction}
+% \VignetteIndexEntry{PepSAVIms introduction}
 
 \documentclass{article}
 
@@ -24,11 +24,11 @@
   {\large \today}
 
 \end{center}
-\vspace{10mm}
+\vspace{5mm}
 
 
 \tableofcontents
-\vspace{10mm}
+\vspace{5mm}
 
 
 

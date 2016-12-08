@@ -1,5 +1,5 @@
 
-% \VignetteIndexEntry{Kirkpatrick et. al (2016) data analysis}
+% \VignetteIndexEntry{Kirkpatrick et al. (2016) data analysis}
 % \VignetteEngine{knitr::knitr}
 
 \documentclass{article}
@@ -35,10 +35,10 @@ fcom <- function(x) format(x, big.mark=",")
   {\large \today}
 
 \end{center}
-\vspace{10mm}
+\vspace{5mm}
 
 \tableofcontents
-\vspace{10mm}
+\vspace{5mm}
 
 
 
@@ -91,7 +91,7 @@ SCX fractions.
 \subsection{Bioactivity screening} \label{sec: bioact}
 
 Peptide libraries were assayed for growth inhibition against the following
-pathogens: \textit{E. coli} (ec), \textit{E. faecium} (ef), \textit{S. aureus}
+pathogens: \textit{E. coli} (ec), \textit{E. faecium} (ef) \textit{S. aureus}
 (sa), \textit{K. pneumoniae} (kp), \textit{A. baumannii} (ab),
 \textit{P. aeruginosa} (pa), \textit{E. cloacae} (ecl), \textit{F. graminearum}
 (fg), and cancer cell lines: breast cancer (bc), prostate cancer (pc) and
@@ -209,9 +209,9 @@ for each of the assays with the exception of \textit{F. graminearum}, which had
 two replicates. The resulting percent activity of each fraction was quantified
 using cell viability assays, and the average response across all replicates was
 used for this analysis. Assays showing promising activity in the region of cyO2
-elution include \textit{E. coli} (ec), \textit{E. faecium} (ef),
-\textit{A. baumannii} (ab), \textit{P. aeruginosa} (pa), \textit{F. graminearum}
-(fg), breast cancer (bc), prostate cancer (pc) and ovarian cancer (oc).
+elution include \textit{E. coli} (ec), \textit{A. baumannii} (ab),
+\textit{P. aeruginosa} (pa), \textit{F. graminearum} (fg), breast cancer (bc),
+prostate cancer (pc) and ovarian cancer (oc).
 
 
 <<reading-data-bioact>>=
@@ -365,7 +365,8 @@ datset, namely fractions 17-25.
     pathogens in which strong activity was seen in the region of cyO2 elution.
     Average percentage of activity values for each fraction are plotted with
     error bars representing +1 standard deviation. The fractions selected as the
-    region of interest are shown using blue bars.}
+    region of interest are shown using blue bars.  \textit{(note that this figure was
+    not created using \pkgname/ or \R/)}}
   \label{fig:fracs-of-interest}
 \end{figure}
 
@@ -496,12 +497,6 @@ rank_ab <- rankEN(msObj      = filter_out,
                   region_bio = paste0("VO_", 17:21),
                   lambda     = 0.001)
 
-rank_ef <- rankEN(msObj      = filter_out,
-                  bioact     = bioact$ef,
-                  region_ms  = paste0("VO_", 17:21),
-                  region_bio = paste0("VO_", 17:21),
-                  lambda     = 0.001)
-
 rank_pa <- rankEN(msObj      = filter_out,
                   bioact     = bioact$pa,
                   region_ms  = paste0("VO_", 18:21),
@@ -536,8 +531,8 @@ rich cyclotide comprised of 30 amino acids (MWmonoisotopic: 3138.37 Da), which
 has been shown to have diverse activity against many Gram-negative bacteria
 (\textit{E. coli}, \textit{K. pneumoniae}, and \textit{P. aeruginosa}), as well
 as several cancer cell lines.  Here, we demonstrate successful detection,
-prioritization, and identification of cyO2 thereby validating the use of this
-statistical analysis approach for bioactive peptide discovery.
+prioritization, and identification of cyO2 as a means of validating the use of
+this statistical analysis approach for bioactive peptide discovery.
 
 
 
@@ -558,12 +553,12 @@ determined to be (1047.4898, 3), and (1570.2414, 2) in our data.
 Thus the \R/ function \texttt{find\_cyO2\_rank} shown below returns a vector of
 the rankings of each charge state of cyO2.
 
-From the output below we see that for the \textit{E. coli}, \textit{E. faecium},
-and breast cancer data sets, at least one charge state corresponding to cyO2 is
-identified in the first 20 candidate compounds.  For the \textit{A. baumannii},
+From the output below we see that for the \textit{E. coli}, and breast cancer
+data sets, at least one charge state corresponding to cyO2 is identified in the
+first 20 candidate compounds.  For the \textit{A. baumannii},
 \textit{P. aeruginosa}, and prostate cancer data cets, CyO2 is identified in the
 first 50 compounds; and for the \textit{F. graminearum} and ovarian cancer data
-sets cyO2 is identified in the first 50 compounds.
+sets cyO2 is identified in the first 100 compounds.
 
 <<cyO2-rankings>>=
 # Function to find the rank of cyO2 compounds
@@ -577,8 +572,8 @@ find_cyO2_rank <- function(rankEN_obj) {
 }
 
 # List the ranks for cyO2
-lapply(list(ab=rank_ab, bc=rank_bc, ec=rank_ec, ef=rank_ef,
-            fg=rank_fg, oc=rank_oc, pa=rank_pa, pc=rank_pc),
+lapply(list(ab=rank_ab, bc=rank_bc, ec=rank_ec, fg=rank_fg,
+            oc=rank_oc, pa=rank_pa, pc=rank_pc),
        find_cyO2_rank)
 @
 

@@ -17,7 +17,7 @@ progenesis <- read.csv("data-raw/20150427_CLK_BAP_VO_peptide_ion_data.csv",
 # Fraction 32 has versions Sample0 and Sample1.  We don't want to use Sample0,
 # which corresponds to the 98-th column.
 
-mass_spec <- progenesis[, c(1:2, 4:5, 77:97, 99:111)]
+mass_spec <- progenesis[, c(1:2, 4:5, setdiff(77:111, 98))]
 names(mass_spec)[ grepl("Sample1", names(mass_spec)) ] <- "20150207_CLK_BAP_VO_32"
 
 
@@ -32,13 +32,19 @@ names(biomat) <- c("Modeling region",
                    paste0("20150207_CLK_BAP_VO_", 1:43),
                    "20150207_CLK_BAP_VO_47")
 
+# Create a list with each element a data.frame of the bioactivity observations
+# for a given pathogen or cancer cell line.  Each row in the data.frames is a
+# replicate, and the columns are bioactivity data for exposure to a fraction.
+#
+# Note: the E. faecium (ef) data was determined by the laboratory to be faulty,
+# so it is not included
 region_idx <- 2:45
 bioact <- list()
 bioact$ec <- biomat[8:10, region_idx]
 bioact$bc <- biomat[11:13, region_idx]
 bioact$pc <- biomat[14:16, region_idx]
 bioact$oc <- biomat[17:19, region_idx]
-bioact$ef <- biomat[20:22, region_idx]
+# bioact$ef <- biomat[20:22, region_idx]
 bioact$ab <- biomat[23:25, region_idx]
 bioact$pa <- biomat[26:28, region_idx]
 bioact$fg <- biomat[29:30, region_idx]
