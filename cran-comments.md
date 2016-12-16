@@ -1,44 +1,32 @@
+This is a minor update to the package to remove one of the data sets provided by
+the package, and rebuild the vignettes without using that particular data set.
+
 
 ## Test environments ##
-* Ubuntu 14.04.4, R 3.3.0
+* Ubuntu 14.04.4, R 3.3.0 (local machine)
 * win-builder (devel and release)
+
 
 ## Release summary ##
 
-This is the first CRAN release of PepSAVIms
+This is the second CRAN release of PepSAVIms
 
-## CRAN resubmittion modifications ##
-
-The previous CRAN submissions were rejected with the following comments:
-* **Can you pls provide DOIs for the references in the Description?**  In the previous version of the DESCRIPTION file, it may have appeared that the package is referring to a paper that already exists.  However, the paper that the package accompanies is still in progress (i.e. the package precedes the paper); this is made clear in the updated versio of the DESCRIPTION file.
-* **Possibly mis-spelled words in DESCRIPTION: developement.  Pls fix.**  The error has been fixed; our apologies.
 
 ## R CMD check results ##
-There were no ERRORs or WARNINGs. 
+R CMD check results
+0 errors | 0 warnings | 1 notes
 
-The was the following 1 note:
-* checking CRAN incoming feasibility ... NOTE  
-  Maintainer: Pritchard David <dpritch@live.unc.edu>
-
-There were the following 3 messages:
-
-* **First time submission**
-
-* **Non-FOSS package license (CC BY-NC-SA 4.0)**.  This license was chosen to be as flexible as possible while being compatible with a patent process which is part of the wet-laboratory procedure that the software accompanies.
-
-* **Possibly mis-spelled words in DESCRIPTION**.  These words all have scientific meaning and are spelled correctly (PepSAVI is the first part of the name PepSAVI-MS).
-    * Bioactive
-    * PepSAVI
-    * Peptide
-    * al
-    * bioactive
-    * bioactivity
-    * deconvolute
-    * et
-    * peptide
-    * peptides
-    * spectrometry
-
+* **Possibly mis-spelled words in DESCRIPTION**.  These words all have
+  scientific meaning and are spelled correctly (PepSAVI is the first part of the
+  name PepSAVI-MS).
+  
+    * PepSAVI (3:8, 10:29)
+    * bioactive (13:55)
+    * bioactivity (17:14, 18:38)
+    * deconvolute (14:55)
+    * peptide (15:65)
+    * peptides (13:65)
+    * spectrometry (15:5)
 
 ## Downstream dependencies ##
 There are no downstream dependencies

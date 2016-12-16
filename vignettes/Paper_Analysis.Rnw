@@ -586,13 +586,14 @@ lapply(list(ab=rank_ab, bc=rank_bc, ec=rank_ec, fg=rank_fg,
 
 This document describes in detail the data processing and analysis steps as
 implimented in \papername/, including explanations for the choices that were
-made when performing the analysis. We hope that in conjunction with the Pipeline
-Introduction these vignettes provide a valuable template for laboratories
-wishing to implement this methodology for their own research purposes.  As a
-result of the analysis, we see that out of 30,799 MS features originally
-measured by the LC-MS process, this pipeline was able to identify cyO2 as a
-top-20 likely contributor to bioactivity against three of the eight pathogens,
-and as one of the first 100 candidate compounds for all bioactivity data sets.
+made when performing the analysis. We hope that in conjunction with the
+\pkgname/ introduction vignette these vignettes provide a valuable template for
+laboratories wishing to implement this methodology for their own research
+purposes.  As a result of the analysis, we see that out of 30,799 MS features
+originally measured by the LC-MS process, this pipeline was able to identify
+cyO2 as a top-20 likely contributor to bioactivity against two of the seven
+pathogens, and as one of the first 100 candidate compounds for each of the
+bioactivity data sets.
 
 
 
