@@ -11,8 +11,8 @@
 #' @format A \code{list} containing relative growth inhibition of bioactivity
 #'     levels for the bacteria and virus strains listed below.  Each of the
 #'     following elements in the \code{list} is a \code{data.frame} with 3 rows
-#'     and 44 columns (with the exception of fg ********* which has 2 rows).
-#'     The rows in each \code{data.frame} correspond to replications of the data
+#'     and 44 columns (with the exception of \codefg} which has 2 rows).  The
+#'     rows in each \code{data.frame} correspond to replications of the data
 #'     collection process, while the columns correspond to relative growth
 #'     inhibition bioactivity levels when subject to peptide libraries across
 #'     fractions 1-43 and fraction 47.
@@ -27,13 +27,11 @@
 #'
 #'     \item{oc}{A. baumannii}
 #'
-#'     \item{ef}{E. cloacae}
+#'     \item{ab}{A. baumannii}
 #'
-#'     \item{ab}{??}
+#'     \item{pa}{P. aeruginosa}
 #'
-#'     \item{pa}{??}
-#'
-#'     \item{fg}{??}
+#'     \item{fg}{F. graminearum.}
 #'
 #' }
 "bioact"
