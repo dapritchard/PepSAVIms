@@ -1,4 +1,3 @@
-
 % \VignetteIndexEntry{Kirkpatrick et al. (2016) data analysis}
 % \VignetteEngine{knitr::knitr}
 
@@ -602,8 +601,10 @@ bioactivity data sets.
 
 \begin{thebibliography}{9}
 
-\bibitem{kirkpatrick2016} Kirkpatrick et al.  The PepSAVI-MS pipeline for natural
-  product bioactive peptide discovery.  Under review.
+\bibitem{kirkpatrick2017} Kirkpatrick, C.L., Broberg, C.A., McCool, E.N.,
+  Lee, W.J., Chao, A., McConnell, E.W., Hebert, M., Fleeman, R., Adams, J. and
+  Jamil, A. (2017). The “PepSAVI-MS” Pipeline for Natural Product Bioactive
+  Peptide Discovery. Analytical chemistry, 89(2), 1194-1201.
 
 \bibitem{zou2005} Zou, H., \& Hastie, T. (2005). Regularization and variable
   selection via the elastic net. Journal of the Royal Statistical Society:

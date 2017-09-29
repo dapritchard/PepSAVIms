@@ -1,12 +1,11 @@
-
 # Software for the prioritization of putative bioactive compounds
 
 The PepSAVIms R package provides a collection of software tools used to
 facilitate the prioritization of putative bioactive compounds from a complex
 biological matrix. The package was constructed to provide an implementation of
 the statistical portion of the laboratory and statistical procedure proposed in
-_The PepSAVI-MS pipeline for natural product bioactive peptide discovery_, by
-Kirkpatrick et al.
+[_The PepSAVI-MS pipeline for natural product bioactive peptide discovery_](http://dx.doi.org/10.1021/acs.analchem.6b03625), by
+Kirkpatrick et al .
 
 
 ## Data analysis pipeline
@@ -55,5 +54,6 @@ set.
 
 ## Further information
 
-Please see the R function documentation or the package vignettes for far more
-information regarding the use of this package.
+Please see the R function documentation or the package vignettes for more
+information regarding the use of this package
+at [CRAN](https://CRAN.R-project.org/package=PepSAVIms).
