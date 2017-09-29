@@ -8,8 +8,8 @@ Authors@R: c(
     person("Kirkpatrick", "Christine", email="ckirkpat@live.unc.edu", role="aut"))
 Description: An implementation of the data processing and data analysis portion
     of the PepSAVI-MS pipeline developed by principal investigator Christine
-    Kirkpatrick and the Hicks laboratory at the University of North Carolina, as
-    presented in the paper \emph{The “PepSAVI-MS” Pipeline for Natural Product
+    Kirkpatrick and the Hicks Laboratory at the University of North Carolina, as
+    presented in the paper \emph{The "PepSAVI-MS" Pipeline for Natural Product
     Bioactive Peptide Discovery} (DOI:10.1021/acs.analchem.6b03625). The
     statistical analysis package presented herein provides a collection of
     software tools used to facilitate the prioritization of putative bioactive
