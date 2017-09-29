@@ -238,4 +238,3 @@ bin_matr <- extractMS(msObj = bin_out, type = "matrix")
 bin_msDat <- extractMS(msObj = bin_out, type = "matrix")
 
 }
-

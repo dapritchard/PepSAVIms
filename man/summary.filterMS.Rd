@@ -16,4 +16,3 @@ Prints a description of the filtering process.  Displays arguments chosen for
 the \code{filterMS} constructor, how many candidate compounds were chosen for
 each criterion, and how many candidate compounds were chosen overall.
 }
-

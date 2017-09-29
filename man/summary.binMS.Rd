@@ -17,4 +17,3 @@ to the \code{binMS} routine, how many m/z levels were chosen for each
 criterion, how many candidate compounds were chosen overall, and how many
 candidate compounds were obtained after consolidation.
 }
-

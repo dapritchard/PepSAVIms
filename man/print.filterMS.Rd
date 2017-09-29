@@ -14,4 +14,3 @@
 \description{
 Displays the number of candidate compounds left in the data after filtering
 }
-

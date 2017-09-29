@@ -39,4 +39,3 @@ A convenience function for extracting and inspecting the mass
     \code{msDat} object are combined into a single matrix using \code{cbind}
     and returned.
 }
-

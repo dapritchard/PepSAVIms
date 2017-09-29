@@ -21,4 +21,3 @@ mass spectrometry and the bioactivity data in the region of interest, the
 parameter specifications for the model, and a table with the identifying
 information of the candidate compounds produced by the model fit.
 }
-

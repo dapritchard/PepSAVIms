@@ -7,29 +7,27 @@
 \format{A \code{list} containing relative growth inhibition of bioactivity
     levels for the bacteria and virus strains listed below.  Each of the
     following elements in the \code{list} is a \code{data.frame} with 3 rows
-    and 44 columns (with the exception of fg ********* which has 2 rows).
-    The rows in each \code{data.frame} correspond to replications of the data
-    collection process, while the columns correspond to relative growth
-    inhibition bioactivity levels when subject to peptide libraries across
-    fractions 1-43 and fraction 47.
+    and 44 columns (with the exception of \emph{F. graminearum} which has 2
+    rows).  The rows in each \code{data.frame} correspond to replications of
+    the data collection process, while the columns correspond to relative
+    growth inhibition bioactivity levels when subject to peptide libraries
+    across fractions 1-43 and fraction 47.
 
 \describe{
 
-    \item{ec}{E. Coli}
+    \item{ec}{\emph{E. coli}}
 
-    \item{bc}{S. aureus}
+    \item{bc}{\emph{S. aureus}}
 
-    \item{pc}{K. pneumoniae}
+    \item{pc}{\emph{K. pneumoniae}}
 
-    \item{oc}{A. baumannii}
+    \item{oc}{\emph{A. baumannii}}
 
-    \item{ef}{E. cloacae}
+    \item{ab}{\emph{A. baumannii}}
 
-    \item{ab}{??}
+    \item{pa}{\emph{P. aeruginosa}}
 
-    \item{pa}{??}
-
-    \item{fg}{??}
+    \item{fg}{\emph{F. graminearum}}
 
 }}
 \usage{
@@ -40,4 +38,3 @@ The relative relative growth inhibition of bioactivity levels for the
     bacteria and virus strains studies in Kirkpatrick et al. (2016).
 }
 \keyword{datasets}
-

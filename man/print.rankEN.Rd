@@ -14,4 +14,3 @@
 \description{
 Displays the data dimensions used to fit the elastic net model
 }
-

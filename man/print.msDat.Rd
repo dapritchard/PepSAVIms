@@ -14,4 +14,3 @@
 \description{
 Prints the mass spectrometry data encapsulated by the \code{msDat} object
 }
-

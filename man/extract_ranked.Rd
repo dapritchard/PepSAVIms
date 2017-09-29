@@ -25,4 +25,3 @@ charge information, and possibly the correlation between the compound and the
 within-fraction average of the bioactivity replicates in the region of
 interest.
 }
-
