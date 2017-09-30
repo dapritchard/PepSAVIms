@@ -5,7 +5,7 @@ facilitate the prioritization of putative bioactive compounds from a complex
 biological matrix. The package was constructed to provide an implementation of
 the statistical portion of the laboratory and statistical procedure proposed in
 [_The PepSAVI-MS pipeline for natural product bioactive peptide discovery_](http://dx.doi.org/10.1021/acs.analchem.6b03625), by
-Kirkpatrick et al .
+Kirkpatrick et al.
 
 
 ## Data analysis pipeline
